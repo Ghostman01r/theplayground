@@ -119,15 +119,45 @@
         .btn-review { background: var(--accent-color); color: black; }
         .btn-delete { background: transparent; color: var(--text-secondary); width: 30px; flex: none; border: 1px solid #333; }
 
-        /* --- LOADING OVERLAY --- */
+        /* --- NOTHING OS LOADER (NEW) --- */
         .loader-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(5,5,5,0.95); z-index: 50;
-            display: flex; justify-content: center; align-items: center;
-            font-family: var(--font-tech); color: var(--accent-color);
-            transition: opacity 0.5s ease;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #000000; z-index: 999;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transition: opacity 0.5s ease, visibility 0.5s;
         }
-        .hidden { opacity: 0; pointer-events: none; }
+        .loader-hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+
+        .loader-content { width: 300px; max-width: 80%; }
+        
+        .loader-text {
+            font-family: var(--font-tech);
+            color: #fff;
+            font-size: 2rem;
+            margin-bottom: 20px;
+            letter-spacing: -2px;
+            text-transform: uppercase;
+        }
+        
+        .loader-bar-bg {
+            width: 100%; height: 4px; background: #333;
+            position: relative; overflow: hidden;
+        }
+        
+        .loader-bar-fill {
+            height: 100%; background: #D71921; /* Red */
+            width: 0%;
+            animation: load 2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        
+        .loader-matrix {
+            margin-top: 10px; font-family: var(--font-tech);
+            font-size: 0.6rem; color: #666; letter-spacing: 4px;
+        }
+
+        @keyframes load {
+            0% { width: 0%; } 50% { width: 70%; } 100% { width: 100%; }
+        }
 
         /* --- MOBILE --- */
         @media (max-width: 768px) {
@@ -139,9 +169,17 @@
             
             .topic-name { font-size: 1.1rem; margin-top: 10px; }
             .card-meta { font-size: 0.65rem; }
-            .card-actions { flex-direction: column; gap: 6px; }
-            .action-btn { padding: 8px; font-size: 0.8rem; }
-        }
+            .card-actions { flex-direction: row; gap: 8px; padding-top: 10px; }
+            .action-btn { padding: 8px 0;      /* Less padding */
+                font-size: 0.75rem; 
+                height: 36px;        /* Fixed height for uniformity */
+                display: flex; align-items: center; justify-content: center; /* Center text */ }
+            }
+            .btn-delete { 
+                width: 36px;         /* Match height */
+                flex: none;          /* Don't stretch */
+                margin-top: 0;       /* Remove vertical margin */
+            }
 
         /* --- MODAL --- */
         .modal-overlay {
@@ -179,12 +217,20 @@
                         <p>Topics Due</p>
                     </div>
                 </div>
-                <div id="loader" class="loader-overlay">INITIALIZING DATABASE...</div>
+                <div id="loader" class="loader-overlay">
+                    <div class="loader-content">
+                    <div class="loader-text">NEXUS( )</div>
+                    <div class="loader-bar-bg">
+                    <div class="loader-bar-fill"></div>
+                </div>
+            <div class="loader-matrix">LOADING SYSTEM DATA...</div>
+        </div>
+    </div>
             </div>
         </header>
 
         <div class="controls">
-            <span class="section-label">CLOUD MODULES</span>
+            <span class="section-label">Topics modules</span>
             <button class="btn btn-primary" id="btn-add-modal">+ Add Topic</button>
         </div>
 
@@ -218,9 +264,11 @@
 
         // --- SAFETY NET ---
         // This ensures the loader disappears after 4 seconds NO MATTER WHAT
-        setTimeout(() => {
-            document.getElementById('loader').classList.add('hidden');
-        }, 4000);
+        // --- SAFETY NET (2 SECONDS) ---
+        setTimeout(() => { 
+            const loader = document.getElementById('loader');
+            if(loader) loader.classList.add('loader-hidden'); 
+        }, 3500);
 
 
         // --- CORE FUNCTIONS ---
