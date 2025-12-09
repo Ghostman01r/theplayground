@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXUS // CALENDAR SYNC</title>
+    <title>NEXUS // FINAL STABLE</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
         /* --- CORE VARIABLES --- */
@@ -25,7 +25,7 @@
             --font-tech: 'Space Mono', monospace;
         }
 
-        /* --- RESET & BASE --- */
+        /* --- BASE --- */
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
         body {
             background-color: var(--bg-color);
@@ -37,23 +37,22 @@
             background-size: 20px 20px;
         }
 
-        /* --- LAYOUTS --- */
-        .app-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-        }
+        .app-container { max-width: 1400px; margin: 0 auto; padding: 20px; }
 
         /* --- HEADER --- */
         header { margin-bottom: 40px; }
-
-        .brand {
+        
+        .status-bar {
             font-family: var(--font-tech);
-            font-size: 0.9rem;
-            letter-spacing: 2px;
+            font-size: 0.75rem;
             color: var(--text-secondary);
             margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
         }
+
+        .sync-indicator { color: var(--text-secondary); }
+        .sync-active { color: var(--accent-color); animation: blink 1s infinite; }
 
         .hero-card {
             background-color: var(--accent-color);
@@ -66,240 +65,123 @@
             gap: 10px;
             box-shadow: 0 10px 30px rgba(255, 85, 0, 0.2);
             position: relative;
-            overflow: hidden;
         }
 
-        .hero-card::after {
-            content: "N(3)";
-            position: absolute;
-            top: 20px; right: 20px;
-            font-family: var(--font-tech);
-            opacity: 0.3; font-size: 1.5rem;
-        }
+        .hero-title { font-size: 2rem; font-weight: 800; line-height: 1.1; max-width: 600px; }
 
-        .hero-title {
-            font-size: 2rem;
-            font-weight: 800;
-            line-height: 1.1;
-            max-width: 600px;
-        }
-
-        .progress-container {
-            margin-top: 20px;
-            display: flex;
-            gap: 40px;
-        }
-
-        .stat-item h3 {
-            font-size: 3rem;
-            font-weight: 400;
-            font-family: var(--font-tech);
-            letter-spacing: -2px;
-        }
-        
-        .stat-item p {
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            opacity: 0.7;
-        }
+        .progress-container { margin-top: 20px; display: flex; gap: 40px; }
+        .stat-item h3 { font-size: 3rem; font-family: var(--font-tech); letter-spacing: -2px; }
+        .stat-item p { font-size: 0.8rem; text-transform: uppercase; opacity: 0.7; }
 
         /* --- CONTROLS --- */
-        .controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .section-label {
-            font-family: var(--font-tech);
-            color: var(--text-secondary);
-        }
+        .controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .section-label { font-family: var(--font-tech); color: var(--text-secondary); }
 
         .btn {
-            background: var(--surface-color);
-            border: 1px solid #333;
-            color: white;
-            padding: 10px 20px;
-            border-radius: var(--radius-md);
-            cursor: pointer;
-            font-family: var(--font-tech);
-            transition: all 0.2s ease;
+            background: var(--surface-color); border: 1px solid #333; color: white;
+            padding: 10px 20px; border-radius: var(--radius-md); cursor: pointer;
+            font-family: var(--font-tech); transition: all 0.2s ease;
         }
-
-        .btn:hover { background: var(--surface-hover); transform: translateY(-2px); border-color: var(--text-secondary); }
+        .btn:hover { background: var(--surface-hover); transform: translateY(-2px); }
         .btn-primary { background: white; color: black; border: none; font-weight: bold; }
 
-        /* --- GRID SYSTEM --- */
+        /* --- GRID --- */
         .grid-view {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 20px;
         }
 
-        /* --- CARD --- */
         .card {
             background: var(--surface-color);
             border-radius: var(--radius-lg);
             padding: 24px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
+            display: flex; flex-direction: column; justify-content: space-between;
             min-height: 220px;
             border: 1px solid #222;
             transition: transform 0.2s ease;
-            position: relative;
         }
-
-        .card:hover { transform: scale(1.02); border-color: #444; background: var(--surface-hover); }
+        .card:hover { transform: scale(1.02); border-color: #444; }
 
         .card-header { display: flex; justify-content: space-between; }
-
-        .status-dot {
-            width: 12px; height: 12px;
-            border-radius: 50%;
-            background: #333;
-        }
-
+        .status-dot { width: 12px; height: 12px; border-radius: 50%; background: #333; }
         .status-due { background: var(--accent-color); box-shadow: 0 0 10px var(--accent-color); animation: pulse 2s infinite; }
         .status-ok { background: var(--success); }
 
-        .topic-name {
-            font-size: 1.4rem;
-            font-weight: 600;
-            margin-top: 15px;
-            line-height: 1.2;
-            word-break: break-word; /* Prevents overflow on mobile */
-        }
+        .topic-name { font-size: 1.4rem; font-weight: 600; margin-top: 15px; line-height: 1.2; word-break: break-word; }
+        .card-meta { font-family: var(--font-tech); font-size: 0.75rem; color: var(--text-secondary); margin-top: 5px; }
 
-        .card-meta {
-            font-family: var(--font-tech);
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            margin-top: 5px;
-        }
-
-        .card-actions {
-            margin-top: auto;
-            display: flex;
-            gap: 10px;
-            padding-top: 20px;
-        }
-
-        .action-btn {
-            flex: 1;
-            padding: 12px;
-            border-radius: var(--radius-sm);
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-        }
-
+        .card-actions { margin-top: auto; display: flex; gap: 10px; padding-top: 20px; }
+        .action-btn { flex: 1; padding: 12px; border-radius: var(--radius-sm); border: none; cursor: pointer; font-weight: 600; }
         .btn-review { background: var(--accent-color); color: black; }
         .btn-delete { background: transparent; color: var(--text-secondary); width: 30px; flex: none; border: 1px solid #333; }
-        .btn-delete:hover { color: var(--danger); border-color: var(--danger); }
 
-        /* --- MOBILE OVERRIDES (2-Column Grid) --- */
+        /* --- LOADING OVERLAY --- */
+        .loader-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(5,5,5,0.95); z-index: 50;
+            display: flex; justify-content: center; align-items: center;
+            font-family: var(--font-tech); color: var(--accent-color);
+            transition: opacity 0.5s ease;
+        }
+        .hidden { opacity: 0; pointer-events: none; }
+
+        /* --- MOBILE --- */
         @media (max-width: 768px) {
             .app-container { padding: 10px; }
-            .hero-card {
-                border-radius: 0 0 var(--radius-lg) var(--radius-lg);
-                margin: -10px -10px 30px -10px;
-                width: calc(100% + 20px);
-                padding-top: 50px; 
-            }
+            .hero-card { margin: -10px -10px 30px -10px; width: calc(100% + 20px); border-radius: 0 0 28px 28px; padding-top: 50px; }
             
-            /* The 2-Column Grid Logic */
-            .grid-view { 
-                display: grid; 
-                grid-template-columns: 1fr 1fr; /* Two equal columns */
-                gap: 10px; 
-            }
+            .grid-view { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .card { padding: 15px; min-height: 180px; border-radius: 16px; }
             
-            .card {
-                padding: 15px;
-                min-height: 180px; /* Smaller height for mobile */
-                border-radius: var(--radius-md);
-            }
-
             .topic-name { font-size: 1.1rem; margin-top: 10px; }
             .card-meta { font-size: 0.65rem; }
-            
-            .card-actions { 
-                padding-top: 10px; 
-                flex-direction: column; /* Stack buttons vertically on very small screens if needed, or keep row */
-                gap: 6px;
-            }
-            
+            .card-actions { flex-direction: column; gap: 6px; }
             .action-btn { padding: 8px; font-size: 0.8rem; }
-            .btn-delete { width: 100%; height: 30px; border: 1px solid #333; margin-top: 5px; }
         }
 
         /* --- MODAL --- */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(5px);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
+            display: none; justify-content: center; align-items: center; z-index: 100;
         }
         .modal-active { display: flex !important; }
-
-        .modal {
-            background: var(--surface-color);
-            padding: 30px;
-            border-radius: var(--radius-lg);
-            width: 90%;
-            max-width: 400px;
-            border: 1px solid #333;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-        }
-
-        input {
-            width: 100%;
-            background: transparent;
-            border: none;
-            border-bottom: 2px solid #333;
-            color: white;
-            font-size: 1.2rem;
-            padding: 10px 0;
-            margin-bottom: 20px;
-            font-family: var(--font-main);
-        }
+        .modal { background: var(--surface-color); padding: 30px; border-radius: 28px; width: 90%; max-width: 400px; border: 1px solid #333; }
+        
+        input { width: 100%; background: transparent; border: none; border-bottom: 2px solid #333; color: white; font-size: 1.2rem; padding: 10px 0; margin-bottom: 20px; }
         input:focus { outline: none; border-color: var(--accent-color); }
 
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(255, 85, 0, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(255, 85, 0, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(255, 85, 0, 0); }
-        }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 85, 0, 0.4); } 70% { box-shadow: 0 0 0 10px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
+        @keyframes blink { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
     </style>
 </head>
 <body>
 
     <div class="app-container">
         <header>
+            <div class="status-bar">
+                <span>NEXUS v5.0 (STABLE)</span>
+                <span id="sync-status" class="sync-indicator">ONLINE</span>
+            </div>
             <div class="hero-card">
-                <div class="brand">NEXUS // G-CAL SYNC</div>
-                <div class="hero-title">Automated Learning Schedule.</div>
+                <div class="hero-title">Cloud Knowledge Matrix.</div>
                 <div class="progress-container">
                     <div class="stat-item">
-                        <h3 id="score-display">0%</h3>
+                        <h3 id="score-display">--</h3>
                         <p>Retention</p>
                     </div>
                     <div class="stat-item">
-                        <h3 id="due-display">0</h3>
+                        <h3 id="due-display">--</h3>
                         <p>Topics Due</p>
                     </div>
                 </div>
+                <div id="loader" class="loader-overlay">INITIALIZING DATABASE...</div>
             </div>
         </header>
 
         <div class="controls">
-            <span class="section-label">ACTIVE MODULES</span>
+            <span class="section-label">CLOUD MODULES</span>
             <button class="btn btn-primary" id="btn-add-modal">+ Add Topic</button>
         </div>
 
@@ -320,121 +202,117 @@
 
     <script>
         /**
-         * NEXUS ENGINE v3.0 (Calendar Sync)
+         * NEXUS ENGINE v5.0 (Final Stable + Safety Net)
          */
 
-        const defaultTopics = ["Pharmacology", "Human Anatomy", "Biochemistry"];
+        // ---------------------------------------------------------
+        // PASTE YOUR GOOGLE SCRIPT URL HERE (Keep the quotes!)
+        // ---------------------------------------------------------
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwZibrs-eDobjGZVmVTFwTRTHUqD8zRP2_K5WFyvGM6y-tNIKDFgBqH8p_jasCjG7W6Jw/exec'; 
+        // ---------------------------------------------------------
+
         let state = { topics: [] };
 
-        // --- ID GENERATOR ---
-        function generateId() {
-            return 'top_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
-        }
+        // --- SAFETY NET ---
+        // This ensures the loader disappears after 4 seconds NO MATTER WHAT
+        setTimeout(() => {
+            document.getElementById('loader').classList.add('hidden');
+        }, 4000);
+
+
+        // --- CORE FUNCTIONS ---
+        function generateId() { return 'top_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5); }
 
         function createTopic(name) {
             return {
                 id: generateId(),
                 name: name,
-                level: 0, 
-                lastReviewed: null,
-                nextReview: new Date().getTime(),
-                totalReviews: 0
+                level: 0,
+                nextReview: new Date().getTime() // Due immediately
             };
         }
 
-        // --- CALENDAR INTEGRATION ---
-        function openGoogleCalendar(topicName, nextReviewDate) {
-            // 1. Format Dates for Google (YYYYMMDD)
-            const dateObj = new Date(nextReviewDate);
-            
-            // Set default time to 09:00 AM
-            dateObj.setHours(9, 0, 0, 0);
-            const startISO = dateObj.toISOString().replace(/-|:|\.\d\d\d/g, "");
-            
-            // End time 09:30 AM
-            dateObj.setHours(9, 30, 0, 0);
-            const endISO = dateObj.toISOString().replace(/-|:|\.\d\d\d/g, "");
-
-            // 2. Build URL
-            const title = encodeURIComponent(`Review: ${topicName}`);
-            const details = encodeURIComponent(`NEXUS Spaced Repetition System.\nReview due for module: ${topicName}.`);
-            const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startISO}/${endISO}&details=${details}&sf=true&output=xml`;
-
-            // 3. Open in new tab
-            window.open(url, '_blank');
-        }
-
-        // --- CORE LOGIC ---
-        function init() {
+        // --- CLOUD SYNC ---
+        async function fetchFromCloud() {
             try {
-                const savedData = localStorage.getItem('nexus_srs_v3');
-                if (savedData) {
-                    state = JSON.parse(savedData);
-                } else {
-                    state.topics = defaultTopics.map(name => createTopic(name));
-                    saveState();
-                }
+                // Try to get data
+                const response = await fetch(GOOGLE_SCRIPT_URL + '?t=' + Date.now());
+                const data = await response.json();
                 
-                // Event Bindings
-                document.getElementById('btn-add-modal').addEventListener('click', openModal);
-                document.getElementById('btn-cancel').addEventListener('click', closeModal);
-                document.getElementById('btn-create-topic').addEventListener('click', addTopic);
-                document.getElementById('new-topic-name').addEventListener('keydown', function(e) {
-                    if (e.key === 'Enter') addTopic();
-                    if (e.key === 'Escape') closeModal();
-                });
-
-                render();
-            } catch (e) {
-                console.error("Init Error:", e);
-                localStorage.removeItem('nexus_srs_v3'); 
-                location.reload();
+                if (Array.isArray(data)) {
+                    state.topics = data;
+                    render();
+                }
+                // Success: Hide loader immediately
+                document.getElementById('loader').classList.add('hidden');
+            } catch (error) {
+                console.warn("Fetch failed (Offline Mode active):", error);
+                document.getElementById('sync-status').innerText = "OFFLINE MODE";
+                // Safety net will hide loader in 4s anyway
             }
         }
 
-        function saveState() {
-            localStorage.setItem('nexus_srs_v3', JSON.stringify(state));
+        async function pushToCloud() {
+            document.getElementById('sync-status').innerText = "SAVING...";
+            document.getElementById('sync-status').classList.add('sync-active');
+            
+            try {
+                await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(state.topics)
+                });
+                
+                document.getElementById('sync-status').innerText = "CLOUD SYNCED";
+                document.getElementById('sync-status').classList.remove('sync-active');
+                document.getElementById('sync-status').style.color = "var(--success)";
+            } catch (error) {
+                console.error("Save Error:", error);
+                document.getElementById('sync-status').innerText = "SAVE FAILED";
+                document.getElementById('sync-status').style.color = "var(--danger)";
+            }
+        }
+
+        // --- DATE LOGIC ---
+        function isDue(timestamp) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); 
+            const reviewDate = new Date(timestamp);
+            reviewDate.setHours(0, 0, 0, 0); 
+            return today.getTime() >= reviewDate.getTime();
         }
 
         function calculateNextReview(level) {
             const now = new Date();
+            // Intervals: 0, 1, 3, 7, 14, 30, 90 days
             const intervals = [0, 1, 3, 7, 14, 30, 90]; 
             const daysToAdd = intervals[Math.min(level, intervals.length - 1)];
-            return now.setDate(now.getDate() + daysToAdd);
+            
+            now.setDate(now.getDate() + daysToAdd);
+            return now.getTime();
         }
 
+        // --- ACTIONS ---
         function processReview(id, success) {
             const topic = state.topics.find(t => t.id === id);
-            
             if (topic) {
                 if (success) {
                     topic.level = Math.min(topic.level + 1, 6);
+                    openGoogleCalendar(topic.name, calculateNextReview(topic.level));
                 } else {
                     topic.level = Math.max(topic.level - 1, 0);
                 }
                 
-                // Calculate next date
-                topic.lastReviewed = Date.now();
                 topic.nextReview = calculateNextReview(topic.level);
-                topic.totalReviews++;
-                
-                saveState();
                 render();
-
-                // --- CALENDAR TRIGGER ---
-                if (success) {
-                    // Logic: If user completed it successfully, schedule the NEXT one.
-                    // We only auto-open calendar if it's a future date
-                    openGoogleCalendar(topic.name, topic.nextReview);
-                }
+                pushToCloud();
             }
         }
 
         function deleteTopic(id) {
-            if(confirm("Delete this topic?")) {
+            if(confirm("Delete from Cloud?")) {
                 state.topics = state.topics.filter(t => t.id !== id);
-                saveState();
                 render();
+                pushToCloud();
             }
         }
 
@@ -443,57 +321,64 @@
             const name = nameInput.value.trim();
             if (name) {
                 state.topics.push(createTopic(name));
-                saveState();
                 render();
+                pushToCloud();
                 closeModal();
                 nameInput.value = '';
             }
         }
 
+        // --- CALENDAR ---
+        function openGoogleCalendar(topicName, nextReviewDate) {
+            const dateObj = new Date(nextReviewDate);
+            dateObj.setHours(9, 0, 0, 0);
+            const startISO = dateObj.toISOString().replace(/-|:|\.\d\d\d/g, "");
+            dateObj.setHours(9, 30, 0, 0);
+            const endISO = dateObj.toISOString().replace(/-|:|\.\d\d\d/g, "");
+
+            const title = encodeURIComponent(`Review: ${topicName}`);
+            const details = encodeURIComponent(`NEXUS Spaced Repetition`);
+            const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startISO}/${endISO}&details=${details}&sf=true&output=xml`;
+            window.open(url, '_blank');
+        }
+
         // --- RENDERER ---
         function render() {
             const grid = document.getElementById('topic-grid');
-            if (!grid) return;
-
             grid.innerHTML = '';
             
-            const now = Date.now();
             let dueCount = 0;
             let totalLevel = 0;
 
             state.topics.forEach(t => {
-                const isDue = t.nextReview <= now;
-                if (isDue) dueCount++;
+                const due = isDue(t.nextReview); 
+                if (due) dueCount++;
                 totalLevel += t.level;
 
                 const dateObj = new Date(t.nextReview);
                 const dateString = dateObj.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-                const statusClass = isDue ? 'status-due' : 'status-ok';
-                const statusText = isDue ? 'DUE' : `${dateString}`;
+                const statusClass = due ? 'status-due' : 'status-ok';
+                const statusText = due ? 'DUE' : `${dateString}`;
 
                 const card = document.createElement('div');
                 card.className = 'card';
-                
                 card.innerHTML = `
                     <div class="card-header">
                         <div class="status-dot ${statusClass}"></div>
-                        <div class="card-meta" style="margin:0">LVL ${t.level}</div>
+                        <div class="card-meta">LVL ${t.level}</div>
                     </div>
                     <div class="topic-name">${t.name}</div>
                     <div class="card-meta" style="margin-top:auto; margin-bottom: 10px;">
-                        ${isDue ? 'REVIEW REQUIRED' : 'Next: ' + statusText}
+                        ${due ? 'REVIEW REQUIRED' : 'Next: ' + statusText}
                     </div>
                     <div class="card-actions">
-                        ${isDue 
-                            ? `<button class="action-btn btn-review" 
-                                       onclick="event.stopPropagation(); processReview('${t.id}', true)">Review</button>`
+                        ${due 
+                            ? `<button class="action-btn btn-review" onclick="event.stopPropagation(); processReview('${t.id}', true)">Review</button>`
                             : `<button class="action-btn" style="background:#222; color:#555; cursor:default">Done</button>`
                         }
-                        <button class="action-btn btn-delete" 
-                                onclick="event.stopPropagation(); deleteTopic('${t.id}')">×</button>
+                        <button class="action-btn btn-delete" onclick="event.stopPropagation(); deleteTopic('${t.id}')">×</button>
                     </div>
                 `;
-
                 grid.appendChild(card);
             });
 
@@ -502,20 +387,30 @@
             document.getElementById('score-display').innerText = `${avgRetention}%`;
         }
 
-        // --- MODAL UTILS ---
-        function openModal() { 
-            document.getElementById('add-modal').classList.add('modal-active'); 
-            setTimeout(() => document.getElementById('new-topic-name').focus(), 50);
-        }
-        function closeModal() { 
-            document.getElementById('add-modal').classList.remove('modal-active'); 
-        }
+        // --- UTILS ---
+        function openModal() { document.getElementById('add-modal').classList.add('modal-active'); setTimeout(() => document.getElementById('new-topic-name').focus(), 50); }
+        function closeModal() { document.getElementById('add-modal').classList.remove('modal-active'); }
+
+        // --- INIT ---
+        document.getElementById('btn-add-modal').addEventListener('click', openModal);
+        document.getElementById('btn-cancel').addEventListener('click', closeModal);
+        document.getElementById('btn-create-topic').addEventListener('click', addTopic);
+        document.getElementById('new-topic-name').addEventListener('keydown', (e) => { 
+            if(e.key==='Enter') addTopic(); 
+            if(e.key==='Escape') closeModal(); 
+        });
         
+        // Expose to HTML
         window.deleteTopic = deleteTopic;
         window.processReview = processReview;
 
         // Start
-        init();
+        if(GOOGLE_SCRIPT_URL === 'PASTE_YOUR_WEB_APP_URL_HERE') {
+            alert("NEXUS SETUP: Paste your URL on line 305!");
+            document.getElementById('loader').classList.add('hidden'); // Force hide if setup not done
+        } else {
+            fetchFromCloud();
+        }
     </script>
 </body>
 </html>
