@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CalorieArc // Daily Sync</title>
+    <title>CalorieArc // v3.4 Stable</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -29,7 +29,7 @@
 
         /* HEADER */
         .header { margin-bottom: 30px; margin-top: 10px; }
-        .logo { font-weight: 800; font-size: 1.8rem; background: linear-gradient(to right, #fff, #666); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .logo { font-weight: 800; font-size: 1.8rem; background: linear-gradient(to right, #fff, #666); -webkit-background-clip: text; color: transparent; }
         .refresh-btn { background: #222; border: 1px solid var(--border); color: #fff; padding: 8px 12px; border-radius: 50px; cursor: pointer; font-size: 0.8rem; }
 
         /* DASHBOARD */
@@ -65,6 +65,13 @@
         }
         input:focus { border-color: var(--primary); }
 
+        /* Real-Time Preview */
+        .calc-preview {
+            margin-top: 10px; font-size: 0.9rem; color: var(--text-sub); text-align: right; font-family: monospace;
+            height: 20px;
+        }
+        .calc-highlight { color: var(--primary); font-weight: 700; }
+
         /* SEARCH */
         .search-wrapper { position: relative; width: 100%; }
         .suggestions-box {
@@ -93,6 +100,18 @@
         .food-main h4 { font-size: 1rem; margin-bottom: 3px; }
         .food-main p { font-size: 0.75rem; color: var(--text-sub); }
         .food-cal { font-weight: 700; color: var(--primary); }
+
+        /* HISTORY CARDS */
+        .day-card {
+            background: var(--card-bg); padding: 20px; border-radius: 20px;
+            margin-bottom: 15px; border: 1px solid var(--border);
+        }
+        .day-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #222; padding-bottom: 10px; }
+        .day-date { font-weight: 700; color: #fff; }
+        .day-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+        .day-stat-box { text-align: center; background: #000; padding: 10px; border-radius: 12px; }
+        .day-stat-lbl { font-size: 0.65rem; color: #666; text-transform: uppercase; display: block; margin-bottom: 4px; }
+        .day-stat-val { font-size: 0.9rem; font-weight: 700; }
 
         /* NAV */
         .nav-dock {
@@ -163,11 +182,14 @@
                 <input type="hidden" id="selectedFoodIdx">
                 
                 <div class="input-row">
-                    <input type="number" id="qtyInput" placeholder="Quantity">
+                    <input type="number" id="qtyInput" placeholder="Quantity" oninput="updatePreview()">
                     <div style="background:#222; padding:12px; border-radius:12px; border:1px solid var(--border); min-width:80px; text-align:center; color:#888; font-size:0.9rem;" id="unitLabel">
                         Unit
                     </div>
                 </div>
+                
+                <!-- Live Calculator Preview -->
+                <div id="calcPreview" class="calc-preview"></div>
                 
                 <button class="btn-add" onclick="logFood()">LOG ENTRY</button>
                 <div style="text-align:center; margin-top:15px; font-size:0.8rem; color:var(--text-sub); cursor:pointer;" onclick="toggleModal('modal-add')">+ Create New Food</div>
@@ -217,7 +239,7 @@
                 <input type="text" id="new-name" placeholder="Name">
                 <div class="input-row">
                     <input type="text" id="new-unit" placeholder="Measurement (e.g. Cup)" style="width:70%">
-                    <input type="number" id="new-base" placeholder="Base Qty (1)" value="1">
+                    <input type="number" id="new-base" placeholder="Base Qty (e.g. 100)" value="100">
                 </div>
                 <div style="font-size:0.7rem; color:#666;">Nutrients per Base Qty</div>
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
@@ -242,7 +264,7 @@
     <script>
         // --- CONFIG ---
         // Paste your NEW URL here
-        const API_URL = 'https://script.google.com/macros/s/AKfycbwpI7S9cvfYGVrwKMOK0e-Uh3BdpRXFK4A0VtkZBsNTN7pf0CShtN7OdoIZI5wHZPVh/exec'; 
+        const API_URL = 'https://script.google.com/macros/s/AKfycbw8G3WVWU_wO-n0b_vJdn5CRpgM04MHlCr85Msd3W8AS3ObZ-0XUbthbF5vZnYJt0fK/exec'; 
         // --------------
 
         let db = { foods: [], history: [], daily: [], settings: {} };
@@ -256,8 +278,13 @@
             return `${year}-${month}-${day}`;
         }
 
+        // Safe Number Parser: Returns float/int or 0 (no NaN)
+        function safeNum(val) {
+            const parsed = parseFloat(val);
+            return isNaN(parsed) ? 0 : parsed;
+        }
+
         async function init(force = false) {
-            // Show loader if forced or no data
             document.getElementById('loader').classList.remove('loader-hidden');
 
             if(API_URL.includes('SCRIPT')) {
@@ -271,14 +298,18 @@
                 const data = await res.json();
                 
                 db = data;
-                localStorage.setItem('arc_db_v4', JSON.stringify(db)); // Save Sync
+                localStorage.setItem('arc_db_v7', JSON.stringify(db)); 
                 
                 updateUI();
+                
+                // NO AUTO-RESET ON LOAD
+                // We display whatever is in 'db.daily' from the server.
+                // Resetting only happens when logging a NEW item for a NEW day.
+
                 document.getElementById('loader').classList.add('loader-hidden');
             } catch(e) {
                 console.error(e);
-                // If offline, try to load cache
-                const cached = localStorage.getItem('arc_db_v4');
+                const cached = localStorage.getItem('arc_db_v7');
                 if(cached) {
                     db = JSON.parse(cached);
                     updateUI();
@@ -316,50 +347,76 @@
                 box.style.display = 'block';
                 matches.forEach(f => {
                     const displayUnit = f.measurement || f.unit || 'g';
+                    const baseQty = safeNum(f.base || f.baseqty || 100);
+                    const displayCal = safeNum(f.cal); 
+                    
                     const div = document.createElement('div');
                     div.className = 'suggestion-item';
-                    div.innerHTML = `<span>${f.name}</span><span class="suggestion-meta">${displayUnit}</span>`;
+                    div.innerHTML = `<span>${f.name}</span><span class="suggestion-meta">${displayCal} cal per ${baseQty} ${displayUnit}</span>`;
                     div.onclick = () => {
                         input.value = f.name;
                         document.getElementById('selectedFoodIdx').value = f.idx;
                         document.getElementById('unitLabel').innerText = displayUnit;
                         box.style.display = 'none';
+                        document.getElementById('qtyInput').focus();
+                        updatePreview(); // Trigger calc
                     };
                     box.appendChild(div);
                 });
             } else { box.style.display = 'none'; }
         }
 
+        // --- NEW: LIVE PREVIEW ---
+        function updatePreview() {
+            const idx = document.getElementById('selectedFoodIdx').value;
+            const qty = safeNum(document.getElementById('qtyInput').value);
+            const preview = document.getElementById('calcPreview');
+            
+            if(idx === "" || qty === 0) {
+                preview.innerHTML = "";
+                return;
+            }
+
+            const f = db.foods[idx];
+            const base = safeNum(f.base || f.baseqty || 100);
+            const ratio = qty / base;
+            const cal = Math.round(safeNum(f.cal) * ratio);
+            
+            preview.innerHTML = `= <span class="calc-highlight">${cal} kcal</span>`;
+        }
+
         function processData() {
-            // Logic: Dashboard data now comes primarily from db.daily
-            // db.daily is the sheet that automatically resets on new date server-side
+            // Use DailyLog sheet data. No strict date filter.
+            // Why? Because 'DailyLog' sheet IS the bucket for "Today".
+            // If the backend reset logic works, this sheet only contains today's items.
+            let dailyData = db.daily && db.daily.length > 0 ? db.daily : [];
             
             let t = { cal:0, pro:0, carb:0, fat:0 };
             const list = document.getElementById('today-list');
             list.innerHTML = '';
 
-            // Use db.daily if available, otherwise fallback to local filtering (e.g. offline mode)
-            let todayItems = db.daily && db.daily.length > 0 ? db.daily : [];
-            
-            // Show logs in reverse order (newest first)
-            [...todayItems].reverse().forEach(l => {
-                t.cal += parseInt(l.cal || 0); t.pro += parseInt(l.pro || 0);
-                t.carb += parseInt(l.carb || 0); t.fat += parseInt(l.fat || 0);
+            [...dailyData].reverse().forEach(l => {
+                let iCal = safeNum(l.cal);
+                let iPro = safeNum(l.pro);
+                let iCarb = safeNum(l.carb);
+                let iFat = safeNum(l.fat);
+
+                t.cal += iCal; t.pro += iPro; t.carb += iCarb; t.fat += iFat;
                 
                 const item = document.createElement('div');
                 item.className = 'food-item';
-                item.innerHTML = `<div class="food-main"><h4>${l.food}</h4><p>${l.qty} ${l.measurement || l.unit || ''}</p></div><div class="food-cal">${l.cal}</div>`;
+                item.innerHTML = `<div class="food-main"><h4>${l.food}</h4><p>${l.qty} ${l.measurement || l.unit || ''}</p></div><div class="food-cal">${iCal}</div>`;
                 list.appendChild(item);
             });
 
-            document.getElementById('ui-rem').innerText = targets.cal - t.cal;
+            document.getElementById('ui-rem').innerText = targets.cal - Math.round(t.cal);
             document.getElementById('ui-goal').innerText = targets.cal;
             const pct = Math.min(100, Math.round((t.cal/targets.cal)*100));
             document.getElementById('ui-percent').innerText = pct + '%';
             
-            setBar('pro', t.pro, targets.pro);
-            setBar('carb', t.carb, targets.carb);
-            setBar('fat', t.fat, targets.fat);
+            setBar('pro', Math.round(t.pro), targets.pro);
+            setBar('carb', Math.round(t.carb), targets.carb);
+            setBar('fat', Math.round(t.fat), targets.fat);
         }
 
         function setBar(k, v, max) {
@@ -368,37 +425,63 @@
         }
 
         function renderHistory() {
-            const list = document.getElementById('history-list');
-            list.innerHTML = '';
+            const container = document.getElementById('history-list');
+            container.innerHTML = '';
             
             const todayISO = getLocalDate();
             const grouped = {};
             const sortedHistory = [...db.history].sort((a,b) => new Date(b.date) - new Date(a.date));
 
             sortedHistory.forEach(entry => {
-                const date = entry.date.substring(0, 10);
-                if(date === todayISO) return; // STRICTLY IGNORE TODAY in history tab
+                let dStr = entry.date.toString();
+                if(dStr.includes('T')) dStr = dStr.split('T')[0];
+                if(dStr === todayISO) return; 
 
-                if (!grouped[date]) grouped[date] = { cal:0, items: [] };
-                grouped[date].cal += parseInt(entry.cal);
-                grouped[date].items.push(entry);
+                if (!grouped[dStr]) grouped[dStr] = { cal:0, items: [] };
+                grouped[dStr].cal += safeNum(entry.cal); 
+                grouped[dStr].items.push(entry);
             });
 
-            Object.keys(grouped).forEach(d => {
-                const div = document.createElement('div');
-                div.className = 'food-item';
-                div.innerHTML = `<div class="food-main"><h4>${d}</h4></div><div class="food-cal">${grouped[d].cal} kcal</div>`;
-                list.appendChild(div);
+            Object.keys(grouped).forEach(date => {
+                const dayData = grouped[date];
+                const goal = targets.cal; 
+                const balance = goal - dayData.cal;
+                const balanceColor = balance < 0 ? '#EF4444' : '#10B981';
+                const status = balance >= 0 ? 'Under' : 'Over';
+                
+                const card = document.createElement('div');
+                card.className = 'day-card';
+                card.innerHTML = `
+                    <div class="day-header">
+                        <span class="day-date">${date}</span>
+                        <span style="font-size:0.8rem; color:${balanceColor}">${status} by ${Math.abs(balance)}</span>
+                    </div>
+                    <div class="day-stats">
+                        <div class="day-stat-box">
+                            <span class="day-stat-lbl">Consumed</span>
+                            <span class="day-stat-val" style="color:#fff">${Math.round(dayData.cal)}</span>
+                        </div>
+                        <div class="day-stat-box">
+                            <span class="day-stat-lbl">Goal</span>
+                            <span class="day-stat-val" style="color:#666">${goal}</span>
+                        </div>
+                        <div class="day-stat-box">
+                            <span class="day-stat-lbl">Items</span>
+                            <span class="day-stat-val" style="color:#fff">${dayData.items.length}</span>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
             });
         }
 
         async function logFood() {
             const idx = document.getElementById('selectedFoodIdx').value;
-            const qty = parseFloat(document.getElementById('qtyInput').value);
+            const qty = safeNum(document.getElementById('qtyInput').value);
             if(!idx || !qty) return;
 
             const f = db.foods[idx];
-            const base = f.base || f.baseqty || 100;
+            const base = safeNum(f.base || f.baseqty || 100);
             const ratio = qty / base;
             const unitName = f.measurement || f.unit || 'g';
 
@@ -408,25 +491,23 @@
                 food: f.name,
                 qty: qty,
                 measurement: unitName,
-                cal: Math.round(f.cal * ratio),
-                pro: Math.round(f.pro * ratio),
-                carb: Math.round(f.carb * ratio),
-                fat: Math.round(f.fat * ratio)
+                cal: Math.round(safeNum(f.cal) * ratio),
+                pro: Math.round(safeNum(f.pro) * ratio),
+                carb: Math.round(safeNum(f.carb) * ratio),
+                fat: Math.round(safeNum(f.fat) * ratio)
             };
 
-            // Optimistic Update: Push to daily and history locally
+            // Optimistic Update
             if(!db.daily) db.daily = [];
             db.daily.push(entry);
             db.history.push(entry);
-            
-            localStorage.setItem('arc_db_v4', JSON.stringify(db));
+            localStorage.setItem('arc_db_v6', JSON.stringify(db));
             processData();
             
-            // Reset Inputs
             document.getElementById('foodSearch').value = '';
-            document.getElementById('selectedFoodIdx').value = '';
             document.getElementById('qtyInput').value = '';
             document.getElementById('unitLabel').innerText = 'Unit';
+            document.getElementById('calcPreview').innerText = '';
             
             await fetch(API_URL, { method: 'POST', body: JSON.stringify(entry) });
         }
@@ -436,11 +517,11 @@
                 action: 'addFood',
                 name: document.getElementById('new-name').value,
                 measurement: document.getElementById('new-unit').value,
-                base: parseFloat(document.getElementById('new-base').value)||1,
-                cal: parseFloat(document.getElementById('new-cal').value)||0,
-                pro: parseFloat(document.getElementById('new-pro').value)||0,
-                carb: parseFloat(document.getElementById('new-carb').value)||0,
-                fat: parseFloat(document.getElementById('new-fat').value)||0
+                base: safeNum(document.getElementById('new-base').value) || 1,
+                cal: safeNum(document.getElementById('new-cal').value),
+                pro: safeNum(document.getElementById('new-pro').value),
+                carb: safeNum(document.getElementById('new-carb').value),
+                fat: safeNum(document.getElementById('new-fat').value)
             };
             if(!food.name) return;
             
@@ -450,11 +531,11 @@
         }
 
         async function calculateGoals() {
-            const w = parseFloat(document.getElementById('calc-weight').value);
-            const h = parseFloat(document.getElementById('calc-height').value);
-            const age = parseFloat(document.getElementById('calc-age').value);
-            const act = parseFloat(document.getElementById('calc-activity').value);
-            const goalDiff = parseInt(document.getElementById('calc-goal').value);
+            const w = safeNum(document.getElementById('calc-weight').value);
+            const h = safeNum(document.getElementById('calc-height').value);
+            const age = safeNum(document.getElementById('calc-age').value);
+            const act = safeNum(document.getElementById('calc-activity').value);
+            const goalDiff = safeNum(document.getElementById('calc-goal').value);
             const gender = document.getElementById('calc-gender').value;
 
             if(!w) return;
@@ -462,7 +543,6 @@
             let bmr = (10*w) + (6.25*h) - (5*age) + (gender=='m'?5:-161);
             let target = Math.round(bmr*act) + goalDiff;
             
-            // Update Local
             db.settings = {
                 daily_goal: target,
                 macro_pro: Math.round((target*0.3)/4),
@@ -470,7 +550,6 @@
                 macro_fat: Math.round((target*0.35)/9)
             };
             
-            // Save payload
             const load = {
                 action: 'saveSettings',
                 goal: db.settings.daily_goal,
@@ -481,9 +560,8 @@
             
             updateUI();
             switchView('home');
-            
             await fetch(API_URL, { method: 'POST', body: JSON.stringify(load) });
-            alert("Goals Saved to Cloud!");
+            alert("Goals Saved!");
         }
 
         function switchView(v) {
