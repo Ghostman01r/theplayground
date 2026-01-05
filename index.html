@@ -230,6 +230,7 @@
         </header>
 
         <div class="controls">
+            <a href="guide.html" class="btn" style="text-decoration:none; display:inline-block;">Manual ?</a>
             <span class="section-label">Topics modules</span>
             <button class="btn btn-primary" id="btn-add-modal">+ Add Topic</button>
         </div>
@@ -462,6 +463,21 @@
         } else {
             fetchFromCloud();
         }
+        // --- ONBOARDING CHECK ---
+        // Checks if user has read the guide. If not, redirects them there.
+        // NOTE: Comment this out if you are testing and keep getting redirected.
+        
+        window.onload = function() {
+                        // The Check
+            const guideCompleted = localStorage.getItem('nexus_guide_completed');
+            
+            if (!guideCompleted) {
+                console.log("New user detected. Redirecting to Manual...");
+                window.location.href = 'guide.html';
+            } else {
+                console.log("User verified.");
+            }
+        };
     </script>
 </body>
 </html>
