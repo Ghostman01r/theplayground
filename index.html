@@ -19,6 +19,7 @@
             --success: #00E055;
             --radius-lg: 28px;
             --radius-md: 16px;
+            --radius-sm: 8px;
             --font-main: 'Inter', sans-serif;
             --font-tech: 'Space Mono', monospace;
         }
@@ -31,26 +32,24 @@
             font-family: var(--font-main);
             overflow-x: hidden;
             min-height: 100vh;
+            padding-bottom: 100px;
             background-image: radial-gradient(#222 1px, transparent 1px);
             background-size: 20px 20px;
         }
 
-        /* HIDDEN BY DEFAULT to prevent "Dummy Dashboard" */
         .app-container { 
             max-width: 1400px; margin: 0 auto; padding: 20px; 
-            display: none; /* KEY FIX 1 */
-            opacity: 0;
-            transition: opacity 0.5s ease;
+            display: none; opacity: 0; transition: opacity 0.5s ease;
         }
         .app-visible { display: block; opacity: 1; }
 
         /* --- HEADER --- */
         header { margin-bottom: 40px; }
-        
         .status-bar {
-            font-family: var(--font-tech); font-size: 0.75rem; color: var(--text-secondary);
-            margin-bottom: 8px; display: flex; justify-content: space-between;
+            font-family: var(--font-tech); font-size: 0.8rem; color: var(--text-secondary);
+            margin-bottom: 8px; display: flex; justify-content: space-between; letter-spacing: 1px;
         }
+        #user-identity { color: var(--accent-color); font-weight: bold; text-shadow: 0 0 10px rgba(255, 85, 0, 0.3); }
 
         .hero-card {
             background-color: var(--accent-color); color: #000; padding: 30px;
@@ -63,29 +62,27 @@
         .stat-item h3 { font-size: 3rem; font-family: var(--font-tech); letter-spacing: -2px; }
 
         /* --- CONTROLS --- */
-        .controls { 
-            display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; 
-            background: var(--surface-color); padding: 10px 20px; border-radius: var(--radius-md); border: 1px solid #222;
-        }
-        
+        .controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .btn {
             background: var(--surface-color); border: 1px solid #333; color: white;
             padding: 10px 20px; border-radius: var(--radius-md); cursor: pointer;
             font-family: var(--font-tech); transition: all 0.2s ease;
         }
-        .btn:hover { background: var(--surface-hover); transform: translateY(-2px); }
-        .btn-primary { background: white; color: black; border: none; font-weight: bold; }
-        
-        /* LOGOUT BUTTON SPECIFIC */
-        .btn-logout {
-            color: var(--danger); border-color: #333; margin-right: 10px;
+        .btn-glow {
+            background: var(--surface-color); color: white; border: 1px solid var(--accent-color);
+            box-shadow: 0 0 5px rgba(255, 85, 0, 0.2); font-weight: bold;
         }
-        .btn-logout:hover {
-            background: rgba(255, 42, 42, 0.1); border-color: var(--danger);
+        .btn-glow:hover {
+            background: var(--accent-color); color: black; box-shadow: 0 0 20px rgba(255, 85, 0, 0.6); transform: translateY(-2px);
         }
 
-        /* --- GRID --- */
-        .grid-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        /* --- GRID (DESKTOP DEFAULT) --- */
+        .grid-view { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+            gap: 20px; 
+        }
+
         .card {
             background: var(--surface-color); border-radius: var(--radius-lg);
             padding: 24px; min-height: 220px; border: 1px solid #222;
@@ -95,7 +92,7 @@
         .status-dot { width: 12px; height: 12px; border-radius: 50%; background: #333; }
         .status-due { background: var(--accent-color); box-shadow: 0 0 10px var(--accent-color); animation: pulse 2s infinite; }
         .status-ok { background: var(--success); }
-        .topic-name { font-size: 1.4rem; font-weight: 600; margin-top: 15px; }
+        .topic-name { font-size: 1.4rem; font-weight: 600; margin-top: 15px; word-break: break-word; }
         .card-meta { font-family: var(--font-tech); font-size: 0.75rem; color: var(--text-secondary); margin-top: 5px; }
         
         .card-actions { margin-top: auto; display: flex; gap: 10px; padding-top: 20px; }
@@ -103,43 +100,90 @@
         .btn-review { background: var(--accent-color); color: black; }
         .btn-delete { background: transparent; color: var(--text-secondary); width: 30px; flex: none; border: 1px solid #333; }
 
+        /* --- MOBILE GRID OVERRIDE (FIX 1) --- */
+        @media (max-width: 768px) {
+            .app-container { padding: 15px; }
+            .hero-card { margin-top: -10px; padding: 25px; }
+            .hero-title { font-size: 1.5rem; }
+            .stat-item h3 { font-size: 2.2rem; }
+
+            .grid-view {
+                /* FORCE 2 COLUMNS */
+                grid-template-columns: 1fr 1fr; 
+                gap: 10px;
+            }
+
+            .card {
+                /* SMALLER CARDS */
+                min-height: 180px;
+                padding: 15px;
+                border-radius: 16px;
+            }
+
+            .topic-name {
+                font-size: 1rem; /* Smaller text to fit */
+                margin-top: 10px;
+                line-height: 1.2;
+            }
+
+            .card-actions {
+                /* Smaller buttons */
+                padding-top: 10px;
+                gap: 5px;
+            }
+
+            .action-btn {
+                padding: 8px 0;
+                font-size: 0.7rem;
+            }
+        }
+
+        /* --- BOTTOM NAV BAR --- */
+        .bottom-nav {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: rgba(18, 18, 18, 0.9); backdrop-filter: blur(10px);
+            border: 1px solid #333; border-radius: 24px; padding: 10px 30px;
+            display: flex; gap: 40px; z-index: 900; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-secondary); cursor: pointer; transition: 0.3s; }
+        .nav-item:hover, .nav-item.active { color: var(--accent-color); }
+        .nav-icon { width: 24px; height: 24px; margin-bottom: 4px; fill: currentColor; }
+        .nav-label { font-family: var(--font-tech); font-size: 0.65rem; }
+
+        /* --- PROFILE POPUP --- */
+        .profile-header { text-align: center; margin-bottom: 30px; }
+        .profile-avatar {
+            width: 80px; height: 80px; background: #222; border-radius: 50%;
+            margin: 0 auto 15px auto; display: flex; align-items: center; justify-content: center;
+            border: 2px solid var(--accent-color); font-size: 2rem; color: #fff;
+        }
+        .profile-stats {
+            display: flex; justify-content: space-around; background: #000; padding: 15px; border-radius: 12px;
+            margin-bottom: 30px; font-family: var(--font-tech);
+        }
+        .stat-box { text-align: center; }
+        .stat-num { display: block; font-size: 1.2rem; color: #fff; font-weight: bold; }
+        .stat-lbl { font-size: 0.7rem; color: #666; }
+        .btn-logout-pop {
+            width: 100%; padding: 15px; background: rgba(255, 42, 42, 0.1); border: 1px solid var(--danger);
+            color: var(--danger); font-family: var(--font-tech); font-weight: bold; cursor: pointer; border-radius: 12px; transition: 0.2s;
+        }
+        .btn-logout-pop:hover { background: var(--danger); color: white; }
+
         /* --- GATEKEEPER --- */
-        .gatekeeper-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(5, 5, 5, 1); /* Solid background initially */
-            z-index: 2000; display: flex; justify-content: center; align-items: center;
-        }
-
-        .gatekeeper-card {
-            width: 90%; max-width: 420px;
-            background: var(--surface-color); border: 1px solid #333;
-            padding: 40px; border-radius: 28px; text-align: center;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-            position: relative; overflow: hidden;
-        }
-        .gatekeeper-card::after {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px;
-            background: var(--accent-color); box-shadow: 0 0 15px var(--accent-color);
-        }
-
+        .gatekeeper-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 5, 5, 1); z-index: 2000; display: flex; justify-content: center; align-items: center; }
+        .gatekeeper-card { width: 90%; max-width: 420px; background: var(--surface-color); border: 1px solid #333; padding: 40px; border-radius: 28px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.8); position: relative; overflow: hidden; }
+        .gatekeeper-card::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: var(--accent-color); box-shadow: 0 0 15px var(--accent-color); }
         .gate-title { font-family: var(--font-tech); color: #fff; font-size: 1.2rem; margin-bottom: 30px; letter-spacing: 2px; text-transform: uppercase; }
-        .gate-input { 
-            width: 100%; background: #000; border: 1px solid #333; 
-            padding: 15px; color: white; font-family: var(--font-tech); 
-            border-radius: 12px; font-size: 1rem; text-align: center; margin-bottom: 15px;
-        }
+        .gate-input { width: 100%; background: #000; border: 1px solid #333; padding: 15px; color: white; font-family: var(--font-tech); border-radius: 12px; font-size: 1rem; text-align: center; margin-bottom: 15px; }
         .gate-input:focus { outline: none; border-color: var(--accent-color); }
         .gate-btn { width: 100%; padding: 15px; font-weight: bold; font-family: var(--font-tech); background: white; color: black; border-radius: 12px; cursor: pointer; border: none;}
         .switch-link { color: #555; margin-top: 25px; font-size: 0.75rem; cursor: pointer; font-family: var(--font-tech); display: inline-block; text-decoration: underline;}
-        
         .loader-bar { height: 4px; width: 100%; background: #222; margin-top: 20px; display: none; }
         .loader-fill { height: 100%; width: 50%; background: var(--accent-color); animation: load 1.5s infinite ease-in-out; }
 
         /* --- MODALS --- */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 100;
-        }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 100; }
         .modal-active { display: flex !important; }
         .modal { background: var(--surface-color); padding: 30px; border-radius: 28px; width: 90%; max-width: 400px; border: 1px solid #333; }
 
@@ -151,7 +195,6 @@
 <body>
 
     <div class="gatekeeper-overlay" id="gatekeeper">
-        
         <div class="gatekeeper-card" id="form-login">
             <div class="gate-title">System // Access</div>
             <input type="text" id="login-user" class="gate-input" placeholder="CODENAME" autocomplete="off">
@@ -160,12 +203,11 @@
             <div class="loader-bar" id="loader-login"><div class="loader-fill"></div></div>
             <div class="switch-link" onclick="toggleAuthMode('signup')">Initialize New Identity</div>
         </div>
-
         <div class="gatekeeper-card" id="form-signup" style="display:none;">
             <div class="gate-title">System // Enlist</div>
             <div style="display:flex; gap:10px; margin-bottom: 15px;">
-                <input type="text" id="signup-user" class="gate-input" placeholder="GENERATING..." readonly style="margin:0; font-weight:bold; color: var(--accent-color);">
-                <button class="btn" onclick="generateCodename()" style="width: 50px; height: 100%;">↻</button>
+                <input type="text" id="signup-user" class="gate-input" placeholder="ENTER CODENAME" style="margin:0; font-weight:bold; color: var(--accent-color);">
+                <button class="btn" onclick="generateCodename()" style="width: 50px; height: 100%; display:flex; align-items:center; justify-content:center;">↻</button>
             </div>
             <input type="password" id="signup-pass" class="gate-input" placeholder="CREATE PASSWORD">
             <button class="gate-btn" onclick="performSignup()">CONFIRM IDENTITY</button>
@@ -177,8 +219,8 @@
     <div class="app-container" id="app-core">
         <header>
             <div class="status-bar">
-                <span>NEXUS v6.2 (FIXED)</span>
-                <span id="user-display">GUEST MODE</span>
+                <span id="user-identity">--</span>
+                <span>SYSTEM ONLINE</span>
             </div>
             <div class="hero-card">
                 <div class="hero-title">Cloud Knowledge Matrix.</div>
@@ -191,13 +233,21 @@
 
         <div class="controls">
             <span class="section-label">Modules</span>
-            <div style="display: flex; align-items: center;">
-                <button class="btn btn-logout" onclick="logout()">// LOGOUT</button>
-                <button class="btn btn-primary" id="btn-add-modal">+ Add Topic</button>
-            </div>
+            <button class="btn btn-glow" id="btn-add-modal">+ Add Topic</button>
         </div>
 
         <div class="grid-view" id="topic-grid"></div>
+    </div>
+
+    <div class="bottom-nav" id="bottom-nav" style="display:none;">
+        <div class="nav-item active" onclick="showDashboard()">
+            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M4 13h6a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1zm-1 7a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v4zm10 0a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-7a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v7zm1-10h6a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1z"/></svg>
+            <span class="nav-label">GRID</span>
+        </div>
+        <div class="nav-item" onclick="openProfile()">
+            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+            <span class="nav-label">PROFILE</span>
+        </div>
     </div>
 
     <div class="modal-overlay" id="add-modal">
@@ -209,6 +259,25 @@
                 <button class="btn" id="btn-cancel" style="flex: 1">Cancel</button>
                 <button class="btn btn-primary" id="btn-create-topic" style="flex: 1">Create</button>
             </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="profile-modal">
+        <div class="modal">
+            <div class="profile-header">
+                <div class="profile-avatar">
+                    <svg style="width:40px; height:40px; fill:white;" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                </div>
+                <h2 id="profile-name">--</h2>
+                <div style="color:#666; font-family:var(--font-tech); font-size:0.8rem; margin-top:5px;">OPERATOR LEVEL: 1</div>
+            </div>
+            <div class="profile-stats">
+                <div class="stat-box"><span class="stat-num" id="stat-total">0</span><span class="stat-lbl">TOPICS</span></div>
+                <div class="stat-box"><span class="stat-num" id="stat-due">0</span><span class="stat-lbl">DUE</span></div>
+            </div>
+            <button class="btn-logout-pop" onclick="logout()">// TERMINATE SESSION (LOGOUT)</button>
+            <br><br>
+            <button class="btn" style="width:100%; border:none; color:#666;" onclick="closeProfile()">Close</button>
         </div>
     </div>
 
@@ -225,22 +294,17 @@
         let currentUser = { name: null, hex: null };
         let topics = [];
 
-        // --- AUTH & INIT ---
         window.onload = checkSession;
 
         function checkSession() {
             const savedHex = localStorage.getItem('nexus_hex');
             const savedName = localStorage.getItem('nexus_name');
-            
             if(savedHex && savedName) {
-                // User is remembered, unlock immediately
                 currentUser.hex = savedHex;
                 currentUser.name = savedName;
                 unlockApp();
                 syncDown(); 
             } else {
-                // User is NOT remembered, ensure Gatekeeper is visible
-                // (It is visible by default in HTML/CSS, so we just generate the name)
                 generateCodename();
             }
         }
@@ -257,14 +321,10 @@
         }
 
         function unlockApp() {
-            // Hide Gatekeeper
             document.getElementById('gatekeeper').style.display = 'none';
-            
-            // Show App (FIX 1)
-            const app = document.getElementById('app-core');
-            app.classList.add('app-visible');
-            
-            document.getElementById('user-display').innerText = "OPERATOR: " + currentUser.name.toUpperCase();
+            document.getElementById('app-core').classList.add('app-visible');
+            document.getElementById('bottom-nav').style.display = 'flex';
+            document.getElementById('user-identity').innerText = currentUser.name.toUpperCase();
         }
 
         function logout() {
@@ -273,60 +333,57 @@
             location.reload();
         }
 
-        // --- NETWORK CALLS ---
+        function showDashboard() { closeProfile(); }
+        function openProfile() {
+            document.getElementById('profile-name').innerText = currentUser.name;
+            document.getElementById('stat-total').innerText = topics.length;
+            const dueCount = topics.filter(t => {
+                const today = new Date(); today.setHours(0,0,0,0);
+                const reviewDate = new Date(t.nextReview); reviewDate.setHours(0,0,0,0);
+                return today.getTime() >= reviewDate.getTime();
+            }).length;
+            document.getElementById('stat-due').innerText = dueCount;
+            document.getElementById('profile-modal').classList.add('modal-active');
+        }
+        function closeProfile() { document.getElementById('profile-modal').classList.remove('modal-active'); }
 
         async function performLogin() {
             const user = document.getElementById('login-user').value.trim();
             const pass = document.getElementById('login-pass').value;
             if(!user || !pass) return alert("Credentials missing.");
-
             document.getElementById('loader-login').style.display = 'block';
-
             try {
                 const res = await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST', body: JSON.stringify({ action: 'LOGIN', email: user, password: pass })
                 });
                 const data = await res.json();
-
                 if(data.status === 'SUCCESS') {
                     localStorage.setItem('nexus_hex', data.hex);
                     localStorage.setItem('nexus_name', user);
                     currentUser = { hex: data.hex, name: user };
-                    
-                    // DIRECT ACCESS (Existing users skip guide)
                     unlockApp();
                     syncDown();
-                } else {
-                    alert("ACCESS DENIED: " + data.message);
-                }
+                } else { alert("ACCESS DENIED: " + data.message); }
             } catch(e) { alert("Network Error. Check URL."); }
             document.getElementById('loader-login').style.display = 'none';
         }
 
         async function performSignup() {
-            const user = document.getElementById('signup-user').value;
+            const user = document.getElementById('signup-user').value.trim();
             const pass = document.getElementById('signup-pass').value;
-            if(!pass) return alert("Password required.");
-
+            if(!user || !pass) return alert("Credentials missing.");
             document.getElementById('loader-signup').style.display = 'block';
-
             try {
                 const res = await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST', body: JSON.stringify({ action: 'SIGNUP', email: user, password: pass })
                 });
                 const data = await res.json();
-
                 if(data.status === 'SUCCESS') {
                     localStorage.setItem('nexus_hex', data.hex);
                     localStorage.setItem('nexus_name', user);
                     currentUser = { hex: data.hex, name: user };
-                    
-                    // FIX 3: REDIRECT TO GUIDE FOR NEW USERS
                     window.location.href = 'guide.html';
-                    
-                } else {
-                    alert("ERROR: " + data.message);
-                }
+                } else { alert("ERROR: " + data.message); }
             } catch(e) { alert("Network Error. Check URL."); }
             document.getElementById('loader-signup').style.display = 'none';
         }
@@ -336,36 +393,18 @@
             try {
                 const res = await fetch(GOOGLE_SCRIPT_URL + '?hex=' + currentUser.hex);
                 const data = await res.json();
-                if(Array.isArray(data)) {
-                    topics = data;
-                    render();
-                }
+                if(Array.isArray(data)) { topics = data; render(); }
             } catch(e) { console.log(e); }
         }
 
         async function syncUp() {
-            document.getElementById('user-display').style.color = "var(--accent-color)";
-            document.getElementById('user-display').innerText = "SAVING...";
             try {
                 const res = await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST', body: JSON.stringify({ action: 'SYNC_UP', hex: currentUser.hex, topics: topics })
                 });
-                const result = await res.json();
-                if(result.status === "SAVED") {
-                    document.getElementById('user-display').style.color = "var(--success)";
-                    document.getElementById('user-display').innerText = "SAVED";
-                    setTimeout(() => {
-                        document.getElementById('user-display').style.color = "var(--text-secondary)";
-                        document.getElementById('user-display').innerText = "OPERATOR: " + currentUser.name.toUpperCase();
-                    }, 2000);
-                }
-            } catch(e) { 
-                document.getElementById('user-display').style.color = "var(--danger)";
-                document.getElementById('user-display').innerText = "SAVE FAILED";
-            }
+            } catch(e) { console.log("Save failed"); }
         }
 
-        // --- APP LOGIC ---
         function createTopic(name) { return { id: 'top_' + Date.now(), name: name, level: 0, nextReview: new Date().getTime() }; }
         function calculateNextReview(level) {
             const now = new Date();
