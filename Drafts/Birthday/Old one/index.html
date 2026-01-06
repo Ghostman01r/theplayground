@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Surprise for You!</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght=600;700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- NEW: Container for the falling hearts and roses -->
+    <div id="falling-items-container"></div>
+
+    <div id="fireworks-container"></div>
+
+    <!-- Intro Page -->
+    <div class="intro-page">
+        <div class="intro-content">
+            <h1>You've got a surprise!</h1>
+            <p>Tap the gift to open it</p>
+            <div id="gift-box">🎁</div>
+        </div>
+    </div>
+
+    <!-- Main Birthday Page -->
+    <main class="birthday-page">
+        <header>
+            <div class="made-for">
+                
+                <span>Specially Made for My Darling Anshika ❤️</span>
+            </div>
+            <div class="title">
+    <h1>Happy</h1>
+    <h2>Birthday</h2>
+<h2>Maidam ji 🥰</h2>
+       
+        </header>
+
+        <section class="card-section">
+
+ <!-- ADD THE DIV FOR THE ARROW HERE -->
+    <div class="swipe-indicator">
+        <!-- We use an SVG so we can style it easily with CSS -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M10 17l5-5-5-5v10z"></path>
+        </svg>
+    </div>
+    <!-- END OF NEW CODE -->
+            <div class="swiper">
+                <div class="swiper-wrapper">
+                    <!-- All slides have the same full structure now -->
+                    <div class="swiper-slide">
+                        <div class="post-card">
+                            <div class="post-header"><img src="assets/profile.jpg" class="profile-pic"><span class="username">Princesses 👑 Anshika ❤️</span></div>
+                            <div class="post-image"><img src="assets/bg.jpg" alt="Birthday Person"></div>
+                            <div class="post-footer">
+                                <div class="post-actions"><svg id="like-button" class="icon" viewBox="0 0 24 24"><path d="M16.5 3c-1.74 0-3.41.81-4.5 2.09C10.91 3.81 9.24 3 7.5 3 4.42 3 2 5.42 2 8.5c0 3.78 3.4 6.86 8.55 11.54L12 21.35l1.45-1.32C18.6 15.36 22 12.28 22 8.5 22 5.42 19.58 3 16.5 3zm-4.4 15.55l-.1.1-.1-.1C7.14 14.24 4 11.39 4 8.5 4 6.5 5.5 5 7.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5c2 0 3.5 1.5 3.5 3.5 0 2.89-3.14 5.74-7.9 10.05z"></path></svg></div>
+                                <p class="like-count">Liked by <strong>you</strong> and <strong id="like-counter">1,205,199</strong> others</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="swiper-slide">
+                        <div class="post-card">
+                            <div class="post-header"><img src="assets/profile.jpg" class="profile-pic"><span class="username">Princesses 👑 Anshika ❤️</span></div>
+                            <div class="post-image"><img src="assets/photo2.jpg" alt="Another moment"></div>
+                        </div>
+                    </div>
+                    <div class="swiper-slide">
+                        <div class="post-card">
+                            <div class="post-header"><img src="assets/profile.jpg" class="profile-pic"><span class="username">Princesses 👑 Anshika ❤️</span></div>
+                            <div class="post-image"><img src="assets/photo3.jpg" alt="Happy memory"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p class="wish">Happy birthday! May your new chapter be filled with endless joy, beautiful moments, and all the success you deserve.</p>
+
+
+
+            <p class="archive">Made with ❤️ by <strong>Your love 😎</strong></p>
+        </footer>
+    </main>
+    
+    <audio id="birthday-song" loop><source src="assets/birthday_song.mp3" type="audio/mpeg"></audio>
+
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fireworks-js@2.10.2/dist/index.umd.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,106 @@
+/* Basic Reset & Setup */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Poppins', sans-serif; height: 100vh; overflow: hidden; background: #111; color: white; display: flex; justify-content: center; align-items: center; }
+body::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: url('assets/bg.jpg'); background-size: cover; background-position: center; filter: blur(15px) brightness(0.4); transform: scale(1.1); z-index: -1; }
+
+/* Effects Containers */
+#fireworks-container { position: fixed; left: 0; top: 0; width: 100%; height: 100%; z-index: 90; pointer-events: none; }
+#falling-items-container { position: fixed; left: 0; top: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; overflow: hidden; }
+.falling-item {
+    position: absolute;
+    font-size: 2rem;
+    user-select: none;
+    /* The animation properties have been completely removed from here. */
+    /* They will be set entirely by JavaScript. */
+}
+@keyframes fall {
+    to {
+        transform: translateY(105vh) rotate(360deg);
+        opacity: 0;
+    }
+}
+/* Intro Page Styling */
+.intro-page { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(45deg, #4c00ff, #ff007f, #ffc800); display: flex; justify-content: center; align-items: center; text-align: center; z-index: 100; transition: opacity 1s ease, transform 1s ease; transform: scale(1); }
+.intro-page.hidden { opacity: 0; transform: scale(1.2); pointer-events: none; }
+.intro-content h1 { font-size: 2.5rem; margin-bottom: 10px; text-shadow: 2px 2px 5px rgba(0,0,0,0.3); }
+.intro-content p { font-size: 1rem; opacity: 0.9; margin-bottom: 30px; }
+#gift-box { font-size: 6rem; cursor: pointer; animation: pulse 1.5s infinite; transition: transform 0.2s ease; }
+#gift-box:hover { transform: scale(1.1); }
+@keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+
+/* Main Birthday Page Styling */
+.birthday-page { width: 100%; height: 100%; max-width: 450px; display: flex; flex-direction: column; justify-content: space-between; padding: 20px; opacity: 0; animation: fadeIn 1s ease-out 0.5s forwards; position: relative; z-index: 2; /* Sits above the falling items */ }
+@keyframes fadeIn { to { opacity: 1; } }
+
+/* Header Styling */
+header .made-for { display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 1rem; font-weight: 600; color: #fff; text-shadow: 0 0 5px #fff, 0 0 10px #ff007f, 0 0 15px #ff007f; animation: text-glow 3s infinite alternate; }
+@keyframes text-glow { from { text-shadow: 0 0 5px #fff, 0 0 10px #ff007f, 0 0 15px #ff007f; } to { text-shadow: 0 0 5px #fff, 0 0 15px #ff66b2, 0 0 25px #ff66b2; } }
+header .title { position: relative; text-align: center; margin: 20px 0; display: flex; flex-direction: column; align-items: center; }
+header .title h1 { font-size: 4rem; font-weight: 700; color: white; text-shadow: 0 0 10px rgba(255, 255, 255, 0.5); line-height: 1; }
+header .title h2 { font-family: 'Dancing Script', cursive; font-size: 4.5rem; color: #ff9d00; text-shadow: 0 0 15px #ff9d00, 0 0 25px #ff9d00; animation: glow 2s infinite alternate; line-height: 1.2; }
+@keyframes glow { from { text-shadow: 0 0 10px #ff9d00, 0 0 20px #ff9d00; } to { text-shadow: 0 0 20px #ff9d00, 0 0 30px #ffa81f; } }
+/* --- [NEW] SWIPE INDICATOR STYLING --- */
+.swipe-indicator {
+    position: absolute;
+    /* Position it to the right of the card stack */
+    right: 10px; 
+    /* Vertically centered */
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10; /* Make sure it's above the cards */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none; /* So it doesn't interfere with swiping */
+    opacity: 0; /* Starts invisible */
+    animation: fadeInSwipeArrow 1s ease-out 2s forwards, pulseSwipeArrow 2s infinite 3s; /* 1. Fade in after 2s, 2. Start pulsing after 3s */
+}
+
+.swipe-indicator svg {
+    width: 60px;
+    height: 60px;
+    fill: #ffffff;
+    filter: drop-shadow(0 0 10px rgba(255, 157, 0, 0.7));
+    opacity: 0.7;
+}
+
+@keyframes fadeInSwipeArrow {
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes pulseSwipeArrow {
+    0% {
+        transform: translateY(-50%) scale(1);
+    }
+    50% {
+        transform: translateY(-50%) scale(1.1);
+    }
+    100% {
+        transform: translateY(-50%) scale(1);
+    }
+}
+
+/* Card Section Styling */
+.card-section { flex-grow: 1; display: flex; align-items: center; justify-content: center; padding: 20px 0; }
+.swiper { width: 100%; max-width: 320px; height: 450px; }
+.swiper-slide { display: flex; align-items: center; justify-content: center; border-radius: 18px; font-size: 22px; font-weight: bold; color: #fff; }
+.post-card { width: 100%; height: 100%; background-color: white; border-radius: 18px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); overflow: hidden; display: flex; flex-direction: column; }
+.post-header { padding: 10px 15px; display: flex; align-items: center; gap: 10px; color: black; }
+.profile-pic { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid #ddd; }
+.username { font-size: 0.9rem; font-weight: 600; }
+.post-image { flex-grow: 1; overflow: hidden; }
+.post-image img { width: 100%; height: 100%; object-fit: cover; }
+.post-footer { padding: 0 15px 15px 15px; color: #262626; margin-top: auto; }
+.post-actions { padding: 10px 0; }
+.post-actions .icon { width: 28px; height: 28px; cursor: pointer; fill: #262626; transition: transform 0.2s ease, fill 0.2s ease; }
+.post-actions .icon:active { transform: scale(0.85); }
+.post-actions .icon.liked { fill: #ff3040; }
+.like-count { font-size: 0.9rem; }
+.like-count strong { font-weight: 600; }
+
+/* Footer Styling */
+footer { text-align: center; }
+footer .wish { font-style: italic; font-size: 0.9rem; opacity: 0.9; margin-bottom: 5px; }
+footer .archive { font-size: 0.75rem; opacity: 0.6; }
