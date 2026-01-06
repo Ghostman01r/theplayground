@@ -214,14 +214,16 @@
 
     <script>
         function initializeNexus() {
-            // 1. Mark tutorial as complete in browser memory
+            // We don't really need to set a flag anymore because
+            // existing users skip this page entirely via the logic in index.html.
+            // But we keep this for consistency.
             localStorage.setItem('nexus_guide_completed', 'true');
             
-            // 2. Add a cool exit animation (optional)
+            // Visual transition
             document.body.style.opacity = '0';
             document.body.style.transition = 'opacity 1s ease';
 
-            // 3. Redirect back to the App after 1 second
+            // Send back to dashboard
             setTimeout(() => {
                 window.location.href = 'index.html';
             }, 1000);

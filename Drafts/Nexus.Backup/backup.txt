@@ -1,0 +1,51 @@
+function doGet(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var data = sheet.getDataRange().getValues();
+  
+  // Convert rows to JSON objects
+  var headers = data[0];
+  var topics = [];
+  
+  // If sheet is empty or only headers, return empty list
+  if (data.length > 1) {
+    for (var i = 1; i < data.length; i++) {
+      var row = data[i];
+      var topic = {};
+      // Rebuild object from columns
+      topic.id = row[0];
+      topic.name = row[1];
+      topic.level = parseInt(row[2]);
+      topic.nextReview = parseInt(row[3]); // Timestamp
+      topics.push(topic);
+    }
+  }
+  
+  return ContentService.createTextOutput(JSON.stringify(topics))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function doPost(e) {
+  // Receives the full list from the website and OVERWRITES the sheet
+  // This is the safest way to ensure sync without conflicts
+  
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var json = JSON.parse(e.postData.contents);
+  
+  sheet.clear(); // Wipe old data
+  
+  // Set Headers
+  sheet.appendRow(["ID", "NAME", "LEVEL", "NEXT_REVIEW_TIMESTAMP"]);
+  
+  // Write new data
+  if (json.length > 0) {
+    var rows = json.map(function(t) {
+      return [t.id, t.name, t.level, t.nextReview];
+    });
+    
+    // Write in bulk for speed
+    sheet.getRange(2, 1, rows.length, 4).setValues(rows);
+  }
+  
+  return ContentService.createTextOutput(JSON.stringify({result: "Success"}))
+    .setMimeType(ContentService.MimeType.JSON);
+}

@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NEXUS // ASRS </title>
-
     <link rel="icon" type="image/png" href="favicon.png">
-
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
         /* --- CORE VARIABLES --- */
@@ -19,11 +17,8 @@
             --text-secondary: #888888;
             --danger: #FF2A2A;
             --success: #00E055;
-            
             --radius-lg: 28px;
             --radius-md: 16px;
-            --radius-sm: 8px;
-            
             --font-main: 'Inter', sans-serif;
             --font-tech: 'Space Mono', monospace;
         }
@@ -40,46 +35,39 @@
             background-size: 20px 20px;
         }
 
-        .app-container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        /* HIDDEN BY DEFAULT to prevent "Dummy Dashboard" */
+        .app-container { 
+            max-width: 1400px; margin: 0 auto; padding: 20px; 
+            display: none; /* KEY FIX 1 */
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        .app-visible { display: block; opacity: 1; }
 
         /* --- HEADER --- */
         header { margin-bottom: 40px; }
         
         .status-bar {
-            font-family: var(--font-tech);
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            margin-bottom: 8px;
-            display: flex;
-            justify-content: space-between;
+            font-family: var(--font-tech); font-size: 0.75rem; color: var(--text-secondary);
+            margin-bottom: 8px; display: flex; justify-content: space-between;
         }
-
-        .sync-indicator { color: var(--text-secondary); }
-        .sync-active { color: var(--accent-color); animation: blink 1s infinite; }
 
         .hero-card {
-            background-color: var(--accent-color);
-            color: #000;
-            padding: 30px;
-            border-radius: var(--radius-lg);
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+            background-color: var(--accent-color); color: #000; padding: 30px;
+            border-radius: var(--radius-lg); width: 100%;
+            display: flex; flex-direction: column; gap: 10px;
             box-shadow: 0 10px 30px rgba(255, 85, 0, 0.2);
-            position: relative;
         }
-
-        .hero-title { font-size: 2rem; font-weight: 800; line-height: 1.1; max-width: 600px; }
-
+        .hero-title { font-size: 2rem; font-weight: 800; line-height: 1.1; }
         .progress-container { margin-top: 20px; display: flex; gap: 40px; }
         .stat-item h3 { font-size: 3rem; font-family: var(--font-tech); letter-spacing: -2px; }
-        .stat-item p { font-size: 0.8rem; text-transform: uppercase; opacity: 0.7; }
 
         /* --- CONTROLS --- */
-        .controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .section-label { font-family: var(--font-tech); color: var(--text-secondary); }
-
+        .controls { 
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; 
+            background: var(--surface-color); padding: 10px 20px; border-radius: var(--radius-md); border: 1px solid #222;
+        }
+        
         .btn {
             background: var(--surface-color); border: 1px solid #333; color: white;
             padding: 10px 20px; border-radius: var(--radius-md); cursor: pointer;
@@ -87,152 +75,126 @@
         }
         .btn:hover { background: var(--surface-hover); transform: translateY(-2px); }
         .btn-primary { background: white; color: black; border: none; font-weight: bold; }
+        
+        /* LOGOUT BUTTON SPECIFIC */
+        .btn-logout {
+            color: var(--danger); border-color: #333; margin-right: 10px;
+        }
+        .btn-logout:hover {
+            background: rgba(255, 42, 42, 0.1); border-color: var(--danger);
+        }
 
         /* --- GRID --- */
-        .grid-view {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
-        }
-
+        .grid-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
         .card {
-            background: var(--surface-color);
-            border-radius: var(--radius-lg);
-            padding: 24px;
+            background: var(--surface-color); border-radius: var(--radius-lg);
+            padding: 24px; min-height: 220px; border: 1px solid #222;
             display: flex; flex-direction: column; justify-content: space-between;
-            min-height: 220px;
-            border: 1px solid #222;
-            transition: transform 0.2s ease;
         }
-        .card:hover { transform: scale(1.02); border-color: #444; }
-
         .card-header { display: flex; justify-content: space-between; }
         .status-dot { width: 12px; height: 12px; border-radius: 50%; background: #333; }
         .status-due { background: var(--accent-color); box-shadow: 0 0 10px var(--accent-color); animation: pulse 2s infinite; }
         .status-ok { background: var(--success); }
-
-        .topic-name { font-size: 1.4rem; font-weight: 600; margin-top: 15px; line-height: 1.2; word-break: break-word; }
+        .topic-name { font-size: 1.4rem; font-weight: 600; margin-top: 15px; }
         .card-meta { font-family: var(--font-tech); font-size: 0.75rem; color: var(--text-secondary); margin-top: 5px; }
-
+        
         .card-actions { margin-top: auto; display: flex; gap: 10px; padding-top: 20px; }
-        .action-btn { flex: 1; padding: 12px; border-radius: var(--radius-sm); border: none; cursor: pointer; font-weight: 600; }
+        .action-btn { flex: 1; padding: 12px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; }
         .btn-review { background: var(--accent-color); color: black; }
         .btn-delete { background: transparent; color: var(--text-secondary); width: 30px; flex: none; border: 1px solid #333; }
 
-        /* --- NOTHING OS LOADER (NEW) --- */
-        .loader-overlay {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: #000000; z-index: 999;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            transition: opacity 0.5s ease, visibility 0.5s;
+        /* --- GATEKEEPER --- */
+        .gatekeeper-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(5, 5, 5, 1); /* Solid background initially */
+            z-index: 2000; display: flex; justify-content: center; align-items: center;
         }
-        .loader-hidden { opacity: 0; visibility: hidden; pointer-events: none; }
 
-        .loader-content { width: 300px; max-width: 80%; }
-        
-        .loader-text {
-            font-family: var(--font-tech);
-            color: #fff;
-            font-size: 2rem;
-            margin-bottom: 20px;
-            letter-spacing: -2px;
-            text-transform: uppercase;
-        }
-        
-        .loader-bar-bg {
-            width: 100%; height: 4px; background: #333;
+        .gatekeeper-card {
+            width: 90%; max-width: 420px;
+            background: var(--surface-color); border: 1px solid #333;
+            padding: 40px; border-radius: 28px; text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
             position: relative; overflow: hidden;
         }
+        .gatekeeper-card::after {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px;
+            background: var(--accent-color); box-shadow: 0 0 15px var(--accent-color);
+        }
+
+        .gate-title { font-family: var(--font-tech); color: #fff; font-size: 1.2rem; margin-bottom: 30px; letter-spacing: 2px; text-transform: uppercase; }
+        .gate-input { 
+            width: 100%; background: #000; border: 1px solid #333; 
+            padding: 15px; color: white; font-family: var(--font-tech); 
+            border-radius: 12px; font-size: 1rem; text-align: center; margin-bottom: 15px;
+        }
+        .gate-input:focus { outline: none; border-color: var(--accent-color); }
+        .gate-btn { width: 100%; padding: 15px; font-weight: bold; font-family: var(--font-tech); background: white; color: black; border-radius: 12px; cursor: pointer; border: none;}
+        .switch-link { color: #555; margin-top: 25px; font-size: 0.75rem; cursor: pointer; font-family: var(--font-tech); display: inline-block; text-decoration: underline;}
         
-        .loader-bar-fill {
-            height: 100%; background: #D71921; /* Red */
-            width: 0%;
-            animation: load 2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-        }
-        
-        .loader-matrix {
-            margin-top: 10px; font-family: var(--font-tech);
-            font-size: 0.6rem; color: #666; letter-spacing: 4px;
-        }
+        .loader-bar { height: 4px; width: 100%; background: #222; margin-top: 20px; display: none; }
+        .loader-fill { height: 100%; width: 50%; background: var(--accent-color); animation: load 1.5s infinite ease-in-out; }
 
-        @keyframes load {
-            0% { width: 0%; } 50% { width: 70%; } 100% { width: 100%; }
-        }
-
-        /* --- MOBILE --- */
-        @media (max-width: 768px) {
-            .app-container { padding: 10px; }
-            .hero-card { margin: -10px -10px 30px -10px; width: calc(100% + 20px); border-radius: 0 0 28px 28px; padding-top: 50px; }
-            
-            .grid-view { grid-template-columns: 1fr 1fr; gap: 10px; }
-            .card { padding: 15px; min-height: 180px; border-radius: 16px; }
-            
-            .topic-name { font-size: 1.1rem; margin-top: 10px; }
-            .card-meta { font-size: 0.65rem; }
-            .card-actions { flex-direction: row; gap: 8px; padding-top: 10px; }
-            .action-btn { padding: 8px 0;      /* Less padding */
-                font-size: 0.75rem; 
-                height: 36px;        /* Fixed height for uniformity */
-                display: flex; align-items: center; justify-content: center; /* Center text */ }
-            }
-            .btn-delete { 
-                width: 36px;         /* Match height */
-                flex: none;          /* Don't stretch */
-                margin-top: 0;       /* Remove vertical margin */
-            }
-
-        /* --- MODAL --- */
+        /* --- MODALS --- */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
-            display: none; justify-content: center; align-items: center; z-index: 100;
+            background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 100;
         }
         .modal-active { display: flex !important; }
         .modal { background: var(--surface-color); padding: 30px; border-radius: 28px; width: 90%; max-width: 400px; border: 1px solid #333; }
-        
-        input { width: 100%; background: transparent; border: none; border-bottom: 2px solid #333; color: white; font-size: 1.2rem; padding: 10px 0; margin-bottom: 20px; }
-        input:focus { outline: none; border-color: var(--accent-color); }
 
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 85, 0, 0.4); } 70% { box-shadow: 0 0 0 10px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
-        @keyframes blink { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+        @keyframes load { 0% { width: 0%; margin-left: 0; } 50% { width: 100%; margin-left: 0; } 100% { width: 0%; margin-left: 100%; } }
+
     </style>
 </head>
 <body>
 
-    <div class="app-container">
+    <div class="gatekeeper-overlay" id="gatekeeper">
+        
+        <div class="gatekeeper-card" id="form-login">
+            <div class="gate-title">System // Access</div>
+            <input type="text" id="login-user" class="gate-input" placeholder="CODENAME" autocomplete="off">
+            <input type="password" id="login-pass" class="gate-input" placeholder="PASSWORD">
+            <button class="gate-btn" onclick="performLogin()">DECRYPT & ENTER</button>
+            <div class="loader-bar" id="loader-login"><div class="loader-fill"></div></div>
+            <div class="switch-link" onclick="toggleAuthMode('signup')">Initialize New Identity</div>
+        </div>
+
+        <div class="gatekeeper-card" id="form-signup" style="display:none;">
+            <div class="gate-title">System // Enlist</div>
+            <div style="display:flex; gap:10px; margin-bottom: 15px;">
+                <input type="text" id="signup-user" class="gate-input" placeholder="GENERATING..." readonly style="margin:0; font-weight:bold; color: var(--accent-color);">
+                <button class="btn" onclick="generateCodename()" style="width: 50px; height: 100%;">↻</button>
+            </div>
+            <input type="password" id="signup-pass" class="gate-input" placeholder="CREATE PASSWORD">
+            <button class="gate-btn" onclick="performSignup()">CONFIRM IDENTITY</button>
+            <div class="loader-bar" id="loader-signup"><div class="loader-fill"></div></div>
+            <div class="switch-link" onclick="toggleAuthMode('login')">Back to Login</div>
+        </div>
+    </div>
+
+    <div class="app-container" id="app-core">
         <header>
             <div class="status-bar">
-                <span>NEXUS v5.0 (STABLE)</span>
-                <span id="sync-status" class="sync-indicator">ONLINE</span>
+                <span>NEXUS v6.2 (FIXED)</span>
+                <span id="user-display">GUEST MODE</span>
             </div>
             <div class="hero-card">
                 <div class="hero-title">Cloud Knowledge Matrix.</div>
                 <div class="progress-container">
-                    <div class="stat-item">
-                        <h3 id="score-display">--</h3>
-                        <p>Retention</p>
-                    </div>
-                    <div class="stat-item">
-                        <h3 id="due-display">--</h3>
-                        <p>Topics Due</p>
-                    </div>
+                    <div class="stat-item"><h3 id="score-display">--</h3><p>Retention</p></div>
+                    <div class="stat-item"><h3 id="due-display">--</h3><p>Due Now</p></div>
                 </div>
-                <div id="loader" class="loader-overlay">
-                    <div class="loader-content">
-                    <div class="loader-text">NEXUS( )</div>
-                    <div class="loader-bar-bg">
-                    <div class="loader-bar-fill"></div>
-                </div>
-            <div class="loader-matrix">LOADING SYSTEM DATA...</div>
-        </div>
-    </div>
             </div>
         </header>
 
         <div class="controls">
-            <a href="guide.html" class="btn" style="text-decoration:none; display:inline-block;">Manual ?</a>
-            <span class="section-label">Topics modules</span>
-            <button class="btn btn-primary" id="btn-add-modal">+ Add Topic</button>
+            <span class="section-label">Modules</span>
+            <div style="display: flex; align-items: center;">
+                <button class="btn btn-logout" onclick="logout()">// LOGOUT</button>
+                <button class="btn btn-primary" id="btn-add-modal">+ Add Topic</button>
+            </div>
         </div>
 
         <div class="grid-view" id="topic-grid"></div>
@@ -242,7 +204,7 @@
         <div class="modal">
             <h2>New Topic</h2>
             <br>
-            <input type="text" id="new-topic-name" placeholder="Enter topic name..." autocomplete="off">
+            <input type="text" id="new-topic-name" placeholder="Enter topic name..." style="width:100%; background:transparent; border:none; border-bottom:2px solid #333; color:white; font-size:1.2rem; padding:10px 0; margin-bottom:20px; outline:none;" autocomplete="off">
             <div style="display: flex; gap: 10px;">
                 <button class="btn" id="btn-cancel" style="flex: 1">Cancel</button>
                 <button class="btn btn-primary" id="btn-create-topic" style="flex: 1">Create</button>
@@ -251,233 +213,219 @@
     </div>
 
     <script>
-        /**
-         * NEXUS ENGINE v5.0 (Final Stable + Safety Net)
-         */
-
         // ---------------------------------------------------------
-        // PASTE YOUR GOOGLE SCRIPT URL HERE (Keep the quotes!)
+        // PASTE YOUR GOOGLE SCRIPT URL HERE
         // ---------------------------------------------------------
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwZibrs-eDobjGZVmVTFwTRTHUqD8zRP2_K5WFyvGM6y-tNIKDFgBqH8p_jasCjG7W6Jw/exec'; 
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzBhJH57sl9jhjpE06Glt_wV3ceQ-KW5iKt25HqqVOyTT7iavsBhCbbnC2XBAheGQCqcA/exec'; 
         // ---------------------------------------------------------
 
-        let state = { topics: [] };
+        const wordsA = ["Iron", "Neon", "Solar", "Cyber", "Void", "Crimson", "Shadow", "Rogue", "Silent", "Rapid", "Dark", "Aero", "Hyper", "Sonic", "Prime", "Alpha", "Omega", "Steel"];
+        const wordsB = ["Wolf", "Falcon", "Eagle", "Echo", "Ghost", "Hawk", "Blade", "Runner", "Viper", "Storm", "Spark", "Flux", "Core", "Nexus", "Link", "Pulse", "Signal", "Fox"];
 
-        // --- SAFETY NET ---
-        // This ensures the loader disappears after 4 seconds NO MATTER WHAT
-        // --- SAFETY NET (2 SECONDS) ---
-        setTimeout(() => { 
-            const loader = document.getElementById('loader');
-            if(loader) loader.classList.add('loader-hidden'); 
-        }, 3500);
+        let currentUser = { name: null, hex: null };
+        let topics = [];
 
+        // --- AUTH & INIT ---
+        window.onload = checkSession;
 
-        // --- CORE FUNCTIONS ---
-        function generateId() { return 'top_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5); }
-
-        function createTopic(name) {
-            return {
-                id: generateId(),
-                name: name,
-                level: 0,
-                nextReview: new Date().getTime() // Due immediately
-            };
+        function checkSession() {
+            const savedHex = localStorage.getItem('nexus_hex');
+            const savedName = localStorage.getItem('nexus_name');
+            
+            if(savedHex && savedName) {
+                // User is remembered, unlock immediately
+                currentUser.hex = savedHex;
+                currentUser.name = savedName;
+                unlockApp();
+                syncDown(); 
+            } else {
+                // User is NOT remembered, ensure Gatekeeper is visible
+                // (It is visible by default in HTML/CSS, so we just generate the name)
+                generateCodename();
+            }
         }
 
-        // --- CLOUD SYNC ---
-        async function fetchFromCloud() {
+        function generateCodename() {
+            const rA = wordsA[Math.floor(Math.random() * wordsA.length)];
+            const rB = wordsB[Math.floor(Math.random() * wordsB.length)];
+            document.getElementById('signup-user').value = rA + rB;
+        }
+
+        function toggleAuthMode(mode) {
+            document.getElementById('form-login').style.display = mode === 'login' ? 'block' : 'none';
+            document.getElementById('form-signup').style.display = mode === 'signup' ? 'block' : 'none';
+        }
+
+        function unlockApp() {
+            // Hide Gatekeeper
+            document.getElementById('gatekeeper').style.display = 'none';
+            
+            // Show App (FIX 1)
+            const app = document.getElementById('app-core');
+            app.classList.add('app-visible');
+            
+            document.getElementById('user-display').innerText = "OPERATOR: " + currentUser.name.toUpperCase();
+        }
+
+        function logout() {
+            localStorage.removeItem('nexus_hex');
+            localStorage.removeItem('nexus_name');
+            location.reload();
+        }
+
+        // --- NETWORK CALLS ---
+
+        async function performLogin() {
+            const user = document.getElementById('login-user').value.trim();
+            const pass = document.getElementById('login-pass').value;
+            if(!user || !pass) return alert("Credentials missing.");
+
+            document.getElementById('loader-login').style.display = 'block';
+
             try {
-                // Try to get data
-                const response = await fetch(GOOGLE_SCRIPT_URL + '?t=' + Date.now());
-                const data = await response.json();
-                
-                if (Array.isArray(data)) {
-                    state.topics = data;
+                const res = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST', body: JSON.stringify({ action: 'LOGIN', email: user, password: pass })
+                });
+                const data = await res.json();
+
+                if(data.status === 'SUCCESS') {
+                    localStorage.setItem('nexus_hex', data.hex);
+                    localStorage.setItem('nexus_name', user);
+                    currentUser = { hex: data.hex, name: user };
+                    
+                    // DIRECT ACCESS (Existing users skip guide)
+                    unlockApp();
+                    syncDown();
+                } else {
+                    alert("ACCESS DENIED: " + data.message);
+                }
+            } catch(e) { alert("Network Error. Check URL."); }
+            document.getElementById('loader-login').style.display = 'none';
+        }
+
+        async function performSignup() {
+            const user = document.getElementById('signup-user').value;
+            const pass = document.getElementById('signup-pass').value;
+            if(!pass) return alert("Password required.");
+
+            document.getElementById('loader-signup').style.display = 'block';
+
+            try {
+                const res = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST', body: JSON.stringify({ action: 'SIGNUP', email: user, password: pass })
+                });
+                const data = await res.json();
+
+                if(data.status === 'SUCCESS') {
+                    localStorage.setItem('nexus_hex', data.hex);
+                    localStorage.setItem('nexus_name', user);
+                    currentUser = { hex: data.hex, name: user };
+                    
+                    // FIX 3: REDIRECT TO GUIDE FOR NEW USERS
+                    window.location.href = 'guide.html';
+                    
+                } else {
+                    alert("ERROR: " + data.message);
+                }
+            } catch(e) { alert("Network Error. Check URL."); }
+            document.getElementById('loader-signup').style.display = 'none';
+        }
+
+        async function syncDown() {
+            if(!currentUser.hex) return;
+            try {
+                const res = await fetch(GOOGLE_SCRIPT_URL + '?hex=' + currentUser.hex);
+                const data = await res.json();
+                if(Array.isArray(data)) {
+                    topics = data;
                     render();
                 }
-                // Success: Hide loader immediately
-                document.getElementById('loader').classList.add('hidden');
-            } catch (error) {
-                console.warn("Fetch failed (Offline Mode active):", error);
-                document.getElementById('sync-status').innerText = "OFFLINE MODE";
-                // Safety net will hide loader in 4s anyway
-            }
+            } catch(e) { console.log(e); }
         }
 
-        async function pushToCloud() {
-            document.getElementById('sync-status').innerText = "SAVING...";
-            document.getElementById('sync-status').classList.add('sync-active');
-            
+        async function syncUp() {
+            document.getElementById('user-display').style.color = "var(--accent-color)";
+            document.getElementById('user-display').innerText = "SAVING...";
             try {
-                await fetch(GOOGLE_SCRIPT_URL, {
-                    method: 'POST',
-                    body: JSON.stringify(state.topics)
+                const res = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST', body: JSON.stringify({ action: 'SYNC_UP', hex: currentUser.hex, topics: topics })
                 });
-                
-                document.getElementById('sync-status').innerText = "CLOUD SYNCED";
-                document.getElementById('sync-status').classList.remove('sync-active');
-                document.getElementById('sync-status').style.color = "var(--success)";
-            } catch (error) {
-                console.error("Save Error:", error);
-                document.getElementById('sync-status').innerText = "SAVE FAILED";
-                document.getElementById('sync-status').style.color = "var(--danger)";
+                const result = await res.json();
+                if(result.status === "SAVED") {
+                    document.getElementById('user-display').style.color = "var(--success)";
+                    document.getElementById('user-display').innerText = "SAVED";
+                    setTimeout(() => {
+                        document.getElementById('user-display').style.color = "var(--text-secondary)";
+                        document.getElementById('user-display').innerText = "OPERATOR: " + currentUser.name.toUpperCase();
+                    }, 2000);
+                }
+            } catch(e) { 
+                document.getElementById('user-display').style.color = "var(--danger)";
+                document.getElementById('user-display').innerText = "SAVE FAILED";
             }
         }
 
-        // --- DATE LOGIC ---
-        function isDue(timestamp) {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0); 
-            const reviewDate = new Date(timestamp);
-            reviewDate.setHours(0, 0, 0, 0); 
-            return today.getTime() >= reviewDate.getTime();
-        }
-
+        // --- APP LOGIC ---
+        function createTopic(name) { return { id: 'top_' + Date.now(), name: name, level: 0, nextReview: new Date().getTime() }; }
         function calculateNextReview(level) {
             const now = new Date();
-            // Intervals: 0, 1, 3, 7, 14, 30, 90 days
             const intervals = [0, 1, 3, 7, 14, 30, 90]; 
             const daysToAdd = intervals[Math.min(level, intervals.length - 1)];
-            
             now.setDate(now.getDate() + daysToAdd);
             return now.getTime();
         }
-
-        // --- ACTIONS ---
         function processReview(id, success) {
-            const topic = state.topics.find(t => t.id === id);
+            const topic = topics.find(t => t.id === id);
             if (topic) {
-                if (success) {
-                    topic.level = Math.min(topic.level + 1, 6);
-                    openGoogleCalendar(topic.name, calculateNextReview(topic.level));
-                } else {
-                    topic.level = Math.max(topic.level - 1, 0);
-                }
-                
+                if (success) { topic.level = Math.min(topic.level + 1, 6); openGoogleCalendar(topic.name, calculateNextReview(topic.level)); } 
+                else { topic.level = Math.max(topic.level - 1, 0); }
                 topic.nextReview = calculateNextReview(topic.level);
-                render();
-                pushToCloud();
+                render(); syncUp();
             }
         }
-
-        function deleteTopic(id) {
-            if(confirm("Delete from Cloud?")) {
-                state.topics = state.topics.filter(t => t.id !== id);
-                render();
-                pushToCloud();
-            }
-        }
-
-        function addTopic() {
-            const nameInput = document.getElementById('new-topic-name');
-            const name = nameInput.value.trim();
-            if (name) {
-                state.topics.push(createTopic(name));
-                render();
-                pushToCloud();
-                closeModal();
-                nameInput.value = '';
-            }
-        }
-
-        // --- CALENDAR ---
+        function deleteTopic(id) { if(confirm("Delete topic?")) { topics = topics.filter(t => t.id !== id); render(); syncUp(); } }
         function openGoogleCalendar(topicName, nextReviewDate) {
             const dateObj = new Date(nextReviewDate);
             dateObj.setHours(9, 0, 0, 0);
             const startISO = dateObj.toISOString().replace(/-|:|\.\d\d\d/g, "");
             dateObj.setHours(9, 30, 0, 0);
             const endISO = dateObj.toISOString().replace(/-|:|\.\d\d\d/g, "");
-
             const title = encodeURIComponent(`Review: ${topicName}`);
-            const details = encodeURIComponent(`NEXUS Spaced Repetition`);
-            const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startISO}/${endISO}&details=${details}&sf=true&output=xml`;
+            const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startISO}/${endISO}&sf=true&output=xml`;
             window.open(url, '_blank');
         }
-
-        // --- RENDERER ---
         function render() {
-            const grid = document.getElementById('topic-grid');
-            grid.innerHTML = '';
-            
-            let dueCount = 0;
-            let totalLevel = 0;
-
-            state.topics.forEach(t => {
-                const due = isDue(t.nextReview); 
-                if (due) dueCount++;
-                totalLevel += t.level;
-
-                const dateObj = new Date(t.nextReview);
-                const dateString = dateObj.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+            const grid = document.getElementById('topic-grid'); grid.innerHTML = '';
+            let dueCount = 0; let totalLevel = 0;
+            const today = new Date(); today.setHours(0,0,0,0);
+            topics.forEach(t => {
+                const reviewDate = new Date(t.nextReview); reviewDate.setHours(0,0,0,0);
+                const due = today.getTime() >= reviewDate.getTime();
+                if(due) dueCount++; totalLevel += t.level;
                 const statusClass = due ? 'status-due' : 'status-ok';
-                const statusText = due ? 'DUE' : `${dateString}`;
-
-                const card = document.createElement('div');
-                card.className = 'card';
+                const dateString = new Date(t.nextReview).toLocaleDateString(undefined, {month:'short', day:'numeric'});
+                const card = document.createElement('div'); card.className = 'card';
                 card.innerHTML = `
-                    <div class="card-header">
-                        <div class="status-dot ${statusClass}"></div>
-                        <div class="card-meta">LVL ${t.level}</div>
-                    </div>
+                    <div class="card-header"><div class="status-dot ${statusClass}"></div><div class="card-meta">LVL ${t.level}</div></div>
                     <div class="topic-name">${t.name}</div>
-                    <div class="card-meta" style="margin-top:auto; margin-bottom: 10px;">
-                        ${due ? 'REVIEW REQUIRED' : 'Next: ' + statusText}
-                    </div>
+                    <div class="card-meta" style="margin-top:auto; margin-bottom:10px;">${due ? 'REVIEW REQUIRED' : 'Next: ' + dateString}</div>
                     <div class="card-actions">
-                        ${due 
-                            ? `<button class="action-btn btn-review" onclick="event.stopPropagation(); processReview('${t.id}', true)">Review</button>`
-                            : `<button class="action-btn" style="background:#222; color:#555; cursor:default">Done</button>`
-                        }
-                        <button class="action-btn btn-delete" onclick="event.stopPropagation(); deleteTopic('${t.id}')">×</button>
-                    </div>
-                `;
+                        ${due ? `<button class="action-btn btn-review" onclick="processReview('${t.id}', true)">Review</button>` : `<button class="action-btn" style="background:#222; color:#555; cursor:default">Done</button>`}
+                        <button class="action-btn btn-delete" onclick="deleteTopic('${t.id}')">×</button>
+                    </div>`;
                 grid.appendChild(card);
             });
-
             document.getElementById('due-display').innerText = dueCount;
-            const avgRetention = state.topics.length ? Math.round((totalLevel / (state.topics.length * 6)) * 100) : 0;
-            document.getElementById('score-display').innerText = `${avgRetention}%`;
+            document.getElementById('score-display').innerText = topics.length ? Math.round((totalLevel / (topics.length * 6)) * 100) + '%' : '0%';
         }
 
-        // --- UTILS ---
-        function openModal() { document.getElementById('add-modal').classList.add('modal-active'); setTimeout(() => document.getElementById('new-topic-name').focus(), 50); }
-        function closeModal() { document.getElementById('add-modal').classList.remove('modal-active'); }
-
-        // --- INIT ---
-        document.getElementById('btn-add-modal').addEventListener('click', openModal);
-        document.getElementById('btn-cancel').addEventListener('click', closeModal);
-        document.getElementById('btn-create-topic').addEventListener('click', addTopic);
-        document.getElementById('new-topic-name').addEventListener('keydown', (e) => { 
-            if(e.key==='Enter') addTopic(); 
-            if(e.key==='Escape') closeModal(); 
+        // --- EVENTS ---
+        document.getElementById('btn-add-modal').addEventListener('click', () => { document.getElementById('add-modal').classList.add('modal-active'); setTimeout(() => document.getElementById('new-topic-name').focus(), 50); });
+        document.getElementById('btn-cancel').addEventListener('click', () => document.getElementById('add-modal').classList.remove('modal-active'));
+        document.getElementById('btn-create-topic').addEventListener('click', () => {
+            const name = document.getElementById('new-topic-name').value.trim();
+            if(name) { topics.push(createTopic(name)); render(); syncUp(); document.getElementById('add-modal').classList.remove('modal-active'); document.getElementById('new-topic-name').value = ''; }
         });
-        
-        // Expose to HTML
-        window.deleteTopic = deleteTopic;
-        window.processReview = processReview;
-
-        // Start
-        if(GOOGLE_SCRIPT_URL === 'PASTE_YOUR_WEB_APP_URL_HERE') {
-            alert("NEXUS SETUP: Paste your URL on line 305!");
-            document.getElementById('loader').classList.add('hidden'); // Force hide if setup not done
-        } else {
-            fetchFromCloud();
-        }
-        // --- ONBOARDING CHECK ---
-        // Checks if user has read the guide. If not, redirects them there.
-        // NOTE: Comment this out if you are testing and keep getting redirected.
-        
-        window.onload = function() {
-                        // The Check
-            const guideCompleted = localStorage.getItem('nexus_guide_completed');
-            
-            if (!guideCompleted) {
-                console.log("New user detected. Redirecting to Manual...");
-                window.location.href = 'guide.html';
-            } else {
-                console.log("User verified.");
-            }
-        };
     </script>
 </body>
 </html>
