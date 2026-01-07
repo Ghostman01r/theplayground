@@ -1,51 +1,138 @@
+// --- NEXUS CLOUD KERNEL v6.3 (Strict Isolation) ---
+
+const SHEET_USERS = "USERS";
+const SHEET_TOPICS = "TOPICS";
+
+function doPost(e) {
+  try {
+    const params = JSON.parse(e.postData.contents);
+    const action = params.action;
+    
+    if (action === 'SIGNUP') return handleSignup(params);
+    if (action === 'LOGIN') return handleLogin(params);
+    if (action === 'SYNC_UP') return handleSyncUp(params);
+    
+    return response({status: "ERROR", message: "Invalid Action"});
+  } catch (error) {
+    return response({status: "ERROR", message: error.toString()});
+  }
+}
+
 function doGet(e) {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  var data = sheet.getDataRange().getValues();
+  try {
+    const userHex = e.parameter.hex;
+    // SECURITY CHECK: If no ID is provided, return nothing.
+    if (!userHex) return response([]);
+    return handleSyncDown(userHex);
+  } catch (error) {
+    return response([]);
+  }
+}
+
+// --- HANDLERS ---
+
+function handleSignup(data) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let userSheet = ss.getSheetByName(SHEET_USERS);
   
-  // Convert rows to JSON objects
-  var headers = data[0];
-  var topics = [];
+  if (!userSheet) {
+    userSheet = ss.insertSheet(SHEET_USERS);
+    userSheet.appendRow(["EMAIL", "PASSWORD", "HEX_ID"]); // Header
+  }
   
-  // If sheet is empty or only headers, return empty list
-  if (data.length > 1) {
-    for (var i = 1; i < data.length; i++) {
-      var row = data[i];
-      var topic = {};
-      // Rebuild object from columns
-      topic.id = row[0];
-      topic.name = row[1];
-      topic.level = parseInt(row[2]);
-      topic.nextReview = parseInt(row[3]); // Timestamp
-      topics.push(topic);
+  const email = data.email.trim().toLowerCase();
+  const hexID = "0x" + Math.floor(Math.random() * 16777215).toString(16).toUpperCase();
+  
+  // Check duplicates
+  const users = userSheet.getDataRange().getValues();
+  for (let i = 1; i < users.length; i++) {
+    if (users[i][0] == email) return response({status: "ERROR", message: "User exists"});
+  }
+  
+  userSheet.appendRow([email, data.password, hexID]);
+  return response({status: "SUCCESS", hex: hexID});
+}
+
+function handleLogin(data) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const userSheet = ss.getSheetByName(SHEET_USERS);
+  if (!userSheet) return response({status: "ERROR", message: "No Users Found"});
+
+  const email = data.email.trim().toLowerCase();
+  const users = userSheet.getDataRange().getValues();
+  
+  for (let i = 1; i < users.length; i++) {
+    if (users[i][0] == email && users[i][1] == data.password) {
+      return response({status: "SUCCESS", hex: users[i][2]});
+    }
+  }
+  return response({status: "ERROR", message: "Invalid Credentials"});
+}
+
+function handleSyncUp(data) {
+  const userHex = data.hex;
+  const newTopics = data.topics; 
+  
+  if (!userHex) return response({status: "ERROR", message: "Missing User ID"});
+
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let topicSheet = ss.getSheetByName(SHEET_TOPICS);
+  
+  // Create Sheet if missing
+  if (!topicSheet) {
+    topicSheet = ss.insertSheet(SHEET_TOPICS);
+    topicSheet.appendRow(["OWNER_HEX", "TOPIC_ID", "JSON_DATA"]); // Header
+    topicSheet.setFrozenRows(1);
+  }
+  
+  // 1. READ ALL DATA
+  const range = topicSheet.getDataRange();
+  const values = range.getValues(); // This gets everything
+  
+  // 2. FILTER: Keep Header + Data that is NOT mine
+  // (We remove all my old rows so we can replace them with the new state)
+  let cleanData = values.filter((row, index) => {
+    if (index === 0) return true; // Keep Header
+    return row[0] !== userHex;    // Keep other people's data
+  });
+  
+  // 3. ADD: Push my current topics
+  newTopics.forEach(t => {
+    // SECURITY: We explicitly write the Hex in Col A
+    cleanData.push([userHex, t.id, JSON.stringify(t)]);
+  });
+  
+  // 4. WRITE: Wipe and Rewrite
+  topicSheet.clear(); 
+  if (cleanData.length > 0) {
+    topicSheet.getRange(1, 1, cleanData.length, 3).setValues(cleanData);
+  }
+  
+  return response({status: "SAVED"});
+}
+
+function handleSyncDown(userHex) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const topicSheet = ss.getSheetByName(SHEET_TOPICS);
+  if (!topicSheet) return response([]);
+  
+  const data = topicSheet.getDataRange().getValues();
+  let userTopics = [];
+  
+  // SECURITY: Only return rows where Col A matches userHex
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][0] === userHex) {
+      try {
+        userTopics.push(JSON.parse(data[i][2]));
+      } catch (e) {
+        // Skip bad data
+      }
     }
   }
   
-  return ContentService.createTextOutput(JSON.stringify(topics))
-    .setMimeType(ContentService.MimeType.JSON);
+  return response(userTopics);
 }
 
-function doPost(e) {
-  // Receives the full list from the website and OVERWRITES the sheet
-  // This is the safest way to ensure sync without conflicts
-  
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  var json = JSON.parse(e.postData.contents);
-  
-  sheet.clear(); // Wipe old data
-  
-  // Set Headers
-  sheet.appendRow(["ID", "NAME", "LEVEL", "NEXT_REVIEW_TIMESTAMP"]);
-  
-  // Write new data
-  if (json.length > 0) {
-    var rows = json.map(function(t) {
-      return [t.id, t.name, t.level, t.nextReview];
-    });
-    
-    // Write in bulk for speed
-    sheet.getRange(2, 1, rows.length, 4).setValues(rows);
-  }
-  
-  return ContentService.createTextOutput(JSON.stringify({result: "Success"}))
-    .setMimeType(ContentService.MimeType.JSON);
+function response(data) {
+  return ContentService.createTextOutput(JSON.stringify(data)).setMimeType(ContentService.MimeType.JSON);
 }

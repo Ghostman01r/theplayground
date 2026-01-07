@@ -16,7 +16,6 @@
             --text-primary: #FFFFFF;
             --text-secondary: #888888;
             --danger: #FF2A2A;
-            --warning: #FFD700;
             --success: #00E055;
             --radius-lg: 28px;
             --radius-md: 16px;
@@ -39,100 +38,139 @@
             background-size: 20px 20px;
         }
 
-        /* --- LAYOUT --- */
-        .wrapper-fixed { max-width: 1400px; margin: 0 auto; padding: 20px; display: none; opacity: 0; transition: opacity 0.5s ease; }
-        .wrapper-fluid {
-            max-width: 1400px; margin: 0 auto; padding: 0 20px 20px 20px; display: none; opacity: 0;
-            transition: opacity 0.3s ease, max-width 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+        /* --- LAYOUT SPLIT --- */
+        .wrapper-fixed {
+            max-width: 1400px; margin: 0 auto; padding: 20px;
+            display: none; opacity: 0; transition: opacity 0.5s ease;
         }
+        
+        .wrapper-fluid {
+            max-width: 1400px; /* Default */
+            margin: 0 auto; padding: 0 20px 20px 20px;
+            display: none; opacity: 0;
+            transition: opacity 0.5s ease, max-width 0.4s ease-in-out;
+        }
+
         .app-visible { display: block; opacity: 1; }
+
+        /* WIDE MODES (Applied only to wrapper-fluid) */
         .fluid-wide-7 { max-width: 1650px; }
         .fluid-wide-8 { max-width: 98vw; } 
 
+        /* --- CANVAS --- */
         #canvas-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
 
         /* --- HEADER --- */
         header { margin-bottom: 40px; }
-        .status-bar { font-family: var(--font-tech); font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 8px; display: flex; justify-content: space-between; letter-spacing: 1px; }
+        .status-bar {
+            font-family: var(--font-tech); font-size: 0.8rem; color: var(--text-secondary);
+            margin-bottom: 8px; display: flex; justify-content: space-between; letter-spacing: 1px;
+        }
         #user-identity { color: var(--accent-color); font-weight: bold; text-shadow: 0 0 10px rgba(255, 85, 0, 0.3); }
 
-        /* --- HERO CARD (REVERTED TO HEATMAP) --- */
         .hero-card {
             background-color: var(--accent-color); color: #000; padding: 30px;
             border-radius: var(--radius-lg); width: 100%;
-            display: flex; justify-content: space-between; align-items: flex-end;
+            display: flex; flex-direction: column; gap: 10px;
             box-shadow: 0 10px 30px rgba(255, 85, 0, 0.2);
-            overflow: hidden; position: relative;
         }
-        .hero-left { display: flex; flex-direction: column; gap: 10px; z-index: 2; }
         .hero-title { font-size: 2rem; font-weight: 800; line-height: 1.1; }
         .progress-container { margin-top: 20px; display: flex; gap: 40px; }
         .stat-item h3 { font-size: 3rem; font-family: var(--font-tech); letter-spacing: -2px; }
-        
-        .hero-right { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; opacity: 0.8; }
-        .heatmap-grid { display: grid; grid-template-columns: repeat(14, 1fr); gap: 4px; }
-        .hm-cell { width: 12px; height: 12px; background: rgba(0,0,0,0.1); border-radius: 2px; transition: background 0.5s; }
-        .hm-active { background: #000; }
 
         /* --- CONTROLS --- */
         .controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .btn { background: var(--surface-color); border: 1px solid #333; color: white; padding: 10px 20px; border-radius: var(--radius-md); cursor: pointer; font-family: var(--font-tech); transition: all 0.2s ease; }
-        .btn-glow { background: var(--surface-color); color: white; border: 1px solid var(--accent-color); box-shadow: 0 0 5px rgba(255, 85, 0, 0.2); font-weight: bold; }
-        .btn-glow:hover { background: var(--accent-color); color: black; box-shadow: 0 0 20px rgba(255, 85, 0, 0.6); transform: translateY(-2px); }
+        .btn {
+            background: var(--surface-color); border: 1px solid #333; color: white;
+            padding: 10px 20px; border-radius: var(--radius-md); cursor: pointer;
+            font-family: var(--font-tech); transition: all 0.2s ease;
+        }
+        .btn-glow {
+            background: var(--surface-color); color: white; border: 1px solid var(--accent-color);
+            box-shadow: 0 0 5px rgba(255, 85, 0, 0.2); font-weight: bold;
+        }
+        .btn-glow:hover {
+            background: var(--accent-color); color: black; box-shadow: 0 0 20px rgba(255, 85, 0, 0.6); transform: translateY(-2px);
+        }
 
-        /* --- GRID --- */
-        .grid-view { display: grid; grid-template-columns: repeat(var(--grid-cols), minmax(210px, 1fr)); gap: 15px; }
+        /* --- GRID SYSTEM --- */
+        .grid-view { 
+            display: grid; 
+            grid-template-columns: repeat(var(--grid-cols), minmax(210px, 1fr)); 
+            gap: 15px; 
+        }
+        .card {
+            background: var(--surface-color); border-radius: var(--radius-lg);
+            padding: 20px; min-height: 200px; border: 1px solid #222;
+            display: flex; flex-direction: column; justify-content: space-between;
+            overflow: hidden;
+        }
         
-        .card { background: var(--surface-color); border-radius: var(--radius-lg); padding: 20px; min-height: 200px; border: 1px solid #222; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; }
         .card-header { display: flex; justify-content: space-between; }
         .status-dot { width: 10px; height: 10px; border-radius: 50%; background: #333; }
         .status-due { background: var(--accent-color); box-shadow: 0 0 10px var(--accent-color); animation: pulse 2s infinite; }
         .status-ok { background: var(--success); }
+        
         .topic-name { font-size: 1.2rem; font-weight: 600; margin-top: 10px; word-break: break-word; line-height: 1.3; }
         .card-meta { font-family: var(--font-tech); font-size: 0.7rem; color: var(--text-secondary); margin-top: 5px; }
         .card-actions { margin-top: auto; display: flex; gap: 8px; padding-top: 15px; }
-        
-        .action-btn { flex: 1; padding: 10px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; font-size: 0.8rem; font-family: var(--font-tech); }
+        .action-btn { flex: 1; padding: 10px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; font-size: 0.8rem; }
         .btn-review { background: var(--accent-color); color: black; }
-        
-        /* REWIND BUTTON */
-        .btn-rewind { 
-            background: rgba(255, 215, 0, 0.1); color: var(--warning); border: 1px solid rgba(255, 215, 0, 0.3);
-            transition: all 0.2s;
-        }
-        .btn-rewind:hover { background: var(--warning); color: black; }
-
         .btn-delete { background: transparent; color: var(--text-secondary); width: 25px; flex: none; border: 1px solid #333; }
 
-        .skeleton { background: #111; border-radius: var(--radius-lg); min-height: 200px; padding: 24px; border: 1px solid #222; animation: pulse-gray 1.5s infinite ease-in-out; }
+        /* --- SKELETON LOADER --- */
+        .skeleton {
+            background: #111; border-radius: var(--radius-lg); min-height: 200px; padding: 24px;
+            border: 1px solid #222; animation: pulse-gray 1.5s infinite ease-in-out;
+        }
         .sk-line { height: 10px; background: #222; border-radius: 4px; margin-bottom: 10px; }
         .sk-block { height: 40px; width: 60%; background: #222; border-radius: 4px; margin-top: 20px; }
         @keyframes pulse-gray { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
 
-        /* --- MOBILE --- */
+        /* --- MOBILE FIX --- */
         @media (max-width: 768px) {
             .wrapper-fixed, .wrapper-fluid { padding: 15px; max-width: 100%; }
-            .hero-card { margin-top: -10px; padding: 25px; flex-direction: column; align-items: flex-start; }
-            .hero-right { display: none; }
+            .hero-card { margin-top: -10px; padding: 25px; }
+            .hero-title { font-size: 1.5rem; }
+            .stat-item h3 { font-size: 2.2rem; }
             .grid-view { grid-template-columns: 1fr 1fr !important; gap: 10px; }
             .card { min-height: 180px; padding: 15px; border-radius: 16px; }
             .topic-name { font-size: 1rem; margin-top: 10px; }
         }
 
-        .bottom-nav { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(18, 18, 18, 0.9); backdrop-filter: blur(10px); border: 1px solid #333; border-radius: 24px; padding: 10px 30px; display: flex; gap: 40px; z-index: 900; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        /* --- BOTTOM NAV --- */
+        .bottom-nav {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: rgba(18, 18, 18, 0.9); backdrop-filter: blur(10px);
+            border: 1px solid #333; border-radius: 24px; padding: 10px 30px;
+            display: flex; gap: 40px; z-index: 900; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
         .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-secondary); cursor: pointer; transition: 0.3s; }
         .nav-item:hover, .nav-item.active { color: var(--accent-color); }
         .nav-icon { width: 24px; height: 24px; margin-bottom: 4px; fill: currentColor; }
         .nav-label { font-family: var(--font-tech); font-size: 0.65rem; }
 
+        /* --- PROFILE POPUP --- */
         .modal { background: var(--surface-color); padding: 30px; border-radius: 28px; width: 90%; max-width: 500px; border: 1px solid #333; }
         .profile-header { text-align: center; margin-bottom: 30px; }
-        .profile-avatar { width: 80px; height: 80px; background: #222; border-radius: 50%; margin: 0 auto 15px auto; display: flex; align-items: center; justify-content: center; border: 2px solid var(--accent-color); font-size: 2rem; color: #fff; }
-        .profile-stats { display: flex; justify-content: space-around; background: #000; padding: 15px; border-radius: 12px; margin-bottom: 20px; font-family: var(--font-tech); }
-        .stat-box { text-align: center; } .stat-num { display: block; font-size: 1.2rem; color: #fff; font-weight: bold; } .stat-lbl { font-size: 0.7rem; color: #666; }
+        .profile-avatar {
+            width: 80px; height: 80px; background: #222; border-radius: 50%;
+            margin: 0 auto 15px auto; display: flex; align-items: center; justify-content: center;
+            border: 2px solid var(--accent-color); font-size: 2rem; color: #fff;
+        }
+        .profile-stats {
+            display: flex; justify-content: space-around; background: #000; padding: 15px; border-radius: 12px; margin-bottom: 20px; font-family: var(--font-tech);
+        }
+        .stat-box { text-align: center; }
+        .stat-num { display: block; font-size: 1.2rem; color: #fff; font-weight: bold; }
+        .stat-lbl { font-size: 0.7rem; color: #666; }
+
         .settings-box { background: #191919; border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid #333; }
         .settings-label { font-family: var(--font-tech); color: #888; font-size: 0.75rem; margin-bottom: 8px; display: block; }
-        .form-input { width: 100%; background: #000; border: 1px solid #444; color: white; padding: 10px; font-family: var(--font-tech); font-size: 1rem; border-radius: 8px; cursor: pointer; }
+        .form-input {
+            width: 100%; background: #000; border: 1px solid #444; color: white;
+            padding: 10px; font-family: var(--font-tech); font-size: 1rem; border-radius: 8px; cursor: pointer;
+        }
         .form-input:focus { outline: none; border-color: var(--accent-color); }
         input[type="range"] { width: 100%; height: 6px; background: #333; border-radius: 3px; outline: none; -webkit-appearance: none; }
         input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; background: var(--accent-color); border-radius: 50%; cursor: pointer; box-shadow: 0 0 10px rgba(255,85,0,0.5); }
@@ -141,6 +179,7 @@
         .btn-logout-pop { width: 100%; padding: 15px; background: rgba(255, 42, 42, 0.1); border: 1px solid var(--danger); color: var(--danger); font-family: var(--font-tech); font-weight: bold; cursor: pointer; border-radius: 12px; transition: 0.2s; }
         .btn-logout-pop:hover { background: var(--danger); color: white; }
 
+        /* --- GATEKEEPER --- */
         .gatekeeper-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 5, 5, 1); z-index: 2000; display: flex; justify-content: center; align-items: center; }
         .gatekeeper-card { width: 90%; max-width: 420px; background: var(--surface-color); border: 1px solid #333; padding: 40px; border-radius: 28px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.8); position: relative; overflow: hidden; }
         .gatekeeper-card::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: var(--accent-color); box-shadow: 0 0 15px var(--accent-color); }
@@ -151,8 +190,11 @@
         .switch-link { color: #555; margin-top: 25px; font-size: 0.75rem; cursor: pointer; font-family: var(--font-tech); display: inline-block; text-decoration: underline;}
         .loader-bar { height: 4px; width: 100%; background: #222; margin-top: 20px; display: none; }
         .loader-fill { height: 100%; width: 50%; background: var(--accent-color); animation: load 1.5s infinite ease-in-out; }
+
+        /* --- MODALS --- */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 100; }
         .modal-active { display: flex !important; }
+
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 85, 0, 0.4); } 70% { box-shadow: 0 0 0 10px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
     </style>
 </head>
@@ -189,15 +231,10 @@
                 <span>SYSTEM ONLINE</span>
             </div>
             <div class="hero-card">
-                <div class="hero-left">
-                    <div class="hero-title">Cloud Knowledge Matrix.</div>
-                    <div class="progress-container">
-                        <div class="stat-item"><h3 id="score-display">0%</h3><p>Retention</p></div>
-                        <div class="stat-item"><h3 id="due-display">0</h3><p>Due Now</p></div>
-                    </div>
-                </div>
-                <div class="hero-right">
-                    <div class="heatmap-grid" id="heatmap-viz"></div>
+                <div class="hero-title">Cloud Knowledge Matrix.</div>
+                <div class="progress-container">
+                    <div class="stat-item"><h3 id="score-display">0%</h3><p>Retention</p></div>
+                    <div class="stat-item"><h3 id="due-display">0</h3><p>Due Now</p></div>
                 </div>
             </div>
         </header>
@@ -208,6 +245,7 @@
             <span class="section-label">Modules</span>
             <button class="btn btn-glow" id="btn-add-modal" onclick="sfx.click()">+ Add Topic</button>
         </div>
+
         <div class="grid-view" id="topic-grid"></div>
     </div>
 
@@ -247,10 +285,12 @@
                 <div class="stat-box"><span class="stat-num" id="stat-total">0</span><span class="stat-lbl">TOPICS</span></div>
                 <div class="stat-box"><span class="stat-num" id="stat-due">0</span><span class="stat-lbl">DUE</span></div>
             </div>
+            
             <div class="settings-box">
                 <span class="settings-label">PREFERRED STUDY TIME</span>
                 <input type="time" id="setting-time" class="form-input">
             </div>
+
             <div class="settings-box">
                 <span class="settings-label">VISUAL INTERFACE</span>
                 <select id="setting-theme" class="form-input">
@@ -259,6 +299,7 @@
                     <option value="matrix">DIGITAL RAIN</option>
                 </select>
             </div>
+
             <div class="settings-box">
                 <span class="settings-label">GRID DENSITY: <span id="grid-val-display" style="color:white; font-weight:bold;">4</span></span>
                 <div style="display:flex; align-items:center; gap:10px;">
@@ -267,6 +308,7 @@
                     <span style="font-size:0.8rem; color:#666;">8</span>
                 </div>
             </div>
+
             <button class="btn-save-settings" onclick="sfx.click(); saveSettings()">UPDATE SYSTEMS</button>
             <button class="btn-logout-pop" onclick="sfx.click(); logout()">// TERMINATE SESSION (LOGOUT)</button>
             <br><br>
@@ -309,68 +351,92 @@
         const canvas = document.getElementById('canvas-bg');
         const ctx = canvas.getContext('2d');
         let particles = []; let matrixDrops = [];
-        function initThemeEngine() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; setTheme(currentTheme); animateTheme(); }
+        
+        function initThemeEngine() {
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            setTheme(currentTheme); animateTheme();
+        }
+
         function setTheme(mode) {
             currentTheme = mode; ctx.clearRect(0, 0, canvas.width, canvas.height);
-            if(mode === 'neural') { particles = []; let n = (canvas.height * canvas.width) / 9000; for (let i=0; i<n; i++) particles.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, vx: (Math.random()-0.5)*0.5, vy: (Math.random()-0.5)*0.5, size: Math.random()*2 }); }
-            else if (mode === 'matrix') { const fontSize = 14; const columns = canvas.width / fontSize; matrixDrops = []; for(let x=0; x<columns; x++) matrixDrops[x] = 1; }
+            if(mode === 'neural') {
+                particles = []; let n = (canvas.height * canvas.width) / 9000;
+                for (let i=0; i<n; i++) particles.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, vx: (Math.random()-0.5)*0.5, vy: (Math.random()-0.5)*0.5, size: Math.random()*2 });
+            } else if (mode === 'matrix') {
+                const fontSize = 14; const columns = canvas.width / fontSize;
+                matrixDrops = []; for(let x=0; x<columns; x++) matrixDrops[x] = 1;
+            }
         }
+
         function animateTheme() {
             requestAnimationFrame(animateTheme);
             if(currentTheme === 'void') { ctx.clearRect(0, 0, canvas.width, canvas.height); return; }
             if(currentTheme === 'neural') {
                 ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = '#333';
-                particles.forEach((p, i) => { p.x += p.vx; p.y += p.vy; if(p.x < 0 || p.x > canvas.width) p.vx *= -1; if(p.y < 0 || p.y > canvas.height) p.vy *= -1; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); for(let j=i; j<particles.length; j++) { let dx = p.x - particles[j].x; let dy = p.y - particles[j].y; let dist = dx*dx + dy*dy; if(dist < 20000) { ctx.strokeStyle = `rgba(255, 85, 0, ${1 - dist/20000})`; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(particles[j].x, particles[j].y); ctx.stroke(); } } });
+                particles.forEach((p, i) => {
+                    p.x += p.vx; p.y += p.vy;
+                    if(p.x < 0 || p.x > canvas.width) p.vx *= -1; if(p.y < 0 || p.y > canvas.height) p.vy *= -1;
+                    ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();
+                    for(let j=i; j<particles.length; j++) {
+                        let dx = p.x - particles[j].x; let dy = p.y - particles[j].y; let dist = dx*dx + dy*dy;
+                        if(dist < 20000) { ctx.strokeStyle = `rgba(255, 85, 0, ${1 - dist/20000})`; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(particles[j].x, particles[j].y); ctx.stroke(); }
+                    }
+                });
             }
             if(currentTheme === 'matrix') {
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.05)'; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = '#FF5500'; ctx.font = '14px monospace';
-                for(let i=0; i<matrixDrops.length; i++) { const text = String.fromCharCode(0x30A0 + Math.random() * 96); ctx.fillText(text, i*14, matrixDrops[i]*14); if(matrixDrops[i]*14 > canvas.height && Math.random() > 0.975) matrixDrops[i] = 0; matrixDrops[i]++; }
+                for(let i=0; i<matrixDrops.length; i++) {
+                    const text = String.fromCharCode(0x30A0 + Math.random() * 96); ctx.fillText(text, i*14, matrixDrops[i]*14);
+                    if(matrixDrops[i]*14 > canvas.height && Math.random() > 0.975) matrixDrops[i] = 0; matrixDrops[i]++;
+                }
             }
         }
         window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; setTheme(currentTheme); });
 
         // --- AUTH & INIT ---
-        window.onload = function() { checkSession(); initThemeEngine(); initHeatmap(); };
-
-        function initHeatmap() {
-            const container = document.getElementById('heatmap-viz');
-            for(let i=0; i<28; i++) {
-                const div = document.createElement('div');
-                div.className = 'hm-cell';
-                if(Math.random() > 0.6) div.classList.add('hm-active');
-                container.appendChild(div);
-            }
-        }
+        window.onload = function() { checkSession(); initThemeEngine(); };
 
         function checkSession() {
-            const savedHex = localStorage.getItem('nexus_hex'); const savedName = localStorage.getItem('nexus_name');
+            const savedHex = localStorage.getItem('nexus_hex');
+            const savedName = localStorage.getItem('nexus_name');
             if(savedHex && savedName) {
-                currentUser.hex = savedHex; currentUser.name = savedName; currentUser.preferredTime = localStorage.getItem('nexus_time') || "09:00";
-                currentGrid = localStorage.getItem('nexus_grid') || 4; currentTheme = localStorage.getItem('nexus_theme') || 'void';
-                applySettings(currentTheme, currentGrid); unlockApp(); syncDown(); 
+                currentUser.hex = savedHex; currentUser.name = savedName;
+                currentUser.preferredTime = localStorage.getItem('nexus_time') || "09:00";
+                currentGrid = localStorage.getItem('nexus_grid') || 4;
+                currentTheme = localStorage.getItem('nexus_theme') || 'void';
+                applySettings(currentTheme, currentGrid);
+                unlockApp(); syncDown(); 
             } else { generateCodename(); }
         }
 
+        // --- LOGIC ---
         function generateCodename() {
-            const rA = wordsA[Math.floor(Math.random() * wordsA.length)]; const rB = wordsB[Math.floor(Math.random() * wordsB.length)]; document.getElementById('signup-user').value = rA + rB;
+            const rA = wordsA[Math.floor(Math.random() * wordsA.length)];
+            const rB = wordsB[Math.floor(Math.random() * wordsB.length)];
+            document.getElementById('signup-user').value = rA + rB;
         }
         function toggleAuthMode(mode) {
-            document.getElementById('form-login').style.display = mode === 'login' ? 'block' : 'none'; document.getElementById('form-signup').style.display = mode === 'signup' ? 'block' : 'none';
+            document.getElementById('form-login').style.display = mode === 'login' ? 'block' : 'none';
+            document.getElementById('form-signup').style.display = mode === 'signup' ? 'block' : 'none';
         }
         function updateGridPreview(val) { document.getElementById('grid-val-display').innerText = val; }
 
         function applySettings(theme, grid) {
             setTheme(theme);
             document.documentElement.style.setProperty('--grid-cols', grid);
+            
+            // EXPAND CONTAINER LOGIC
             const appFluid = document.getElementById('app-grid');
             appFluid.classList.remove('fluid-wide-7', 'fluid-wide-8');
             if(grid >= 7) appFluid.classList.add('fluid-wide-7');
             if(grid == 8) appFluid.classList.add('fluid-wide-8');
+            
             currentGrid = grid; currentTheme = theme;
         }
 
         function unlockApp() {
             document.getElementById('gatekeeper').style.display = 'none';
+            // Show both decks
             document.getElementById('app-header').classList.add('app-visible');
             document.getElementById('app-grid').classList.add('app-visible');
             document.getElementById('bottom-nav').style.display = 'flex';
@@ -397,12 +463,34 @@
             const newTime = document.getElementById('setting-time').value;
             const newTheme = document.getElementById('setting-theme').value;
             const newGrid = document.getElementById('setting-grid').value;
+            
+            // 1. Update Local State (Instant)
             currentUser.preferredTime = newTime;
-            localStorage.setItem('nexus_time', newTime); localStorage.setItem('nexus_theme', newTheme); localStorage.setItem('nexus_grid', newGrid);
-            applySettings(newTheme, newGrid); sfx.success(); closeProfile();
-            fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'UPDATE_SETTINGS', hex: currentUser.hex, time: newTime, theme: newTheme, grid: newGrid }) }).catch(e => console.error(e));
+            localStorage.setItem('nexus_time', newTime);
+            localStorage.setItem('nexus_theme', newTheme);
+            localStorage.setItem('nexus_grid', newGrid);
+            
+            // 2. Apply Visuals (Instant)
+            applySettings(newTheme, newGrid);
+
+            // 3. UI FEEDBACK (MOVED UP - HAPPENS INSTANTLY)
+            sfx.success();
+            closeProfile();
+
+            // 4. Send to Database (Background Process)
+            // We removed 'await' so the code doesn't stop here.
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST', body: JSON.stringify({ 
+                    action: 'UPDATE_SETTINGS', 
+                    hex: currentUser.hex, 
+                    time: newTime,
+                    theme: newTheme,
+                    grid: newGrid
+                })
+            }).catch(e => console.error("Background Save Error:", e));
         }
 
+        // --- NETWORK ---
         async function performLogin() {
             const user = document.getElementById('login-user').value.trim(); const pass = document.getElementById('login-pass').value;
             if(!user || !pass) return alert("Credentials missing."); document.getElementById('loader-login').style.display = 'block';
@@ -448,74 +536,54 @@
         }
         async function syncUp() { try { await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'SYNC_UP', hex: currentUser.hex, topics: topics }) }); } catch(e) { console.log("Save failed"); } }
 
+        // --- TOPIC LOGIC ---
         function createTopic(name, desc) { return { id: 'top_' + Date.now(), name: name, desc: desc, level: 0, nextReview: new Date().getTime() }; }
         function calculateNextReview(level) {
             const now = new Date(); const intervals = [0, 1, 3, 7, 14, 30, 90]; 
             const daysToAdd = intervals[Math.min(level, intervals.length - 1)]; now.setDate(now.getDate() + daysToAdd); return now.getTime();
         }
-        
-        // --- PATCHED REVIEW LOGIC ---
         function processReview(id, success) {
             const topic = topics.find(t => t.id === id);
             if (topic) {
-                if (success) { 
-                    topic.level = Math.min(topic.level + 1, 6); 
-                    sfx.success(); 
-                    // SAFETY FALLBACK: Use "09:00" if preferredTime is missing
-                    const time = currentUser.preferredTime || "09:00";
-                    openGoogleCalendar(topic, calculateNextReview(topic.level), time); 
-                } 
-                else { 
-                    topic.level = Math.max(topic.level - 1, 0); 
-                    sfx.click(); 
-                }
+                if (success) { topic.level = Math.min(topic.level + 1, 6); sfx.success(); openGoogleCalendar(topic, calculateNextReview(topic.level), currentUser.preferredTime); } 
+                else { topic.level = Math.max(topic.level - 1, 0); sfx.click(); }
                 topic.nextReview = calculateNextReview(topic.level); render(); syncUp();
             }
         }
-        // UNDO LOGIC
-        function undoReview(id) {
-            const topic = topics.find(t => t.id === id);
-            if (topic) {
-                topic.level = Math.max(topic.level - 1, 0); 
-                topic.nextReview = new Date().getTime() - 86400000; // Force Due Yesterday
-                sfx.click(); render(); syncUp();
-            }
-        }
-        
         function deleteTopic(id) { if(confirm("Delete?")) { topics = topics.filter(t => t.id !== id); render(); syncUp(); } }
 
-        // --- PATCHED CALENDAR LOGIC ---
         function openGoogleCalendar(topic, nextReviewDate, timeString) {
             const dateObj = new Date(nextReviewDate);
-            
-            // Fix potential null time
-            if(!timeString) timeString = "09:00";
-            
-            const parts = timeString.split(':');
-            const hours = parseInt(parts[0], 10);
-            const minutes = parseInt(parts[1], 10);
-            
+            const [hours, minutes] = timeString.split(':').map(Number);
             dateObj.setHours(hours, minutes, 0, 0);
             const startISO = dateObj.toISOString().replace(/-|:|\.\d\d\d/g, "");
             dateObj.setMinutes(minutes + 30);
             const endISO = dateObj.toISOString().replace(/-|:|\.\d\d\d/g, "");
             
             const title = encodeURIComponent(`NEXUS: ${topic.name}`);
+            
             let message = `ACTIVE RECALL SESSION\n\nTarget: ${topic.name}\nProtocol: Test your memory immediately.\n`;
             if (topic.desc) message += `\n[USER NOTES]:\n${topic.desc}\n`;
+            
             const details = encodeURIComponent(message);
             const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startISO}/${endISO}&details=${details}&sf=true&output=xml`;
             window.open(url, '_blank');
         }
 
+        // --- ANIMATION UTIL ---
         function animateValue(obj, start, end, duration) {
             let startTimestamp = null;
             const step = (timestamp) => {
                 if (!startTimestamp) startTimestamp = timestamp;
                 const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-                if(obj.id === 'score-display') obj.innerHTML = Math.floor(progress * (end - start) + start) + "%";
-                else obj.innerHTML = Math.floor(progress * (end - start) + start);
-                if (progress < 1) window.requestAnimationFrame(step);
+                obj.innerHTML = Math.floor(progress * (end - start) + start);
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                } else {
+                    // Ensure final value (especially for string append)
+                    if(obj.id === 'score-display') obj.innerHTML = end + "%";
+                    else obj.innerHTML = end;
+                }
             };
             window.requestAnimationFrame(step);
         }
@@ -523,11 +591,16 @@
         function render() {
             const grid = document.getElementById('topic-grid'); grid.innerHTML = '';
             const today = new Date(); today.setHours(0,0,0,0);
-            let dueCount = 0; let totalLevel = 0;
+            
+            let dueCount = 0;
+            let totalLevel = 0;
+
             topics.forEach(t => {
                 const reviewDate = new Date(t.nextReview); reviewDate.setHours(0,0,0,0);
                 const due = today.getTime() >= reviewDate.getTime();
-                if(due) dueCount++; totalLevel += t.level;
+                if(due) dueCount++;
+                totalLevel += t.level;
+
                 const statusClass = due ? 'status-due' : 'status-ok';
                 const dateString = new Date(t.nextReview).toLocaleDateString(undefined, {month:'short', day:'numeric'});
                 const card = document.createElement('div'); card.className = 'card';
@@ -536,25 +609,31 @@
                     <div class="topic-name">${t.name}</div>
                     <div class="card-meta" style="margin-top:auto; margin-bottom:10px;">${due ? 'REVIEW REQUIRED' : 'Next: ' + dateString}</div>
                     <div class="card-actions">
-                        ${due 
-                            ? `<button class="action-btn btn-review" onclick="processReview('${t.id}', true)">Review</button>` 
-                            : `<button class="action-btn btn-rewind" onclick="undoReview('${t.id}')">REWIND ↺</button>`
-                        }
+                        ${due ? `<button class="action-btn btn-review" onclick="processReview('${t.id}', true)">Review</button>` : `<button class="action-btn" style="background:#222; color:#555; cursor:default">Done</button>`}
                         <button class="action-btn btn-delete" onclick="deleteTopic('${t.id}')">×</button>
                     </div>`;
                 grid.appendChild(card);
             });
+
+            // FIXED: Update Stats with Animation
             const avgRetention = topics.length ? Math.round((totalLevel / (topics.length * 6)) * 100) : 0;
             animateValue(document.getElementById('due-display'), 0, dueCount, 1500);
             animateValue(document.getElementById('score-display'), 0, avgRetention, 1500);
         }
 
+        // --- EVENTS ---
         document.getElementById('btn-add-modal').addEventListener('click', () => { document.getElementById('add-modal').classList.add('modal-active'); setTimeout(() => document.getElementById('new-topic-name').focus(), 50); });
         document.getElementById('btn-cancel').addEventListener('click', () => document.getElementById('add-modal').classList.remove('modal-active'));
         document.getElementById('btn-create-topic').addEventListener('click', () => {
             const name = document.getElementById('new-topic-name').value.trim();
             const desc = document.getElementById('new-topic-desc').value.trim();
-            if(name) { topics.push(createTopic(name, desc)); render(); syncUp(); document.getElementById('add-modal').classList.remove('modal-active'); document.getElementById('new-topic-name').value = ''; document.getElementById('new-topic-desc').value = ''; }
+            if(name) { 
+                topics.push(createTopic(name, desc)); 
+                render(); syncUp(); 
+                document.getElementById('add-modal').classList.remove('modal-active'); 
+                document.getElementById('new-topic-name').value = '';
+                document.getElementById('new-topic-desc').value = ''; 
+            }
         });
     </script>
 </body>
