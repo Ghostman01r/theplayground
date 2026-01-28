@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en" class="light" data-theme="modern">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS // PRO v5.3 (Skeleton Loader)</title>
+    
+    <!-- FONTS -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&family=Lora:ital,wght@0,400;0,600;1,400&family=Work+Sans:wght@400;600&family=DM+Sans:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- TAILWIND CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- ICONS -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- CONFETTI -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <!-- CHART.JS -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- CONFIG -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['var(--font-main)', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                        serif: ['"Lora"', 'serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: 'rgb(var(--color-brand-50) / <alpha-value>)',
+                            100: 'rgb(var(--color-brand-100) / <alpha-value>)',
+                            500: 'rgb(var(--color-brand-500) / <alpha-value>)',
+                            600: 'rgb(var(--color-brand-600) / <alpha-value>)',
+                            900: 'rgb(var(--color-brand-900) / <alpha-value>)',
+                        },
+                        skin: {
+                            base: 'rgb(var(--color-bg-base) / <alpha-value>)',
+                            surface: 'rgb(var(--color-bg-surface) / <alpha-value>)',
+                            border: 'rgb(var(--color-border) / <alpha-value>)',
+                            text: 'rgb(var(--color-text-main) / <alpha-value>)',
+                            muted: 'rgb(var(--color-text-muted) / <alpha-value>)',
+                            accent: 'rgb(var(--color-accent) / <alpha-value>)',
+                        }
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'glow': '0 0 20px -5px rgb(var(--color-brand-500) / 0.4)',
+                    },
+                    borderRadius: {
+                        'theme': 'var(--radius-theme)',
+                    },
+                    animation: {
+                        'pop-in': 'popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'slide-up': 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                    },
+                    keyframes: {
+                        popIn: { '0%': { opacity: '0', transform: 'scale(0.95)' }, '100%': { opacity: '1', transform: 'scale(1)' } },
+                        slideUp: { '0%': { transform: 'translateY(20px)', opacity: '0' }, '100%': { transform: 'translateY(0)', opacity: '1' } }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* --- THEME VARIABLES --- */
+        :root { --radius-theme: 0.75rem; --font-main: 'Outfit'; }
+
+        /* Global Smooth Transition */
+        .transition-theme, body, .card-surface, .modern-input, .btn-secondary, header, aside, .nav-item, button, .modal-backdrop {
+            transition-property: background-color, border-color, color, fill, stroke, box-shadow;
+            transition-duration: 300ms;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* 1. MODERN (Default) */
+        [data-theme="modern"] {
+            --color-brand-50: 238 242 255; --color-brand-100: 224 231 255; --color-brand-500: 99 102 241; --color-brand-600: 79 70 229; --color-brand-900: 49 46 129;
+            --color-bg-base: 248 250 252; --color-bg-surface: 255 255 255; --color-border: 226 232 240;
+            --color-text-main: 15 23 42; --color-text-muted: 100 116 139; --radius-theme: 1rem; --font-main: 'Outfit';
+        }
+        [data-theme="modern"].dark {
+            --color-bg-base: 15 23 42; --color-bg-surface: 30 41 59; --color-border: 51 65 85;
+            --color-text-main: 241 245 249; --color-text-muted: 148 163 184;
+        }
+
+        /* 2. CYBER */
+        [data-theme="cyber"] {
+            --color-brand-50: 6 78 59; --color-brand-100: 6 95 70; --color-brand-500: 16 185 129; --color-brand-600: 5 150 105; --color-brand-900: 236 253 245;
+            --color-bg-base: 24 24 27; --color-bg-surface: 9 9 11; --color-border: 63 63 70;
+            --color-text-main: 228 228 231; --color-text-muted: 161 161 170; --radius-theme: 0px; --font-main: 'JetBrains Mono';
+        }
+        [data-theme="cyber"].light {
+            --color-bg-base: 245 245 245; --color-bg-surface: 255 255 255; --color-border: 212 212 212;
+            --color-text-main: 23 23 23; --color-text-muted: 82 82 82;
+        }
+
+        /* 3. LATTE */
+        [data-theme="latte"] {
+            --color-brand-50: 255 241 242; --color-brand-100: 255 228 230; --color-brand-500: 225 29 72; --color-brand-600: 190 18 60; --color-brand-900: 136 19 55;
+            --color-bg-base: 250 245 240; --color-bg-surface: 255 255 255; --color-border: 231 229 228;
+            --color-text-main: 68 64 60; --color-text-muted: 120 113 108; --radius-theme: 1.5rem; --font-main: 'Lora';
+        }
+        [data-theme="latte"].dark {
+            --color-bg-base: 41 37 36; --color-bg-surface: 28 25 23; --color-border: 68 64 60;
+            --color-text-main: 231 229 228; --color-text-muted: 168 162 158;
+        }
+
+        /* 4. OCEAN */
+        [data-theme="ocean"] {
+            --color-brand-50: 236 254 255; --color-brand-100: 207 250 254; --color-brand-500: 6 182 212; --color-brand-600: 8 145 178; --color-brand-900: 21 94 117;
+            --color-bg-base: 240 249 255; --color-bg-surface: 255 255 255; --color-border: 186 230 253;
+            --color-text-main: 12 74 110; --color-text-muted: 82 110 130; --radius-theme: 0.5rem; --font-main: 'Work Sans';
+        }
+        [data-theme="ocean"].dark {
+            --color-bg-base: 8 47 73; --color-bg-surface: 12 74 110; --color-border: 7 89 133;
+            --color-text-main: 224 242 254; --color-text-muted: 125 211 252;
+        }
+
+        /* 5. SUNSET */
+        [data-theme="sunset"] {
+            --color-brand-50: 255 247 237; --color-brand-100: 255 237 213; --color-brand-500: 249 115 22; --color-brand-600: 234 88 12; --color-brand-900: 154 52 18;
+            --color-bg-base: 255 250 245; --color-bg-surface: 255 255 255; --color-border: 254 215 170;
+            --color-text-main: 67 20 7; --color-text-muted: 154 52 18; --radius-theme: 1.25rem; --font-main: 'DM Sans';
+        }
+        [data-theme="sunset"].dark {
+            --color-bg-base: 67 20 7; --color-bg-surface: 124 45 18; --color-border: 154 52 18;
+            --color-text-main: 255 237 213; --color-text-muted: 253 186 116;
+        }
+
+        /* 6. FOREST */
+        [data-theme="forest"] {
+            --color-brand-50: 240 253 244; --color-brand-100: 220 252 231; --color-brand-500: 34 197 94; --color-brand-600: 22 163 74; --color-brand-900: 20 83 45;
+            --color-bg-base: 242 245 240; --color-bg-surface: 255 255 255; --color-border: 209 220 205;
+            --color-text-main: 20 83 45; --color-text-muted: 74 105 85; --radius-theme: 0.25rem; --font-main: 'Outfit';
+        }
+        [data-theme="forest"].dark {
+            --color-bg-base: 20 39 27; --color-bg-surface: 22 101 52; --color-border: 34 85 55;
+            --color-text-main: 240 253 244; --color-text-muted: 187 247 208;
+        }
+
+        body { background-color: rgb(var(--color-bg-base)); color: rgb(var(--color-text-main)); }
+        
+        .modern-input {
+            width: 100%; padding: 12px 16px;
+            background: rgb(var(--color-bg-base));
+            border: 1px solid rgb(var(--color-border));
+            border-radius: var(--radius-theme);
+            font-size: 0.95rem; outline: none;
+            color: rgb(var(--color-text-main));
+            font-family: var(--font-main);
+        }
+        .modern-input:focus {
+            border-color: rgb(var(--color-brand-500));
+            box-shadow: 0 0 0 3px rgb(var(--color-brand-500) / 0.15);
+        }
+
+        .btn-primary {
+            background: rgb(var(--color-brand-600)); color: white;
+            padding: 10px 20px; border-radius: var(--radius-theme);
+            font-weight: 500; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            transition: all 0.2s;
+        }
+        .btn-primary:hover {
+            filter: brightness(1.1); transform: translateY(-1px);
+            box-shadow: 0 8px 16px -4px rgb(var(--color-brand-500) / 0.4);
+        }
+
+        .btn-secondary {
+            background: rgb(var(--color-bg-surface)); color: rgb(var(--color-text-muted));
+            border: 1px solid rgb(var(--color-border));
+            padding: 10px 20px; border-radius: var(--radius-theme);
+            font-weight: 500; 
+        }
+        .btn-secondary:hover {
+            border-color: rgb(var(--color-brand-500) / 0.5);
+            color: rgb(var(--color-text-main));
+        }
+
+        .card-surface {
+            background-color: rgb(var(--color-bg-surface));
+            border: 1px solid rgb(var(--color-border));
+            border-radius: var(--radius-theme);
+        }
+        
+        .nav-item { border-radius: var(--radius-theme); }
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+        .timer-circle circle { transition: stroke-dashoffset 1s linear; }
+        
+        /* Modal Overlay centering */
+        .modal-backdrop {
+            background-color: rgba(0,0,0,0.4);
+            backdrop-filter: blur(4px);
+        }
+        
+        /* Theme Button styling */
+        .theme-btn {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 8px; border: 1px solid rgb(var(--color-border)); border-radius: var(--radius-theme);
+            cursor: pointer; transition: all 0.2s;
+        }
+        .theme-btn:hover { border-color: rgb(var(--color-brand-500)); background: rgb(var(--color-bg-base)); }
+        .theme-btn.active { border-color: rgb(var(--color-brand-500)); background: rgb(var(--color-brand-50)); }
+        .theme-preview { width: 100%; height: 8px; border-radius: 4px; margin-bottom: 4px; }
+        
+        /* Markdown bullet fix */
+        .desc-text ul { list-style-type: disc; padding-left: 1.5rem; }
+        .desc-text li { margin-bottom: 0.25rem; }
+        
+        /* Skeleton Pulse */
+        .skeleton {
+            background: rgb(var(--color-bg-base));
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden font-sans selection:bg-brand-100 selection:text-brand-900 transition-theme">
+
+    <!-- AUDIO ENGINE -->
+    <div id="audio-engine"></div>
+
+    <!-- TOAST CONTAINER -->
+    <div id="toast-container" class="fixed bottom-24 md:bottom-6 right-6 z-[80] flex flex-col gap-3 pointer-events-none"></div>
+
+    <!-- ================= AUTH VIEW ================= -->
+    <div id="view-auth" class="fixed inset-0 z-50 flex items-center justify-center p-6 bg-skin-base transition-theme">
+        <div class="w-full max-w-md card-surface p-8 relative z-10 animate-slide-up shadow-soft transition-theme">
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center justify-center w-14 h-14 rounded-theme bg-brand-600 text-white mb-4 shadow-lg shadow-brand-500/30">
+                    <i data-lucide="layers" class="w-7 h-7"></i>
+                </div>
+                <h1 class="text-3xl font-bold tracking-tight">Nexus</h1>
+                <p class="text-skin-muted mt-2 text-sm">Active Space Repetition System v5.3</p>
+            </div>
+
+            <div class="flex p-1 bg-skin-base rounded-theme mb-6 transition-theme">
+                <button onclick="switchAuthTab('login')" id="tab-login" class="flex-1 py-2.5 text-sm font-semibold rounded-theme shadow-sm card-surface transition-all">Sign In</button>
+                <button onclick="switchAuthTab('signup')" id="tab-signup" class="flex-1 py-2.5 text-sm font-medium text-skin-muted hover:text-skin-text transition-all">Register</button>
+            </div>
+
+            <div id="form-login" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-skin-muted mb-1.5 ml-1">CODENAME</label>
+                    <input type="text" id="login-user" class="modern-input transition-theme" placeholder="Enter your ID">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-skin-muted mb-1.5 ml-1">ACCESS KEY</label>
+                    <input type="password" id="login-pass" class="modern-input transition-theme" placeholder="••••••••">
+                </div>
+                <button onclick="performLogin()" class="btn-primary w-full mt-2 py-3 shadow-glow transition-theme">Start Session <i data-lucide="arrow-right" class="w-4 h-4"></i></button>
+            </div>
+
+            <div id="form-signup" class="space-y-4 hidden">
+                <div>
+                    <label class="block text-xs font-semibold text-skin-muted mb-1.5 ml-1">GENERATED ID</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="signup-user" class="modern-input font-mono font-medium text-brand-600 bg-brand-50 border-brand-100 transition-theme" readonly>
+                        <button onclick="generateCodename()" class="p-3 rounded-theme border border-skin-border hover:bg-skin-base transition-colors text-skin-muted"><i data-lucide="refresh-cw" class="w-5 h-5"></i></button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-skin-muted mb-1.5 ml-1">CREATE KEY</label>
+                    <input type="password" id="signup-pass" class="modern-input transition-theme" placeholder="New Password">
+                </div>
+                <button onclick="performSignup()" class="btn-primary w-full mt-2 py-3 shadow-glow transition-theme">Initialize System</button>
+            </div>
+            
+            <div id="auth-loader" class="hidden mt-6 flex justify-center"><div class="flex space-x-2"><div class="w-2 h-2 bg-brand-600 rounded-full animate-bounce"></div><div class="w-2 h-2 bg-brand-600 rounded-full animate-bounce delay-75"></div><div class="w-2 h-2 bg-brand-600 rounded-full animate-bounce delay-150"></div></div></div>
+        </div>
+    </div>
+
+    <!-- ================= APP VIEW ================= -->
+    <div id="view-app" class="hidden flex h-full relative z-10 bg-skin-base transition-theme">
+        
+        <!-- SIDEBAR -->
+        <aside class="hidden md:flex flex-col w-64 card-surface border-r-0 border-r border-skin-border h-full p-6 shadow-sm z-20 rounded-none transition-theme">
+            <div class="flex items-center gap-3 mb-10 px-2">
+                <div class="w-8 h-8 rounded-theme bg-brand-600 text-white flex items-center justify-center shadow-lg shadow-brand-500/20">
+                    <i data-lucide="layers" class="w-5 h-5"></i>
+                </div>
+                <span class="font-bold text-xl tracking-tight">Nexus</span>
+            </div>
+            <nav class="space-y-2 flex-1">
+                <button onclick="scrollToTop()" class="w-full flex items-center gap-3 px-4 py-3 bg-brand-50 text-brand-600 rounded-theme font-medium transition-colors border border-brand-100 transition-theme"><i data-lucide="layout-grid" class="w-5 h-5"></i> Dashboard</button>
+                <button onclick="openModal('focus-modal')" class="w-full flex items-center gap-3 px-4 py-3 text-skin-muted hover:bg-skin-base hover:text-skin-text rounded-theme font-medium transition-colors transition-theme"><i data-lucide="timer" class="w-5 h-5"></i> Focus Mode</button>
+                <button onclick="openModal('profile-modal')" class="w-full flex items-center gap-3 px-4 py-3 text-skin-muted hover:bg-skin-base hover:text-skin-text rounded-theme font-medium transition-colors transition-theme"><i data-lucide="settings" class="w-5 h-5"></i> Settings</button>
+                <button onclick="openModal('help-modal')" class="w-full flex items-center gap-3 px-4 py-3 text-skin-muted hover:bg-skin-base hover:text-skin-text rounded-theme font-medium transition-colors transition-theme"><i data-lucide="keyboard" class="w-5 h-5"></i> Shortcuts</button>
+            </nav>
+            
+            <!-- DAILY GOAL WIDGET -->
+            <div class="p-4 mb-4 bg-skin-base rounded-theme border border-skin-border">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-xs font-bold text-skin-muted uppercase">Daily Goal</span>
+                    <span class="text-xs font-bold text-brand-600" id="daily-progress-text">0/10</span>
+                </div>
+                <div class="w-full h-2 bg-skin-border rounded-full overflow-hidden">
+                    <div id="daily-progress-bar" class="h-full bg-brand-500 transition-all duration-500" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div class="mt-auto pt-6 border-t border-skin-border transition-theme">
+                <div class="flex items-center gap-3 mb-4 px-2">
+                    <div class="w-10 h-10 rounded-full bg-skin-base flex items-center justify-center text-skin-muted font-bold border border-skin-border transition-theme" id="sidebar-avatar">U</div>
+                    <div class="overflow-hidden">
+                        <div class="text-sm font-bold truncate" id="sidebar-name">User</div>
+                        <div class="text-xs text-skin-muted">Pro Plan</div>
+                    </div>
+                </div>
+                <button onclick="logout()" class="w-full flex items-center gap-2 text-sm text-red-500 hover:text-red-600 px-2 py-1 rounded-theme hover:bg-red-50 transition-colors"><i data-lucide="log-out" class="w-4 h-4"></i> Sign Out</button>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="flex-1 flex flex-col h-full overflow-hidden">
+            <header class="h-20 flex items-center justify-between px-6 md:px-10 border-b border-skin-border card-surface rounded-none sticky top-0 z-30 transition-theme">
+                <div class="flex items-center gap-6 flex-1 max-w-2xl">
+                    <div>
+                        <h2 class="text-2xl font-bold">Dashboard</h2>
+                        <div class="flex items-center gap-2 text-sm text-skin-muted"><span id="current-date">Fetching...</span>
+                            <!-- STREAK COUNTER (Mobile Visible) -->
+                            <div class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-50/50 border border-orange-200">
+                                <i data-lucide="flame" class="w-3.5 h-3.5 text-orange-500 fill-orange-500 animate-pulse"></i>
+                                <span class="text-xs font-bold text-orange-600" id="streak-count">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hidden md:block flex-1 max-w-sm ml-6">
+                        <div class="relative">
+                            <i data-lucide="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-skin-muted"></i>
+                            <input type="text" id="search-input" onkeyup="handleSearch(this.value)" class="modern-input pl-10 pr-9 transition-theme" placeholder="Search topics...">
+                            <button class="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-skin-muted hover:text-skin-text hidden" id="clear-search-btn" onclick="clearSearch()"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 md:gap-4">
+                    <select id="sort-select" onchange="renderGrid()" class="hidden md:block bg-transparent text-sm font-medium text-skin-muted border-none focus:ring-0 cursor-pointer transition-theme"><option value="urgency">Sort: Urgency</option><option value="level">Sort: Mastery</option><option value="newest">Sort: Newest</option></select>
+                    <button onclick="toggleThemeMode()" class="p-2.5 rounded-theme bg-skin-base text-skin-muted hover:bg-skin-border transition-theme"><i data-lucide="moon" class="w-5 h-5 hidden dark:block"></i><i data-lucide="sun" class="w-5 h-5 block dark:hidden"></i></button>
+                    <div class="hidden lg:flex items-center gap-6 mr-2 ml-2 transition-theme">
+                        <div class="text-right"><div class="text-xs font-semibold text-skin-muted uppercase tracking-wide">Pending</div><div class="text-lg font-bold text-brand-600" id="stat-pending">0</div></div>
+                        <div class="w-px h-8 bg-skin-border transition-theme"></div>
+                        <div class="text-right"><div class="text-xs font-semibold text-skin-muted uppercase tracking-wide">Retention</div><div class="text-lg font-bold text-skin-text" id="stat-retention">0%</div></div>
+                    </div>
+                    <button onclick="openModal('add-modal')" class="btn-primary shadow-glow transition-theme"><i data-lucide="plus" class="w-5 h-5"></i> <span class="hidden sm:inline">New Topic</span></button>
+                </div>
+            </header>
+            
+            <div class="md:hidden px-6 py-2 card-surface border-b border-skin-border z-20 rounded-none transition-theme">
+                <div class="relative"><i data-lucide="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-skin-muted"></i><input type="text" id="search-input-mobile" onkeyup="handleSearch(this.value)" class="modern-input pl-10 transition-theme" placeholder="Search..."></div>
+            </div>
+
+            <div id="main-scroll" class="flex-1 overflow-y-auto p-4 md:p-10 scroll-smooth">
+                <!-- CHARTS -->
+                <div id="analytics-section" class="mb-10 hidden animate-fade-in">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="card-surface p-6 shadow-soft transition-theme">
+                            <div class="flex items-center justify-between mb-4"><h3 class="font-bold flex items-center gap-2"><i data-lucide="pie-chart" class="w-5 h-5 text-brand-500"></i> Mastery</h3><span class="text-xs font-medium bg-skin-base text-skin-muted px-2 py-1 rounded-md transition-theme">Distribution</span></div>
+                            <div class="h-48 md:h-56 w-full relative flex justify-center"><canvas id="chart-levels"></canvas></div>
+                        </div>
+                        <div class="card-surface p-6 shadow-soft transition-theme">
+                            <div class="flex items-center justify-between mb-4"><h3 class="font-bold flex items-center gap-2"><i data-lucide="activity" class="w-5 h-5 text-brand-500"></i> Forecast</h3><span class="text-xs font-medium bg-brand-50 text-brand-600 px-2 py-1 rounded-md transition-theme">Next 7 Days</span></div>
+                            <div class="h-48 md:h-56 w-full relative"><canvas id="chart-forecast"></canvas></div>
+                        </div>
+                    </div>
+                </div>
+                <div id="topic-grid" class="grid gap-4 md:gap-6 pb-24 transition-all duration-300"></div>
+                <div id="empty-state" class="hidden h-96 flex flex-col items-center justify-center text-center animate-fade-in"><div class="w-32 h-32 bg-skin-base rounded-full flex items-center justify-center mb-6 relative transition-theme"><div class="absolute inset-0 border-4 border-skin-surface rounded-full shadow-sm transition-theme"></div><i data-lucide="inbox" class="w-12 h-12 text-skin-muted"></i></div><h3 class="text-xl font-bold">All clear for now</h3><p class="text-skin-muted mt-2 max-w-xs mx-auto">No topics match your filter.</p><button onclick="openModal('add-modal')" class="mt-8 text-brand-600 font-semibold hover:text-brand-700 flex items-center gap-2">Create first topic <i data-lucide="arrow-right" class="w-4 h-4"></i></button></div>
+            </div>
+
+            <div class="md:hidden card-surface border-t border-skin-border px-6 py-3 flex justify-around items-center sticky bottom-0 z-30 pb-safe shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] transition-theme rounded-none">
+                <button onclick="scrollToTop()" class="flex flex-col items-center gap-1 text-brand-600 transition-transform active:scale-95"><i data-lucide="layout-grid" class="w-6 h-6"></i><span class="text-[10px] font-medium">Home</span></button>
+                <button onclick="openModal('add-modal')" class="bg-brand-600 text-white p-3.5 rounded-full -mt-10 shadow-lg shadow-brand-500/40 border-4 border-skin-base transition-transform active:scale-90 transition-theme"><i data-lucide="plus" class="w-6 h-6"></i></button>
+                <button onclick="openModal('profile-modal')" class="flex flex-col items-center gap-1 text-skin-muted hover:text-skin-text transition-transform active:scale-95"><i data-lucide="user" class="w-6 h-6"></i><span class="text-[10px] font-medium">Profile</span></button>
+            </div>
+        </main>
+    </div>
+
+    <!-- ================= MODALS ================= -->
+    
+    <!-- ADD/EDIT MODAL -->
+    <div id="add-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center">
+        <div class="absolute inset-0 modal-backdrop transition-opacity" onclick="closeModal('add-modal')"></div>
+        <div class="w-full max-w-lg card-surface p-8 relative z-10 animate-pop-in shadow-2xl m-4 transition-theme">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold flex items-center gap-2"><span id="modal-title">New Topic</span></h3>
+                <button onclick="closeModal('add-modal')" class="p-2 bg-skin-base rounded-full hover:bg-skin-border transition-colors transition-theme"><i data-lucide="x" class="w-4 h-4 text-skin-muted"></i></button>
+            </div>
+            <input type="hidden" id="edit-topic-id">
+            <div class="space-y-5">
+                <div>
+                    <label class="block text-sm font-semibold text-skin-muted mb-2">Topic Name</label>
+                    <input type="text" id="new-topic-name" class="modern-input transition-theme" placeholder="e.g. React Hooks">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-skin-muted mb-2">Category</label>
+                    <select id="new-topic-category" class="modern-input transition-theme">
+                        <option value="General">General</option>
+                        <option value="Development">Development</option>
+                        <option value="Design">Design</option>
+                        <option value="Science">Science</option>
+                        <option value="Language">Language</option>
+                        <option value="Business">Business</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-skin-muted mb-2">Description / Notes (Supports - bullets)</label>
+                    <textarea id="new-topic-desc" class="modern-input h-32 resize-none transition-theme" placeholder="Brief details about this topic..."></textarea>
+                </div>
+            </div>
+            <div class="mt-8 flex gap-3">
+                <button onclick="closeModal('add-modal')" class="flex-1 btn-secondary justify-center transition-theme">Cancel</button>
+                <button onclick="saveTopic()" class="flex-1 btn-primary shadow-glow transition-theme">Save Topic</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ZEN READER MODAL -->
+    <div id="read-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center">
+        <div class="absolute inset-0 modal-backdrop transition-opacity" onclick="closeModal('read-modal')"></div>
+        <div class="w-full max-w-2xl card-surface p-8 relative z-10 animate-pop-in shadow-2xl m-4 transition-theme max-h-[80vh] overflow-y-auto">
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <span id="read-category" class="text-xs font-bold uppercase tracking-wider px-2 py-1 rounded-md border mb-2 inline-block"></span>
+                    <h3 class="text-2xl font-bold transition-theme" id="read-title"></h3>
+                </div>
+                <button onclick="closeModal('read-modal')" class="p-2 bg-skin-base rounded-full hover:bg-skin-border transition-colors transition-theme"><i data-lucide="x" class="w-4 h-4 text-skin-muted"></i></button>
+            </div>
+            <div id="read-content" class="desc-text text-skin-text leading-relaxed text-lg whitespace-pre-line"></div>
+            <div class="mt-8 flex justify-end">
+                <button onclick="closeModal('read-modal')" class="btn-primary shadow-glow transition-theme">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOCUS MODAL -->
+    <div id="focus-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center">
+        <div class="absolute inset-0 modal-backdrop transition-opacity" onclick="closeModal('focus-modal')"></div>
+        <div class="w-full max-w-sm card-surface rounded-theme shadow-2xl p-8 relative z-10 animate-pop-in text-center m-4 transition-theme">
+            <div class="mb-6"><h3 class="text-2xl font-bold">Focus Mode</h3><p class="text-skin-muted text-sm">Deep work session (25m)</p></div>
+            <div class="relative w-48 h-48 mx-auto mb-8">
+                <svg class="w-full h-full -rotate-90" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" stroke-width="6" class="text-skin-border transition-theme" /><circle id="timer-progress" cx="50" cy="50" r="45" fill="none" stroke="currentColor" stroke-width="6" class="text-brand-500 timer-circle" stroke-dasharray="283" stroke-dashoffset="0" stroke-linecap="round" /></svg>
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-4xl font-mono font-bold" id="timer-display">25:00</div>
+            </div>
+            <div class="flex gap-4 justify-center">
+                <button id="btn-timer-toggle" onclick="toggleTimer()" class="btn-primary w-32 shadow-glow transition-theme">Start</button>
+                <button onclick="resetTimer()" class="btn-secondary w-32 transition-theme">Reset</button>
+            </div>
+            <button onclick="closeModal('focus-modal')" class="absolute top-4 right-4 p-2 text-skin-muted hover:text-skin-text"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+    </div>
+
+    <!-- SETTINGS MODAL -->
+    <div id="profile-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center">
+        <div class="absolute inset-0 modal-backdrop transition-opacity" onclick="closeModal('profile-modal')"></div>
+        <div class="w-full max-w-lg card-surface rounded-theme shadow-2xl p-8 relative z-10 animate-pop-in m-4 transition-theme h-[80vh] overflow-y-auto">
+            <div class="text-center mb-6">
+                <div class="w-20 h-20 bg-brand-100 text-brand-600 rounded-full flex items-center justify-center text-3xl font-bold mx-auto mb-3 border-4 border-skin-surface shadow-lg transition-theme" id="profile-avatar-lg">U</div>
+                <h2 class="text-xl font-bold" id="profile-name-lg">User</h2>
+                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-skin-base text-skin-muted text-xs font-semibold mt-1 transition-theme"><i data-lucide="shield-check" class="w-3 h-3"></i> Pro Account</div>
+            </div>
+            
+            <div class="space-y-4 mb-6">
+                <div class="bg-skin-base rounded-theme p-4 border border-skin-border transition-theme">
+                    <label class="block text-xs font-semibold text-skin-muted uppercase tracking-wide mb-3 text-center">Interface Theme</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div onclick="setTheme('modern')" class="theme-btn group"><div class="theme-preview bg-indigo-500"></div><span class="text-xs font-bold text-skin-text">Modern</span></div>
+                        <div onclick="setTheme('cyber')" class="theme-btn group"><div class="theme-preview bg-emerald-500"></div><span class="text-xs font-bold text-skin-text">Cyber</span></div>
+                        <div onclick="setTheme('latte')" class="theme-btn group"><div class="theme-preview bg-rose-500"></div><span class="text-xs font-bold text-skin-text">Latte</span></div>
+                        <div onclick="setTheme('ocean')" class="theme-btn group"><div class="theme-preview bg-cyan-500"></div><span class="text-xs font-bold text-skin-text">Ocean</span></div>
+                        <div onclick="setTheme('sunset')" class="theme-btn group"><div class="theme-preview bg-orange-500"></div><span class="text-xs font-bold text-skin-text">Sunset</span></div>
+                        <div onclick="setTheme('forest')" class="theme-btn group"><div class="theme-preview bg-green-600"></div><span class="text-xs font-bold text-skin-text">Forest</span></div>
+                    </div>
+                </div>
+                <div class="bg-skin-base rounded-theme p-4 border border-skin-border transition-theme space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-skin-muted uppercase tracking-wide mb-2 text-center">Grid Density</label>
+                        <div class="flex items-center justify-between gap-4 px-2">
+                            <span class="text-xs text-skin-muted">Wide</span>
+                            <input type="range" min="3" max="5" step="1" id="grid-density-slider" onchange="updateGridDensity(this.value)" class="w-full h-2 bg-skin-border rounded-lg appearance-none cursor-pointer accent-brand-600">
+                            <span class="text-xs text-skin-muted">Compact</span>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center px-2">
+                        <span class="text-sm font-medium text-skin-text">Sound Effects</span>
+                        <button onclick="toggleMute()" id="mute-btn" class="p-2 rounded-lg bg-skin-surface border border-skin-border text-skin-muted hover:text-skin-text"><i data-lucide="volume-2" class="w-4 h-4"></i></button>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-skin-muted uppercase tracking-wide mb-2 text-center">Daily Goal</label>
+                        <input type="number" id="goal-input" onchange="updateGoal(this.value)" class="modern-input text-center" value="10" min="1">
+                    </div>
+                </div>
+                <div class="bg-skin-base rounded-theme p-4 border border-skin-border transition-theme">
+                    <label class="block text-xs font-semibold text-skin-muted uppercase tracking-wide mb-3 text-center">Data</label>
+                    <div class="flex gap-2">
+                        <button onclick="exportData('json')" class="flex-1 py-2 btn-secondary text-xs transition-theme"><i data-lucide="download" class="w-3 h-3 inline mr-1"></i> JSON</button>
+                        <button onclick="exportData('csv')" class="flex-1 py-2 btn-secondary text-xs transition-theme"><i data-lucide="file-text" class="w-3 h-3 inline mr-1"></i> CSV</button>
+                        <button onclick="document.getElementById('import-file').click()" class="flex-1 py-2 btn-secondary text-xs transition-theme"><i data-lucide="upload" class="w-3 h-3 inline mr-1"></i> Restore</button>
+                        <input type="file" id="import-file" class="hidden" accept=".json" onchange="importData(this)">
+                    </div>
+                </div>
+            </div>
+            <button onclick="saveSettings()" class="btn-primary w-full mb-3 py-3 shadow-glow transition-theme">Save & Close</button>
+            <button onclick="logout()" class="w-full py-3 text-red-500 text-sm font-medium hover:bg-red-50 rounded-theme transition-colors">Sign Out</button>
+        </div>
+    </div>
+
+    <!-- HELP MODAL -->
+    <div id="help-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center">
+        <div class="absolute inset-0 modal-backdrop transition-opacity" onclick="closeModal('help-modal')"></div>
+        <div class="w-full max-w-sm card-surface rounded-theme shadow-2xl p-8 relative z-10 animate-pop-in m-4 transition-theme">
+            <h3 class="text-xl font-bold mb-4">Shortcuts</h3>
+            <div class="space-y-3 text-sm text-skin-muted">
+                <div class="flex justify-between"><span>New Topic</span><span class="font-mono bg-skin-base px-2 rounded border border-skin-border">N</span></div>
+                <div class="flex justify-between"><span>Search</span><span class="font-mono bg-skin-base px-2 rounded border border-skin-border">/</span></div>
+                <div class="flex justify-between"><span>Close Modal</span><span class="font-mono bg-skin-base px-2 rounded border border-skin-border">Esc</span></div>
+                <div class="flex justify-between"><span>Save Topic</span><span class="font-mono bg-skin-base px-2 rounded border border-skin-border">Ctrl+Ent</span></div>
+                <div class="flex justify-between"><span>Help</span><span class="font-mono bg-skin-base px-2 rounded border border-skin-border">?</span></div>
+            </div>
+            <button onclick="closeModal('help-modal')" class="absolute top-4 right-4 p-2 text-skin-muted hover:text-skin-text"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+    </div>
+
+    <script>
+        // ---------------------------------------------------------
+        // PASTE YOUR V6.7 GOOGLE SCRIPT URL HERE
+        // ---------------------------------------------------------
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxqhlq19-8l-RmOVVGlzaOLhxm3g_cEiPzReXOF1__qGs0h8_qmAmUfnW14Q1k5kI1-Iw/exec'; 
+        // ---------------------------------------------------------
+        
+        const wordsA = ["Alpha", "Beta", "Gamma", "Delta", "Neo", "Prime", "Flux", "Core", "Zen", "Nova"];
+        const wordsB = ["Pilot", "Scout", "Mind", "Flow", "Spark", "Wave", "Link", "Sync", "Pulse", "Drift"];
+        const categoryColors = {
+            'General': 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
+            'Development': 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
+            'Design': 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300',
+            'Science': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
+            'Language': 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300',
+            'Business': 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
+        };
+
+        let state = { user: null, hex: null, time: "09:00", topics: [], lastLogin: null, streak: 0, theme: 'modern', gridCols: 4, mute: false, dailyGoal: 10, dailyProgress: 0 };
+        let retentionChart = null, forecastChart = null, timerInterval, timeLeft = 25 * 60, isTimerRunning = false;
+
+        const sfx = {
+            ctx: null,
+            init: function() { window.AudioContext = window.AudioContext || window.webkitAudioContext; this.ctx = new AudioContext(); },
+            play: function(freq, type, duration, vol=0.05) {
+                if (state.mute) return;
+                if (!this.ctx) this.init();
+                const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain();
+                osc.type = type; osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                gain.gain.setValueAtTime(vol, this.ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+                osc.connect(gain); gain.connect(this.ctx.destination); osc.start(); osc.stop(this.ctx.currentTime + duration);
+            },
+            click: () => sfx.play(600, 'sine', 0.05, 0.02),
+            success: () => { sfx.play(440, 'sine', 0.1, 0.05); setTimeout(() => sfx.play(554, 'sine', 0.2, 0.05), 100); },
+            celebrate: () => { sfx.play(523.25, 'triangle', 0.1, 0.05); setTimeout(() => sfx.play(659.25, 'triangle', 0.1, 0.05), 100); setTimeout(() => sfx.play(783.99, 'triangle', 0.2, 0.05), 200); },
+            error: () => sfx.play(150, 'sawtooth', 0.2, 0.05),
+            bell: () => sfx.play(880, 'sine', 1.5, 0.1)
+        };
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const bgClass = type === 'success' ? 'bg-slate-900 text-white' : 'bg-red-500 text-white';
+            toast.className = `${bgClass} shadow-xl rounded-xl px-4 py-3 flex items-center gap-3 min-w-[300px] animate-slide-in-right pointer-events-auto transition-all`;
+            toast.innerHTML = `<i data-lucide="${type === 'success' ? 'check-circle' : 'alert-circle'}" class="w-5 h-5"></i><span class="text-sm font-medium">${message}</span>`;
+            container.appendChild(toast); lucide.createIcons();
+            setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateY(10px)'; setTimeout(() => toast.remove(), 300); }, 3000);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons(); checkSession();
+            document.getElementById('current-date').innerText = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+            
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') { closeModal('add-modal'); closeModal('profile-modal'); closeModal('focus-modal'); closeModal('help-modal'); closeModal('read-modal'); }
+                if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { if(!document.getElementById('add-modal').classList.contains('hidden')) saveTopic(); }
+                if (e.key === 'n' && document.body.classList.contains('app-active') && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') { e.preventDefault(); openModal('add-modal'); }
+                if (e.key === '/' && document.body.classList.contains('app-active') && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') { e.preventDefault(); document.getElementById('search-input').focus(); }
+                if (e.key === '?' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') openModal('help-modal');
+            });
+        });
+
+        // --- SETTINGS ---
+        function updateGridDensity(val) { state.gridCols = parseInt(val); localStorage.setItem('nexus_grid_cols', val); renderGrid(); }
+        function toggleMute() {
+            state.mute = !state.mute; localStorage.setItem('nexus_mute', state.mute);
+            const btn = document.getElementById('mute-btn');
+            btn.innerHTML = state.mute ? '<i data-lucide="volume-x" class="w-4 h-4"></i>' : '<i data-lucide="volume-2" class="w-4 h-4"></i>';
+            lucide.createIcons();
+        }
+        function updateGoal(val) { state.dailyGoal = parseInt(val); localStorage.setItem('nexus_daily_goal', val); updateDailyProgress(); }
+        function toggleLoader(show) { document.getElementById('auth-loader').classList.toggle('hidden', !show); }
+        
+        // --- THEME ---
+        function setTheme(themeName, silent=false) { 
+            document.documentElement.setAttribute('data-theme', themeName); 
+            state.theme = themeName; 
+            localStorage.setItem('nexus_theme_style', themeName);
+            document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+            renderCharts(); 
+            if(!silent) sfx.click(); 
+        }
+        function toggleThemeMode() { document.documentElement.classList.toggle('dark'); localStorage.setItem('nexus_dark_mode', document.documentElement.classList.contains('dark')); renderCharts(); sfx.click(); }
+        function restoreTheme() {
+            const theme = localStorage.getItem('nexus_theme_style') || 'modern';
+            setTheme(theme, true);
+            if(localStorage.getItem('nexus_dark_mode') === 'true') document.documentElement.classList.add('dark');
+            if(localStorage.getItem('nexus_mute') === 'true') toggleMute(); 
+            const savedGrid = localStorage.getItem('nexus_grid_cols');
+            if(savedGrid) { state.gridCols = parseInt(savedGrid); if(document.getElementById('grid-density-slider')) document.getElementById('grid-density-slider').value = savedGrid; }
+            state.dailyGoal = parseInt(localStorage.getItem('nexus_daily_goal')) || 10;
+            if(document.getElementById('goal-input')) document.getElementById('goal-input').value = state.dailyGoal;
+        }
+
+        // --- TIMER ---
+        function updateTimerDisplay() {
+            const m = Math.floor(timeLeft / 60).toString().padStart(2, '0'); const s = (timeLeft % 60).toString().padStart(2, '0');
+            document.getElementById('timer-display').innerText = `${m}:${s}`;
+            document.getElementById('timer-progress').style.strokeDashoffset = 283 - (timeLeft / (25 * 60)) * 283;
+        }
+        function toggleTimer() {
+            const btn = document.getElementById('btn-timer-toggle');
+            if(isTimerRunning) { clearInterval(timerInterval); isTimerRunning = false; btn.innerText = "Resume"; } 
+            else {
+                isTimerRunning = true; btn.innerText = "Pause";
+                timerInterval = setInterval(() => { timeLeft--; updateTimerDisplay(); if(timeLeft <= 0) { clearInterval(timerInterval); sfx.bell(); fireConfetti(); showToast("Focus session complete!"); isTimerRunning = false; btn.innerText = "Start"; timeLeft = 25 * 60; } }, 1000);
+            }
+        }
+        function resetTimer() { clearInterval(timerInterval); isTimerRunning = false; timeLeft = 25 * 60; updateTimerDisplay(); document.getElementById('btn-timer-toggle').innerText = "Start"; }
+
+        // --- AUTH/DATA ---
+        function checkStreak() {
+            const today = new Date().setHours(0,0,0,0); const last = state.lastLogin ? new Date(state.lastLogin).setHours(0,0,0,0) : null;
+            if (last) { const diff = (today - last) / (1000 * 60 * 60 * 24); if (diff === 1) state.streak++; else if (diff > 1) state.streak = 1; } else state.streak = 1;
+            state.lastLogin = Date.now(); localStorage.setItem('nexus_streak', state.streak); localStorage.setItem('nexus_lastLogin', state.lastLogin);
+            
+            document.getElementById('streak-count').innerText = window.innerWidth < 768 ? ` ${state.streak}` : `${state.streak} Day Streak`;
+            
+            const savedDate = localStorage.getItem('nexus_daily_date');
+            if (savedDate !== new Date().toDateString()) {
+                state.dailyProgress = 0; localStorage.setItem('nexus_daily_progress', 0); localStorage.setItem('nexus_daily_date', new Date().toDateString());
+            } else { state.dailyProgress = parseInt(localStorage.getItem('nexus_daily_progress')) || 0; }
+            updateDailyProgress();
+        }
+        function updateDailyProgress() {
+            const pct = Math.min((state.dailyProgress / state.dailyGoal) * 100, 100);
+            if(document.getElementById('daily-progress-bar')) {
+                document.getElementById('daily-progress-bar').style.width = pct + '%';
+                document.getElementById('daily-progress-text').innerText = `${state.dailyProgress}/${state.dailyGoal}`;
+            }
+        }
+
+        function switchAuthTab(tab) {
+            sfx.click(); document.getElementById('form-login').classList.add('hidden'); document.getElementById('form-signup').classList.add('hidden');
+            document.getElementById('tab-login').className = tab === 'login' ? "flex-1 py-2.5 text-sm font-semibold rounded-theme shadow-sm card-surface transition-all" : "flex-1 py-2.5 text-sm font-medium text-skin-muted hover:text-skin-text transition-all";
+            document.getElementById('tab-signup').className = tab === 'signup' ? "flex-1 py-2.5 text-sm font-semibold rounded-theme shadow-sm card-surface transition-all" : "flex-1 py-2.5 text-sm font-medium text-skin-muted hover:text-skin-text transition-all";
+            document.getElementById('form-' + tab).classList.remove('hidden');
+            if(tab === 'signup') generateCodename();
+        }
+        function generateCodename() { document.getElementById('signup-user').value = `${wordsA[Math.floor(Math.random()*wordsA.length)]}${wordsB[Math.floor(Math.random()*wordsB.length)]}${Math.floor(Math.random()*999)}`; }
+        function checkSession() {
+            restoreTheme();
+            if(localStorage.getItem('nexus_hex')) {
+                state.hex = localStorage.getItem('nexus_hex'); state.user = localStorage.getItem('nexus_name'); state.time = localStorage.getItem('nexus_time') || "09:00";
+                state.streak = parseInt(localStorage.getItem('nexus_streak')) || 0; state.lastLogin = parseInt(localStorage.getItem('nexus_lastLogin')) || null;
+                checkStreak(); loadApp(); syncDown();
+            }
+        }
+        async function performLogin() {
+            const u = document.getElementById('login-user').value.trim(); const p = document.getElementById('login-pass').value;
+            if(!u || !p) return sfx.error();
+            
+            toggleLoader(true);
+            try {
+                if (GOOGLE_SCRIPT_URL) {
+                    const res = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'LOGIN', email: u, password: p }) });
+                    const data = await res.json();
+                    if (data.status === 'SUCCESS') {
+                        saveSession(data.hex, u, data.time || '09:00'); sfx.success(); checkStreak(); loadApp(); syncDown();
+                    } else { showToast(data.message || 'Login failed', 'error'); sfx.error(); }
+                } else {
+                    await new Promise(r => setTimeout(r, 800)); saveSession('DEMO_HEX', u, '09:00'); sfx.success(); checkStreak(); loadApp(); syncDown();
+                }
+            } catch(e) { console.error(e); showToast('Connection Error', 'error'); }
+            toggleLoader(false);
+        }
+        async function performSignup() {
+            const u = document.getElementById('signup-user').value.trim(); const p = document.getElementById('signup-pass').value;
+            if(!p) return sfx.error();
+            toggleLoader(true);
+            try {
+                if(GOOGLE_SCRIPT_URL) {
+                    const res = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'SIGNUP', email: u, password: p }) });
+                    const data = await res.json();
+                    if(data.status === 'SUCCESS') { saveSession(data.hex, u, "09:00"); sfx.success(); checkStreak(); loadApp(); } 
+                    else { showToast(data.message || 'Signup failed', 'error'); }
+                } else {
+                    await new Promise(r => setTimeout(r, 800)); saveSession('DEMO_HEX_'+Date.now(), u, "09:00"); sfx.success(); checkStreak(); loadApp();
+                }
+            } catch(e) { console.error(e); showToast('Connection Error', 'error'); }
+            toggleLoader(false);
+        }
+        function saveSession(hex, name, time) { localStorage.setItem('nexus_hex', hex); localStorage.setItem('nexus_name', name); localStorage.setItem('nexus_time', time); state.hex=hex; state.user=name; state.time=time; }
+        function logout() { localStorage.clear(); location.reload(); }
+        function loadApp() {
+            document.body.classList.add('app-active');
+            document.getElementById('view-auth').classList.add('hidden'); document.getElementById('view-app').classList.remove('hidden'); document.getElementById('view-app').classList.add('animate-fade-in');
+            if(document.getElementById('sidebar-name')) document.getElementById('sidebar-name').innerText = state.user; 
+            if(document.getElementById('sidebar-avatar')) document.getElementById('sidebar-avatar').innerText = state.user.charAt(0).toUpperCase();
+            if(document.getElementById('profile-name-lg')) document.getElementById('profile-name-lg').innerText = state.user; 
+            if(document.getElementById('profile-avatar-lg')) document.getElementById('profile-avatar-lg').innerText = state.user.charAt(0).toUpperCase();
+            if(document.getElementById('setting-time')) document.getElementById('setting-time').value = state.time;
+        }
+        
+        function openModal(id, topicId=null) { 
+            sfx.click(); document.getElementById(id).classList.remove('hidden'); document.getElementById(id).classList.add('flex');
+            if(id === 'add-modal') {
+                if(topicId) {
+                    const t = state.topics.find(x => x.id === topicId);
+                    document.getElementById('modal-title').innerText = "Edit Topic"; document.getElementById('edit-topic-id').value = topicId;
+                    document.getElementById('new-topic-name').value = t.name; document.getElementById('new-topic-category').value = t.category || 'General'; document.getElementById('new-topic-desc').value = t.desc;
+                } else {
+                    document.getElementById('modal-title').innerText = "New Topic"; document.getElementById('edit-topic-id').value = "";
+                    document.getElementById('new-topic-name').value = ""; document.getElementById('new-topic-desc').value = ""; setTimeout(() => document.getElementById('new-topic-name').focus(), 50);
+                }
+            }
+        }
+        function closeModal(id) { sfx.click(); document.getElementById(id).classList.add('hidden'); document.getElementById(id).classList.remove('flex'); if(id==='focus-modal'&&isTimerRunning) toggleTimer(); }
+
+        // --- READ MODE ---
+        function openReadMode(id) {
+            const t = state.topics.find(x => x.id === id);
+            if(t) {
+                document.getElementById('read-title').innerText = t.name;
+                document.getElementById('read-category').innerText = t.category || 'General';
+                document.getElementById('read-category').className = `text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md border inline-block mb-2 ${categoryColors[t.category]||categoryColors['General']}`;
+                let raw = t.desc || 'No notes.';
+                let html = raw.replace(/\n/g, '<br>').replace(/- (.*)/g, '<li>$1</li>');
+                if(html.includes('<li>')) html = `<ul>${html}</ul>`;
+                document.getElementById('read-content').innerHTML = html;
+                openModal('read-modal');
+            }
+        }
+
+        // --- SKELETON RENDERER ---
+        function renderSkeleton() {
+            const grid = document.getElementById('topic-grid');
+            grid.innerHTML = '';
+            for(let i=0; i<8; i++) {
+                const skel = document.createElement('div');
+                skel.className = 'card-surface p-6 shadow-soft h-48 animate-pulse flex flex-col justify-between';
+                skel.innerHTML = `
+                    <div class="w-full h-1.5 bg-gray-200 dark:bg-gray-700 rounded mb-4"></div>
+                    <div class="flex justify-between mb-4">
+                        <div class="h-4 w-16 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                        <div class="h-6 w-12 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                    </div>
+                    <div class="flex-1 space-y-3">
+                        <div class="h-6 w-3/4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                        <div class="h-4 w-full bg-gray-200 dark:bg-gray-700 rounded"></div>
+                        <div class="h-4 w-5/6 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                    </div>
+                    <div class="h-10 w-full bg-gray-200 dark:bg-gray-700 rounded mt-4"></div>
+                `;
+                grid.appendChild(skel);
+            }
+        }
+
+        async function syncDown() {
+            renderSkeleton(); // Show skeleton immediately
+            if (GOOGLE_SCRIPT_URL) {
+                try {
+                    const res = await fetch(GOOGLE_SCRIPT_URL + '?hex=' + state.hex);
+                    const data = await res.json();
+                    if(Array.isArray(data)) { state.topics = data; renderGrid(); }
+                } catch(e) { console.error(e); }
+            } else {
+                const stored = localStorage.getItem('nexus_data');
+                await new Promise(r => setTimeout(r, 600)); // Fake delay for skeleton demo
+                if(stored) state.topics = JSON.parse(stored); else state.topics = [{ id: '1', name: 'UI Principles', category: 'Design', level: 3, nextReview: Date.now() - 100000, desc: 'Hierarchy, Balance, Contrast' }];
+                renderGrid();
+            }
+        }
+
+        async function syncUp() { 
+            if (GOOGLE_SCRIPT_URL) {
+                try {
+                    await fetch(GOOGLE_SCRIPT_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({ action: 'SYNC_UP', hex: state.hex, topics: state.topics })
+                    });
+                } catch(e) { console.error("Save failed"); }
+            } else {
+                localStorage.setItem('nexus_data', JSON.stringify(state.topics)); 
+            }
+        }
+
+        function saveTopic() {
+            const id = document.getElementById('edit-topic-id').value, name = document.getElementById('new-topic-name').value.trim(), cat = document.getElementById('new-topic-category').value, desc = document.getElementById('new-topic-desc').value.trim();
+            if(!name) return;
+            if(id) { const t = state.topics.find(x => x.id === id); if(t) { t.name = name; t.category = cat; t.desc = desc; } showToast('Topic updated'); }
+            else { state.topics.push({ id: 'top_'+Date.now(), name: name, category: cat, desc: desc, level: 0, nextReview: Date.now() }); showToast('New topic created'); }
+            renderGrid(); syncUp(); closeModal('add-modal'); sfx.success();
+        }
+        function deleteTopic(id) { if(confirm("Remove topic?")) { state.topics = state.topics.filter(t => t.id !== id); renderGrid(); syncUp(); sfx.click(); showToast('Deleted', 'error'); } }
+        function processReview(id, success) {
+            const t = state.topics.find(x => x.id === id);
+            if(t) { 
+                if(success) { 
+                    t.level = Math.min(t.level+1, 6); sfx.celebrate(); fireConfetti(); showToast('Retention +'); openCalendar(t); 
+                    state.dailyProgress++; localStorage.setItem('nexus_daily_progress', state.dailyProgress); updateDailyProgress();
+                } else { 
+                    t.level = Math.max(t.level-1, 0); sfx.click(); showToast('Scheduled sooner.'); 
+                } 
+                t.nextReview = calculateNextReview(t.level); renderGrid(); syncUp(); 
+            }
+        }
+        function fireConfetti() { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#6366f1', '#10b981', '#f43f5e'] }); }
+        function calculateNextReview(lvl) { return new Date().setDate(new Date().getDate() + [0,1,3,7,14,30,90][Math.min(lvl,6)]); }
+        function openCalendar(t) {
+            const d = new Date(t.nextReview), time = state.time || "09:00", parts = time.split(':'); d.setHours(parseInt(parts[0]), parseInt(parts[1]), 0, 0);
+            const start = d.toISOString().replace(/-|:|\.\d\d\d/g, ""); d.setMinutes(d.getMinutes() + 30);
+            window.open(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('NEXUS: '+t.name)}&dates=${start}/${d.toISOString().replace(/-|:|\.\d\d\d/g, "")}&details=${encodeURIComponent(t.desc||'')}&sf=true&output=xml`, '_blank');
+        }
+        function saveSettings() { 
+            state.time = document.getElementById('setting-time').value; 
+            localStorage.setItem('nexus_time', state.time); 
+            if (GOOGLE_SCRIPT_URL) { fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'UPDATE_SETTINGS', hex: state.hex, time: state.time }) }).catch(console.error); }
+            sfx.success(); closeModal('profile-modal'); showToast('Saved'); 
+        }
+        
+        function exportData(type) {
+            let dataStr, name;
+            if(type === 'csv') {
+                const header = ['ID','Name','Category','Level','NextReview','Description'].join(',');
+                const rows = state.topics.map(t => [t.id, `"${t.name}"`, t.category, t.level, new Date(t.nextReview).toISOString(), `"${(t.desc||'').replace(/"/g,'""')}"`].join(','));
+                dataStr = "data:text/csv;charset=utf-8," + encodeURIComponent([header, ...rows].join('\n'));
+                name = "nexus_export.csv";
+            } else {
+                dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state.topics));
+                name = "nexus_backup.json";
+            }
+            const dl = document.createElement('a'); dl.setAttribute("href", dataStr); dl.setAttribute("download", name);
+            document.body.appendChild(dl); dl.click(); dl.remove(); showToast('Export downloaded');
+        }
+        function importData(input) {
+            const file = input.files[0]; if(!file) return;
+            const r = new FileReader(); r.onload = function(e) { try { state.topics = JSON.parse(e.target.result); syncUp(); renderGrid(); showToast('Restored'); } catch(err) { showToast('Error', 'error'); } };
+            r.readAsText(file);
+        }
+        function handleSearch(val) { const btn = document.getElementById('clear-search-btn'); if(val) btn.classList.remove('hidden'); else btn.classList.add('hidden'); renderGrid(); }
+        function clearSearch() { document.getElementById('search-input').value = ''; document.getElementById('search-input-mobile').value = ''; document.getElementById('clear-search-btn').classList.add('hidden'); renderGrid(); }
+        function scrollToTop() { document.getElementById('main-scroll').scrollTo({ top: 0, behavior: 'smooth' }); }
+
+        function renderCharts() {
+            const isDark = document.documentElement.classList.contains('dark'), style = getComputedStyle(document.body), brandColor = style.getPropertyValue('--color-brand-500').trim().replace(/ /g, ',') || '99, 102, 241';
+            const levels = [0,0,0,0,0,0,0], forecast = []; state.topics.forEach(t => { if(t.level <= 6) levels[t.level]++; });
+            const labels = []; const now = new Date();
+            for(let i=0; i<7; i++) {
+                const d = new Date(now); d.setDate(d.getDate() + i); labels.push(d.toLocaleDateString('en-US', {weekday: 'short'}));
+                const s = new Date(d).setHours(0,0,0,0), e = new Date(d).setHours(23,59,59,999);
+                if (i===0) forecast.push(state.topics.filter(t => t.nextReview <= e).length); else forecast.push(state.topics.filter(t => t.nextReview >= s && t.nextReview <= e).length);
+            }
+            if(retentionChart) retentionChart.destroy();
+            retentionChart = new Chart(document.getElementById('chart-levels').getContext('2d'), {
+                type: 'doughnut', data: { labels: ['New','L1','L2','L3','L4','L5','Master'], datasets: [{ data: levels, backgroundColor: [`rgba(${brandColor},0.2)`,`rgba(${brandColor},0.3)`,`rgba(${brandColor},0.4)`,`rgba(${brandColor},0.6)`,`rgba(${brandColor},0.7)`,`rgba(${brandColor},0.8)`,`rgba(${brandColor},1)`], borderWidth: 0, hoverOffset: 4 }] },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: {display: false} } }
+            });
+            if(forecastChart) forecastChart.destroy();
+            const grad = document.getElementById('chart-forecast').getContext('2d').createLinearGradient(0,0,0,200); grad.addColorStop(0, `rgba(${brandColor},0.4)`); grad.addColorStop(1, `rgba(${brandColor},0.0)`);
+            forecastChart = new Chart(document.getElementById('chart-forecast').getContext('2d'), {
+                type: 'line', data: { labels: labels, datasets: [{ data: forecast, borderColor: `rgb(${brandColor})`, backgroundColor: grad, borderWidth: 3, fill: true, tension: 0.4, pointRadius: 2 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: {display:false} }, scales: { y: { beginAtZero: true, grid: { color: isDark ? '#334155' : '#e2e8f0', borderDash: [5,5] } }, x: { grid: {display: false} } } }
+            });
+        }
+
+        function renderGrid() {
+            const grid = document.getElementById('topic-grid'); grid.innerHTML = '';
+            const search = (document.getElementById('search-input').value || document.getElementById('search-input-mobile').value).toLowerCase();
+            const sortMode = document.getElementById('sort-select').value;
+            let filtered = state.topics.filter(t => t.name.toLowerCase().includes(search) || (t.category && t.category.toLowerCase().includes(search)));
+            
+            let gridClass = 'grid gap-4 md:gap-6 pb-24 transition-all duration-300 ';
+            if (state.gridCols === 3) gridClass += 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3';
+            else if (state.gridCols === 5) gridClass += 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5';
+            else gridClass += 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'; 
+            grid.className = gridClass;
+
+            filtered.sort((a, b) => {
+                if (sortMode === 'urgency') return a.nextReview - b.nextReview;
+                if (sortMode === 'level') return a.level - b.level;
+                if (sortMode === 'newest') return parseInt(b.id.split('_')[1]||0) - parseInt(a.id.split('_')[1]||0);
+                return 0;
+            });
+
+            if(filtered.length === 0 && search === "") { document.getElementById('empty-state').classList.remove('hidden'); document.getElementById('analytics-section').classList.add('hidden'); }
+            else if (state.topics.length > 0) { document.getElementById('empty-state').classList.add('hidden'); document.getElementById('analytics-section').classList.remove('hidden'); if(search==="") renderCharts(); }
+
+            let dueCount=0, totalLevel=0, today=new Date().setHours(0,0,0,0);
+            filtered.forEach((t, i) => {
+                const isDue = today >= new Date(t.nextReview).setHours(0,0,0,0); if(isDue) dueCount++; totalLevel += t.level;
+                const card = document.createElement('div');
+                card.className = `card-surface p-6 shadow-soft card-hover flex flex-col relative overflow-hidden group animate-slide-up stagger-${(i%5)+1} transition-theme cursor-pointer`;
+                card.onclick = (e) => { if(!e.target.closest('button')) openReadMode(t.id); };
+                
+                card.innerHTML = `
+                    <div class="absolute top-0 left-0 w-full h-1.5 bg-gray-100 dark:bg-gray-800 transition-theme"><div class="h-full bg-brand-500 transition-all duration-1000" style="width: ${(t.level/6)*100}%"></div></div>
+                    <div class="flex justify-between items-start mb-4">
+                         <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md border ${categoryColors[t.category]||categoryColors['General']} transition-theme">${t.category||'General'}</span>
+                        <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                             <button onclick="openModal('add-modal', '${t.id}')" class="text-skin-muted hover:text-brand-600 p-2 hover:bg-skin-base rounded-lg transition-colors"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
+                             <button onclick="deleteTopic('${t.id}')" class="text-skin-muted hover:text-red-500 p-2 hover:bg-skin-base rounded-lg transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        </div>
+                    </div>
+                    <div class="flex-1 mb-5">
+                        <div class="flex justify-between items-start"><h3 class="font-bold text-lg mb-1.5 leading-tight transition-theme">${t.name}</h3>${isDue?'<span class="flex h-2.5 w-2.5 rounded-full bg-red-500 animate-pulse"></span>':''}</div>
+                        <p class="text-sm text-skin-muted line-clamp-2 leading-relaxed transition-theme">${t.desc||'No additional notes provided.'}</p>
+                    </div>
+                    <div class="flex gap-3 mt-auto">
+                        ${isDue?`<button onclick="processReview('${t.id}', true)" class="flex-1 btn-primary py-2.5 text-sm shadow-glow w-full transition-theme">Review Now</button>`:`<div class="w-full py-2.5 bg-skin-base rounded-theme border border-skin-border flex items-center justify-center gap-2 text-xs text-skin-muted font-medium transition-theme"><i data-lucide="clock" class="w-3.5 h-3.5"></i>Next: ${new Date(t.nextReview).toLocaleDateString(undefined, {month:'short', day:'numeric'})}</div>`}
+                    </div>`;
+                grid.appendChild(card);
+            });
+            document.getElementById('stat-pending').innerText = dueCount;
+            document.getElementById('stat-retention').innerText = (state.topics.length ? Math.round((totalLevel/(state.topics.length*6))*100) : 0) + "%";
+            lucide.createIcons();
+        }
+    </script>
+</body>
+</html>
