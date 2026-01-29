@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXUS // PRO v8.2 (Stable)</title>
+    <title>NEXUS // PRO v11.0 (Final)</title>
     
     <!-- FONTS -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -76,7 +76,7 @@
 
         /* Global Smooth Transition */
         .transition-theme, body, .card-surface, .modern-input, .btn-secondary, header, aside, .nav-item, button, .modal-backdrop, select {
-            transition-property: background-color, border-color, color, fill, stroke, box-shadow;
+            transition-property: background-color, border-color, color, fill, stroke, box-shadow, transform, filter, opacity;
             transition-duration: 300ms;
             transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
         }
@@ -234,6 +234,26 @@
             padding: 0 2px;
             border-radius: 2px;
         }
+
+        /* DEEP FOCUS STATES */
+        /* Blur the entire app view when deep focus is active */
+        body.deep-focus-active #view-app > *:not(#focus-modal-wrapper) {
+            filter: blur(12px) brightness(0.5) grayscale(0.5);
+            pointer-events: none;
+            transition: all 0.8s ease;
+        }
+        
+        /* Hide distractions inside the modal itself when Zen is active */
+        body.deep-focus-active .zen-fade {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+        
+        /* Ensure modal is visible during zen */
+        #focus-modal-wrapper {
+            z-index: 9999;
+        }
     </style>
 </head>
 <body class="h-screen flex flex-col overflow-hidden font-sans selection:bg-brand-100 selection:text-brand-900 transition-theme">
@@ -252,7 +272,7 @@
                     <i data-lucide="layers" class="w-7 h-7"></i>
                 </div>
                 <h1 class="text-3xl font-bold tracking-tight">Nexus</h1>
-                <p class="text-skin-muted mt-2 text-sm">Active Space Repetition System v8.2</p>
+                <p class="text-skin-muted mt-2 text-sm">Active Space Repetition System v11.0</p>
             </div>
 
             <div class="flex p-1 bg-skin-base rounded-theme mb-6 transition-theme">
@@ -316,7 +336,7 @@
 
             <nav class="space-y-2 flex-1">
                 <button onclick="scrollToTop()" class="w-full flex items-center gap-3 px-4 py-3 bg-brand-50 text-brand-600 rounded-theme font-medium transition-colors border border-brand-100 transition-theme"><i data-lucide="layout-grid" class="w-6 h-6"></i> Dashboard</button>
-                <button onclick="openModal('focus-modal')" class="w-full flex items-center gap-3 px-4 py-3 text-skin-muted hover:bg-skin-base hover:text-skin-text rounded-theme font-medium transition-colors transition-theme"><i data-lucide="timer" class="w-5 h-5"></i> Focus Mode</button>
+                <button onclick="openModal('focus-modal-wrapper')" class="w-full flex items-center gap-3 px-4 py-3 text-skin-muted hover:bg-skin-base hover:text-skin-text rounded-theme font-medium transition-colors transition-theme"><i data-lucide="timer" class="w-5 h-5"></i> Focus Mode</button>
                 <button onclick="openModal('profile-modal')" class="w-full flex items-center gap-3 px-4 py-3 text-skin-muted hover:bg-skin-base hover:text-skin-text rounded-theme font-medium transition-colors transition-theme"><i data-lucide="settings" class="w-5 h-5"></i> Settings</button>
                 <button onclick="openModal('help-modal')" class="w-full flex items-center gap-3 px-4 py-3 text-skin-muted hover:bg-skin-base hover:text-skin-text rounded-theme font-medium transition-colors transition-theme"><i data-lucide="keyboard" class="w-5 h-5"></i> Shortcuts</button>
             </nav>
@@ -366,7 +386,7 @@
                     <div class="hidden md:block flex-1 max-w-sm ml-6">
                         <div class="relative">
                             <i data-lucide="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-skin-muted"></i>
-                            <input type="text" id="search-input" onkeyup="handleSearch(this.value)" class="modern-input pl-10 pr-9 transition-theme" placeholder="Search topics...">
+                            <input type="text" id="search-input" onkeyup="handleSearch(this.value)" class="modern-input pl-10 pr-9 transition-theme" placeholder="Search topics (or /cmd)...">
                             <button class="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-skin-muted hover:text-skin-text hidden" id="clear-search-btn" onclick="clearSearch()"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
                         </div>
                     </div>
@@ -391,7 +411,7 @@
                         <div class="w-px h-8 bg-skin-border transition-theme"></div>
                         <div class="text-right"><div class="text-xs font-semibold text-skin-muted uppercase tracking-wide">Retention</div><div class="text-lg font-bold text-skin-text" id="stat-retention">0%</div></div>
                     </div>
-                    <button onclick="openModal('add-modal')" class="btn-primary shadow-glow transition-theme"><i data-lucide="plus" class="w-5 h-5"></i> <span class="hidden sm:inline">New Topic</span></button>
+                    <button onclick="openModal('add-modal')" class="btn-primary shadow-glow transition-theme flex items-center gap-2"><i data-lucide="plus" class="w-5 h-5 !text-white"></i> <span class="hidden sm:inline">New Topic</span></button>
                 </div>
             </header>
             
@@ -414,7 +434,9 @@
                         </div>
                     </div>
                 </div>
+                
                 <div id="topic-grid" class="grid gap-4 md:gap-6 pb-24 transition-all duration-300"></div>
+                
                 <div id="empty-state" class="hidden h-96 flex flex-col items-center justify-center text-center animate-fade-in"><div class="w-32 h-32 bg-skin-base rounded-full flex items-center justify-center mb-6 relative transition-theme"><div class="absolute inset-0 border-4 border-skin-surface rounded-full shadow-sm transition-theme"></div><i data-lucide="inbox" class="w-12 h-12 text-skin-muted"></i></div><h3 class="text-xl font-bold">All clear for now</h3><p class="text-skin-muted mt-2 max-w-xs mx-auto">No topics match your filter.</p><button onclick="openModal('add-modal')" class="mt-8 text-brand-600 font-semibold hover:text-brand-700 flex items-center gap-2">Create first topic <i data-lucide="arrow-right" class="w-4 h-4"></i></button></div>
             </div>
 
@@ -487,7 +509,7 @@
                 </div>
                 <div class="flex-1"></div>
                 <button onclick="closeModal('add-modal')" class="flex-1 btn-secondary justify-center transition-theme">Cancel</button>
-                <button onclick="saveTopic()" class="flex-1 btn-primary shadow-glow transition-theme">Save</button>
+                <button onclick="saveTopic()" class="flex-1 btn-primary shadow-glow transition-theme">Save (Enter)</button>
             </div>
         </div>
     </div>
@@ -541,35 +563,58 @@
         </div>
     </div>
 
-    <!-- FOCUS MODAL -->
-    <div id="focus-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center">
-        <div class="absolute inset-0 modal-backdrop transition-opacity" onclick="closeModal('focus-modal')"></div>
-        <div class="w-full max-w-sm card-surface rounded-theme shadow-2xl p-8 relative z-10 animate-pop-in text-center m-4 transition-theme">
-            <div class="mb-6"><h3 class="text-2xl font-bold">Focus Mode</h3><p class="text-skin-muted text-sm">Deep work session (25m)</p></div>
-            <div class="relative w-48 h-48 mx-auto mb-8">
-                <svg class="w-full h-full -rotate-90" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" stroke-width="6" class="text-skin-border transition-theme" /><circle id="timer-progress" cx="50" cy="50" r="45" fill="none" stroke="currentColor" stroke-width="6" class="text-brand-500 timer-circle" stroke-dasharray="283" stroke-dashoffset="0" stroke-linecap="round" /></svg>
-                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-4xl font-mono font-bold" id="timer-display">25:00</div>
+    <!-- FOCUS MODAL (ZEN) -->
+    <div id="focus-modal-wrapper" class="fixed inset-0 z-[200] hidden flex items-center justify-center pointer-events-none">
+        <div id="focus-modal" class="w-full max-w-sm card-surface rounded-theme shadow-2xl p-8 relative z-10 animate-pop-in text-center m-4 transition-theme pointer-events-auto">
+            <div class="zen-fade mb-6 transition-opacity duration-300">
+                <h3 class="text-2xl font-bold">Focus Mode</h3>
+                <p class="text-skin-muted text-sm" id="focus-status-text">Deep work session</p>
             </div>
             
-            <div class="flex flex-col gap-3 mb-6 bg-skin-base p-4 rounded-theme border border-skin-border">
-                <div class="flex items-center justify-between">
-                    <span class="text-sm font-bold text-skin-text">Rain Mode</span>
-                    <button id="noise-toggle" onclick="toggleNoise()" class="w-12 h-6 bg-skin-border rounded-full relative transition-colors duration-300">
-                        <div id="noise-knob" class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform duration-300"></div>
-                    </button>
+            <div class="relative w-48 h-48 mx-auto mb-8 cursor-pointer group" onclick="if(isTimerRunning) toggleTimer()">
+                <svg class="w-full h-full -rotate-90" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" stroke-width="6" class="text-skin-border transition-theme" /><circle id="timer-progress" cx="50" cy="50" r="45" fill="none" stroke="currentColor" stroke-width="6" class="text-brand-500 timer-circle" stroke-dasharray="283" stroke-dashoffset="0" stroke-linecap="round" /></svg>
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-4xl font-mono font-bold transition-transform group-hover:scale-105" id="timer-display">25:00</div>
+                <!-- Hidden Pause Icon Overlay for Zen Mode -->
+                <div id="zen-pause-overlay" class="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 transition-opacity duration-300 pointer-events-none">
+                    <i data-lucide="pause" class="w-12 h-12 text-white"></i>
                 </div>
-                <div class="w-full h-px bg-skin-border"></div>
-                <a href="https://rainymood.com" target="_blank" class="text-xs text-skin-muted hover:text-brand-500 flex items-center justify-center gap-1 transition-colors">
-                    Open RainyMood.com <i data-lucide="external-link" class="w-3 h-3"></i>
-                </a>
             </div>
+            
+            <div class="zen-fade transition-opacity duration-300 space-y-6">
+                <!-- MODE TOGGLES -->
+                <div class="flex justify-center gap-2">
+                    <button onclick="setTimerMode(25)" class="px-3 py-1 rounded-theme text-xs font-bold border border-skin-border hover:bg-skin-base transition-colors">Focus</button>
+                    <button onclick="setTimerMode(5)" class="px-3 py-1 rounded-theme text-xs font-bold border border-skin-border hover:bg-skin-base transition-colors">Short</button>
+                    <button onclick="setTimerMode(15)" class="px-3 py-1 rounded-theme text-xs font-bold border border-skin-border hover:bg-skin-base transition-colors">Long</button>
+                </div>
+                
+                <div class="flex flex-col gap-3 bg-skin-base p-4 rounded-theme border border-skin-border">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-bold text-skin-text">Rain Mode</span>
+                        <div class="flex items-center gap-2">
+                            <input type="range" min="0" max="1" step="0.1" value="0.5" class="w-16 h-1 bg-skin-border rounded-lg appearance-none cursor-pointer accent-brand-600" oninput="updateVolume(this.value)">
+                            <button id="noise-toggle" onclick="toggleNoise()" class="w-10 h-5 bg-skin-border rounded-full relative transition-colors duration-300">
+                                <div id="noise-knob" class="absolute left-1 top-1 w-3 h-3 bg-white rounded-full transition-transform duration-300"></div>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="w-full h-px bg-skin-border"></div>
+                    <a href="https://rainymood.com" target="_blank" class="text-xs text-skin-muted hover:text-brand-500 flex items-center justify-center gap-1 transition-colors">
+                        Open RainyMood.com <i data-lucide="external-link" class="w-3 h-3"></i>
+                    </a>
+                </div>
 
-            <div class="flex gap-4 justify-center">
-                <button id="btn-timer-toggle" onclick="toggleTimer()" class="btn-primary w-32 shadow-glow transition-theme">Start</button>
-                <button onclick="resetTimer()" class="btn-secondary w-32 transition-theme">Reset</button>
+                <div class="flex gap-4 justify-center">
+                    <button id="btn-timer-toggle" onclick="toggleTimer()" class="btn-primary w-32 shadow-glow transition-theme">Start</button>
+                    <button onclick="resetTimer()" class="btn-secondary w-32 transition-theme">Reset</button>
+                </div>
+                
+                <div class="mt-4 text-xs text-skin-muted">Sessions Completed: <span id="session-counter" class="font-bold text-brand-600">0</span></div>
             </div>
-            <button onclick="closeModal('focus-modal')" class="absolute top-4 right-4 p-2 text-skin-muted hover:text-skin-text"><i data-lucide="x" class="w-5 h-5"></i></button>
+            
+            <button onclick="closeModal('focus-modal-wrapper')" class="absolute top-4 right-4 p-2 text-skin-muted hover:text-skin-text zen-fade transition-opacity duration-300"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
+        <div id="focus-backdrop" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[150] transition-opacity duration-500 opacity-0 pointer-events-none"></div>
     </div>
 
     <!-- SETTINGS MODAL -->
@@ -659,6 +704,7 @@
             <div class="space-y-3 text-sm text-skin-muted">
                 <div class="flex justify-between"><span>New Topic</span><span class="font-mono bg-skin-base px-2 rounded border border-skin-border">N</span></div>
                 <div class="flex justify-between"><span>Search</span><span class="font-mono bg-skin-base px-2 rounded border border-skin-border">/</span></div>
+                <div class="flex justify-between"><span>Surprise Review</span><span class="font-mono bg-skin-base px-2 rounded border border-skin-border">Shift + R</span></div>
                 <div class="flex justify-between"><span>Close Modal</span><span class="font-mono bg-skin-base px-2 rounded border border-skin-border">Esc</span></div>
                 <div class="flex justify-between"><span>Save Topic</span><span class="font-mono bg-skin-base px-2 rounded border border-skin-border">Enter</span></div>
                 <div class="flex justify-between"><span>Help</span><span class="font-mono bg-skin-base px-2 rounded border border-skin-border">?</span></div>
@@ -668,6 +714,11 @@
     </div>
 
     <script>
+        // =================================================================
+        // 🎵 PASTE YOUR AUDIO LINK HERE (MP3/OGG)
+        // =================================================================
+        const FOCUS_AUDIO_URL = '0.ogg';
+
         // ---------------------------------------------------------
         // PASTE YOUR V6.7 GOOGLE SCRIPT URL HERE
         // ---------------------------------------------------------
@@ -677,7 +728,6 @@
         const wordsA = ["Alpha", "Beta", "Gamma", "Delta", "Neo", "Prime", "Flux", "Core", "Zen", "Nova"];
         const wordsB = ["Pilot", "Scout", "Mind", "Flow", "Spark", "Wave", "Link", "Sync", "Pulse", "Drift"];
         
-        // Styles for dynamic subjects. We'll cycle through these.
         const subjectStyles = [
             'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border-blue-200 dark:border-blue-800',
             'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 border-green-200 dark:border-green-800',
@@ -715,14 +765,17 @@
             showArchived: false,
             subjects: [],
             xp: 0,
-            level: 1
+            level: 1,
+            focusSessionCount: 0
         };
-        let retentionChart = null, forecastChart = null, timerInterval, timeLeft = 25 * 60, isTimerRunning = false;
+        let retentionChart = null, forecastChart = null, timerInterval, timeLeft = 25 * 60, isTimerRunning = false, currentTimerMode = 25;
         let lastUndoAction = null; 
         let addMode = 'single';
         
-        // Audio Context for Pink Noise
-        let audioCtx, noiseNode, gainNode, isNoisePlaying = false;
+        // Simple HTML5 Audio
+        let focusAudio = new Audio(FOCUS_AUDIO_URL);
+        focusAudio.loop = true;
+        let isNoisePlaying = false;
 
         // --- STYLE HELPER ---
         function getSubjectStyle(name) {
@@ -734,14 +787,15 @@
 
         const sfx = {
             ctx: null,
-            init: function() { window.AudioContext = window.AudioContext || window.webkitAudioContext; this.ctx = new AudioContext(); },
+            init: function() { try { window.AudioContext = window.AudioContext || window.webkitAudioContext; this.ctx = new AudioContext(); } catch(e) {} },
             play: function(freq, type, duration, vol=0.05) {
                 if (state.mute) return;
-                if (!this.ctx) this.init();
-                const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain();
-                osc.type = type; osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
-                gain.gain.setValueAtTime(vol, this.ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
-                osc.connect(gain); gain.connect(this.ctx.destination); osc.start(); osc.stop(this.ctx.currentTime + duration);
+                try { if (!this.ctx) this.init(); if (!this.ctx) return; 
+                    const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain();
+                    osc.type = type; osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                    gain.gain.setValueAtTime(vol, this.ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+                    osc.connect(gain); gain.connect(this.ctx.destination); osc.start(); osc.stop(this.ctx.currentTime + duration);
+                } catch(e) {}
             },
             click: () => sfx.play(600, 'sine', 0.05, 0.02),
             success: () => { sfx.play(440, 'sine', 0.1, 0.05); setTimeout(() => sfx.play(554, 'sine', 0.2, 0.05), 100); },
@@ -754,64 +808,33 @@
             }
         };
 
-        // --- NOISE GENERATOR (Pink Noise with Low Pass - Rain) ---
+        // --- FOCUS AUDIO ---
         function toggleNoise() {
-            if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             const toggle = document.getElementById('noise-toggle');
             const knob = document.getElementById('noise-knob');
             
             if(isNoisePlaying) {
-                // Stop
-                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
-                setTimeout(() => { noiseNode.stop(); isNoisePlaying = false; }, 500);
+                // Disarm
+                isNoisePlaying = false;
                 toggle.classList.remove('bg-brand-500'); toggle.classList.add('bg-skin-border');
                 knob.style.transform = 'translateX(0)';
+                // Stop audio if it was playing (user paused while armed)
+                focusAudio.pause();
             } else {
-                // Start
-                const bufferSize = 4096;
-                const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-                const output = buffer.getChannelData(0);
-                let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
-                
-                // Pink Noise Gen
-                for (let i = 0; i < bufferSize; i++) {
-                    const white = Math.random() * 2 - 1;
-                    b0 = 0.99886 * b0 + white * 0.0555179;
-                    b1 = 0.99332 * b1 + white * 0.0750759;
-                    b2 = 0.96900 * b2 + white * 0.1538520;
-                    b3 = 0.86650 * b3 + white * 0.3104856;
-                    b4 = 0.55000 * b4 + white * 0.5329522;
-                    b5 = -0.7616 * b5 - white * 0.0168980;
-                    output[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
-                    output[i] *= 0.11; 
-                    b6 = white * 0.115926;
-                }
-
-                noiseNode = audioCtx.createBufferSource();
-                noiseNode.buffer = buffer;
-                noiseNode.loop = true;
-                
-                // Create Gain (Volume)
-                gainNode = audioCtx.createGain();
-                gainNode.gain.setValueAtTime(0.001, audioCtx.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.5, audioCtx.currentTime + 2); // Fade in
-
-                // Create Lowpass Filter (Muffle high hiss -> Rain sound)
-                const filter = audioCtx.createBiquadFilter();
-                filter.type = 'lowpass';
-                filter.frequency.value = 800; // Cutoff frequency
-
-                // Connect: Noise -> Filter -> Gain -> Output
-                noiseNode.connect(filter);
-                filter.connect(gainNode);
-                gainNode.connect(audioCtx.destination);
-                
-                noiseNode.start();
+                // Arm
                 isNoisePlaying = true;
-                
                 toggle.classList.add('bg-brand-500'); toggle.classList.remove('bg-skin-border');
                 knob.style.transform = 'translateX(1.5rem)';
+                // If timer is already running, start sound immediately
+                if(isTimerRunning) {
+                     focusAudio.volume = parseFloat(document.querySelector('input[type="range"][step="0.1"]').value);
+                     focusAudio.play().catch(e => console.log(e));
+                }
             }
+        }
+
+        function updateVolume(val) {
+            if(focusAudio) focusAudio.volume = parseFloat(val);
         }
 
         function showToast(message, type = 'success', hasUndo = false) {
@@ -830,23 +853,51 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons(); checkSession();
-            document.getElementById('current-date').innerText = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-            document.getElementById('daily-quote').innerText = `"${quotes[Math.floor(Math.random() * quotes.length)]}"`;
+            
+            const dateEl = document.getElementById('current-date');
+            if (dateEl) dateEl.innerText = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+            
+            const quoteEl = document.getElementById('daily-quote');
+            if (quoteEl) quoteEl.innerText = `"${quotes[Math.floor(Math.random() * quotes.length)]}"`;
             
             document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') { closeModal('add-modal'); closeModal('profile-modal'); closeModal('focus-modal'); closeModal('help-modal'); closeModal('read-modal'); closeModal('subject-modal'); }
-                if (e.key === 'Enter') { 
-                    const isAddModalOpen = !document.getElementById('add-modal').classList.contains('hidden');
-                    const isSettingsOpen = !document.getElementById('profile-modal').classList.contains('hidden');
-                    const isSubjectModalOpen = !document.getElementById('subject-modal').classList.contains('hidden');
-                    const isTextarea = e.target.tagName === 'TEXTAREA';
-                    if(isAddModalOpen && !isTextarea) { e.preventDefault(); saveTopic(); }
-                    if(isSettingsOpen && e.target.id === 'new-subject-input') { e.preventDefault(); addNewSubject(); }
-                    if(isSubjectModalOpen) { e.preventDefault(); saveQuickSubject(); }
+                const viewApp = document.getElementById('view-app');
+                // Check visibility using offsetParent (null if hidden)
+                if (!viewApp || viewApp.offsetParent === null) return;
+
+                const isInputActive = e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA';
+                
+                // IMPORTANT: Check for any open modal (except the wrapper itself)
+                // We check if any element with 'fixed' (modal) is visible and NOT hidden
+                const modals = document.querySelectorAll('.fixed.z-\\[100\\], .fixed.z-\\[200\\]');
+                let isAnyModalOpen = false;
+                modals.forEach(m => {
+                    if(!m.classList.contains('hidden')) isAnyModalOpen = true;
+                });
+
+                // ESC: Always close all modals
+                if (e.key === 'Escape') { 
+                    ['add-modal', 'profile-modal', 'focus-modal-wrapper', 'help-modal', 'read-modal', 'subject-modal'].forEach(id => closeModal(id));
                 }
-                if (e.key === 'n' && document.body.classList.contains('app-active') && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') { e.preventDefault(); openModal('add-modal'); }
-                if (e.key === '/' && document.body.classList.contains('app-active') && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') { e.preventDefault(); document.getElementById('search-input').focus(); }
-                if (e.key === '?' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') openModal('help-modal');
+                
+                // ENTER: Context sensitive actions
+                if (e.key === 'Enter') { 
+                    const addModal = document.getElementById('add-modal');
+                    const settingsModal = document.getElementById('profile-modal');
+                    const subjectModal = document.getElementById('subject-modal');
+                    
+                    if (addModal && !addModal.classList.contains('hidden') && e.target.tagName !== 'TEXTAREA') { e.preventDefault(); saveTopic(); }
+                    if (settingsModal && !settingsModal.classList.contains('hidden') && e.target.id === 'new-subject-input') { e.preventDefault(); addNewSubject(); }
+                    if (subjectModal && !subjectModal.classList.contains('hidden')) { e.preventDefault(); saveQuickSubject(); }
+                }
+                
+                // SHORTCUTS (Only when App is visible & no inputs focused & NO modals open)
+                if (!isInputActive && !isAnyModalOpen) {
+                    if (e.key.toLowerCase() === 'n') { e.preventDefault(); openModal('add-modal'); showToast('Shortcut: New Topic'); }
+                    if (e.key === '/') { e.preventDefault(); const search = document.getElementById('search-input'); if(search) search.focus(); }
+                    if (e.key === '?') openModal('help-modal');
+                    if (e.key === 'R' && e.shiftKey) { e.preventDefault(); surpriseReview(); }
+                }
             });
         });
 
@@ -854,7 +905,10 @@
         function updateGridDensity(val) { state.gridCols = parseInt(val); localStorage.setItem('nexus_grid_cols', val); renderGrid(); }
         function toggleMute() { state.mute = !state.mute; localStorage.setItem('nexus_mute', state.mute); document.getElementById('mute-btn').innerHTML = state.mute ? '<i data-lucide="volume-x" class="w-4 h-4"></i>' : '<i data-lucide="volume-2" class="w-4 h-4"></i>'; lucide.createIcons(); }
         function updateGoal(val) { state.dailyGoal = parseInt(val); localStorage.setItem('nexus_daily_goal', val); updateDailyProgress(); }
-        function toggleLoader(show) { document.getElementById('auth-loader').classList.toggle('hidden', !show); }
+        function toggleLoader(show) { 
+            const loader = document.getElementById('auth-loader');
+            if (loader) loader.classList.toggle('hidden', !show); 
+        }
         
         function toggleShowArchive() {
             state.showArchived = !state.showArchived;
@@ -877,6 +931,27 @@
         function togglePin(id) {
             const t = state.topics.find(x => x.id === id);
             if(t) { t.pinned = !t.pinned; syncUp(); renderGrid(); sfx.click(); }
+        }
+        
+        function surpriseReview() {
+            // Find all DUE topics
+            const now = new Date();
+            const next24h = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+            
+            const dueTopics = state.topics.filter(t => {
+                if (t.archived) return false;
+                let isDue = now >= new Date(t.nextReview);
+                if (state.cramMode && !isDue && new Date(t.nextReview) <= next24h) isDue = true;
+                return isDue;
+            });
+            
+            if(dueTopics.length > 0) {
+                const randomTopic = dueTopics[Math.floor(Math.random() * dueTopics.length)];
+                openReadMode(randomTopic.id);
+                sfx.click();
+            } else {
+                showToast("No topics due right now!", "success");
+            }
         }
 
         // --- LEVEL & XP ---
@@ -937,8 +1012,13 @@
             const input = document.getElementById('new-subject-input');
             const val = input.value.trim();
             if (val && !state.subjects.includes(val)) {
-                state.subjects.push(val); localStorage.setItem('nexus_subjects', JSON.stringify(state.subjects));
-                input.value = ''; renderSubjectList(); populateSubjectSelects(); showToast('Subject added');
+                state.subjects.push(val); 
+                localStorage.setItem('nexus_subjects', JSON.stringify(state.subjects));
+                input.value = ''; 
+                renderSubjectList(); 
+                populateSubjectSelects(); 
+                saveSubjectsToCloud(); // NEW: Sync subjects
+                showToast('Subject added');
             }
         }
 
@@ -946,8 +1026,25 @@
             if (confirm(`Delete subject "${name}"?`)) {
                 state.subjects = state.subjects.filter(s => s !== name);
                 localStorage.setItem('nexus_subjects', JSON.stringify(state.subjects));
-                renderSubjectList(); populateSubjectSelects();
+                renderSubjectList(); 
+                populateSubjectSelects();
+                saveSubjectsToCloud(); // NEW: Sync subjects
             }
+        }
+
+        // NEW: Function to sync subjects via a hidden topic
+        function saveSubjectsToCloud() {
+             if (GOOGLE_SCRIPT_URL) {
+                 // Check if config topic exists
+                 let conf = state.topics.find(t => t.id === 'config_subjects');
+                 if(!conf) {
+                     conf = { id: 'config_subjects', name: 'CONFIG', category: 'System', desc: JSON.stringify(state.subjects), level: 0, nextReview: 0, pinned: false, archived: true };
+                     state.topics.push(conf);
+                 } else {
+                     conf.desc = JSON.stringify(state.subjects);
+                 }
+                 syncUp();
+             }
         }
 
         function openSubjectModal() {
@@ -958,8 +1055,11 @@
         function saveQuickSubject() {
             const val = document.getElementById('quick-subject-input').value.trim();
             if(val && !state.subjects.includes(val)) {
-                state.subjects.push(val); localStorage.setItem('nexus_subjects', JSON.stringify(state.subjects));
-                renderSubjectList(); populateSubjectSelects();
+                state.subjects.push(val); 
+                localStorage.setItem('nexus_subjects', JSON.stringify(state.subjects));
+                renderSubjectList(); 
+                populateSubjectSelects();
+                saveSubjectsToCloud(); // NEW: Sync subjects
                 document.getElementById('new-topic-subject').value = val;
                 showToast('Subject added'); closeModal('subject-modal');
             } else if (state.subjects.includes(val)) { showToast('Subject already exists', 'error'); }
@@ -967,13 +1067,17 @@
 
         // --- THEME ---
         function setTheme(themeName, silent=false) { 
-            document.documentElement.setAttribute('data-theme', themeName); state.theme = themeName; localStorage.setItem('nexus_theme_style', themeName);
+            document.documentElement.setAttribute('data-theme', themeName); 
+            state.theme = themeName; 
+            localStorage.setItem('nexus_theme_style', themeName);
             document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
-            renderCharts(); if(!silent) sfx.click(); 
+            renderCharts(); 
+            if(!silent) sfx.click(); 
         }
         function toggleThemeMode() { document.documentElement.classList.toggle('dark'); localStorage.setItem('nexus_dark_mode', document.documentElement.classList.contains('dark')); renderCharts(); sfx.click(); }
         function restoreTheme() {
-            const theme = localStorage.getItem('nexus_theme_style') || 'modern'; setTheme(theme, true);
+            const theme = localStorage.getItem('nexus_theme_style') || 'modern';
+            setTheme(theme, true);
             if(localStorage.getItem('nexus_dark_mode') === 'true') document.documentElement.classList.add('dark');
             if(localStorage.getItem('nexus_mute') === 'true') toggleMute(); 
             const savedGrid = localStorage.getItem('nexus_grid_cols');
@@ -983,20 +1087,80 @@
         }
 
         // --- TIMER ---
+        function setTimerMode(min) {
+            currentTimerMode = min;
+            timeLeft = min * 60;
+            isTimerRunning = false;
+            clearInterval(timerInterval);
+            document.getElementById('btn-timer-toggle').innerText = "Start";
+            
+            let text = "Deep work session";
+            if (min === 5) text = "Short Break";
+            if (min === 15) text = "Long Break";
+            document.getElementById('focus-status-text').innerText = text;
+            
+            // Remove active focus effect if it was stuck
+            document.body.classList.remove('deep-focus-active');
+
+            updateTimerDisplay();
+        }
+
         function updateTimerDisplay() {
             const m = Math.floor(timeLeft / 60).toString().padStart(2, '0'); const s = (timeLeft % 60).toString().padStart(2, '0');
             document.getElementById('timer-display').innerText = `${m}:${s}`;
-            document.getElementById('timer-progress').style.strokeDashoffset = 283 - (timeLeft / (25 * 60)) * 283;
+            document.getElementById('timer-progress').style.strokeDashoffset = 283 - (timeLeft / (currentTimerMode * 60)) * 283;
         }
         function toggleTimer() {
             const btn = document.getElementById('btn-timer-toggle');
-            if(isTimerRunning) { clearInterval(timerInterval); isTimerRunning = false; btn.innerText = "Resume"; } 
-            else {
-                isTimerRunning = true; btn.innerText = "Pause";
-                timerInterval = setInterval(() => { timeLeft--; updateTimerDisplay(); if(timeLeft <= 0) { clearInterval(timerInterval); sfx.bell(); fireConfetti(); showToast("Focus session complete!"); isTimerRunning = false; btn.innerText = "Start"; timeLeft = 25 * 60; } }, 1000);
+            if(isTimerRunning) { 
+                clearInterval(timerInterval); 
+                isTimerRunning = false; 
+                btn.innerText = "Resume"; 
+                // Pause effect
+                document.body.classList.remove('deep-focus-active');
+                if(isNoisePlaying) focusAudio.pause();
+            } else {
+                isTimerRunning = true; 
+                btn.innerText = "Pause";
+                // Start Effect - USE BODY CLASS
+                document.body.classList.add('deep-focus-active');
+                
+                // AUDIO SYNC
+                if(isNoisePlaying) {
+                    focusAudio.volume = parseFloat(document.querySelector('input[type="range"][step="0.1"]').value);
+                    focusAudio.play().catch(e => console.log(e));
+                }
+                
+                timerInterval = setInterval(() => { 
+                    timeLeft--; 
+                    updateTimerDisplay(); 
+                    if(timeLeft <= 0) { 
+                        clearInterval(timerInterval); 
+                        sfx.bell(); 
+                        fireConfetti(); 
+                        showToast("Session Complete!"); 
+                        isTimerRunning = false; 
+                        btn.innerText = "Start"; 
+                        timeLeft = currentTimerMode * 60; 
+                        state.focusSessionCount++; 
+                        document.getElementById('session-counter').innerText = state.focusSessionCount;
+                        
+                        // Stop Effect
+                        document.body.classList.remove('deep-focus-active');
+                        if(isNoisePlaying) focusAudio.pause();
+                    } 
+                }, 1000);
             }
         }
-        function resetTimer() { clearInterval(timerInterval); isTimerRunning = false; timeLeft = 25 * 60; updateTimerDisplay(); document.getElementById('btn-timer-toggle').innerText = "Start"; }
+        function resetTimer() { 
+            clearInterval(timerInterval); 
+            isTimerRunning = false; 
+            timeLeft = currentTimerMode * 60; 
+            updateTimerDisplay(); 
+            document.getElementById('btn-timer-toggle').innerText = "Start";
+            document.body.classList.remove('deep-focus-active');
+            if(isNoisePlaying) focusAudio.pause();
+        }
 
         // --- AUTH/DATA ---
         function checkStreak() {
@@ -1082,18 +1246,44 @@
         
         function openModal(id, topicId=null) { 
             sfx.click(); 
-            const m = document.getElementById(id); if(m) { m.classList.remove('hidden'); m.classList.remove('animate-pop-in'); void m.offsetWidth; m.classList.add('flex'); m.classList.add('animate-pop-in'); }
+            const m = document.getElementById(id); if(m) { 
+                m.classList.remove('hidden'); 
+                
+                // FORCE ANIMATION REPLAY
+                m.classList.remove('animate-pop-in');
+                void m.offsetWidth; // trigger reflow
+                m.classList.add('animate-pop-in');
+
+                m.classList.add('flex'); 
+                
+                // If opening focus modal, remove blur
+                if(id === 'focus-modal-wrapper' && !isTimerRunning) {
+                   document.body.classList.remove('deep-focus-active');
+                   // Also ensure elements are visible
+                   document.querySelectorAll('.zen-fade').forEach(el => el.classList.remove('zen-hidden'));
+                   const overlay = document.getElementById('zen-pause-overlay');
+                   if(overlay) overlay.style.opacity = '0';
+                }
+            }
+            
+            // Force Icon Refresh for dynamic content like buttons
             lucide.createIcons();
+
             if(id === 'add-modal') {
-                document.getElementById('form-single').classList.remove('hidden'); document.getElementById('form-bulk').classList.add('hidden');
-                document.getElementById('tab-single').classList.add('text-brand-600', 'border-b-2', 'border-brand-500'); document.getElementById('tab-single').classList.remove('text-skin-muted');
-                document.getElementById('tab-bulk').classList.remove('text-brand-600', 'border-b-2', 'border-brand-500'); document.getElementById('tab-bulk').classList.add('text-skin-muted');
+                document.getElementById('form-single').classList.remove('hidden');
+                document.getElementById('form-bulk').classList.add('hidden');
+                document.getElementById('tab-single').classList.add('text-brand-600', 'border-b-2', 'border-brand-500');
+                document.getElementById('tab-single').classList.remove('text-skin-muted');
+                document.getElementById('tab-bulk').classList.remove('text-brand-600', 'border-b-2', 'border-brand-500');
+                document.getElementById('tab-bulk').classList.add('text-skin-muted');
                 addMode = 'single';
                 const resetBtn = document.getElementById('reset-btn-container');
+
                 if(topicId) {
                     const t = state.topics.find(x => x.id === topicId);
                     document.getElementById('modal-title').innerText = "Edit Topic"; document.getElementById('edit-topic-id').value = topicId;
-                    document.getElementById('new-topic-name').value = t.name; document.getElementById('new-topic-subject').value = t.category || 'General'; document.getElementById('new-topic-desc').value = t.desc; document.getElementById('new-topic-link').value = t.link || '';
+                    document.getElementById('new-topic-name').value = t.name; document.getElementById('new-topic-subject').value = t.category || 'General'; document.getElementById('new-topic-desc').value = t.desc;
+                    document.getElementById('new-topic-link').value = t.link || '';
                     if(resetBtn) resetBtn.classList.remove('hidden');
                 } else {
                     document.getElementById('modal-title').innerText = "New Topic"; document.getElementById('edit-topic-id').value = "";
@@ -1103,7 +1293,16 @@
                 }
             }
         }
-        function closeModal(id) { sfx.click(); const m = document.getElementById(id); if(m) { m.classList.add('hidden'); m.classList.remove('flex'); } if(id==='focus-modal'&&isTimerRunning) toggleTimer(); }
+        function closeModal(id) { 
+            sfx.click(); 
+            const m = document.getElementById(id); if(m) { m.classList.add('hidden'); m.classList.remove('flex'); } 
+            
+            // Special handling for focus modal
+            if(id==='focus-modal-wrapper') {
+                if(isTimerRunning) toggleTimer(); // Pause timer
+                document.body.classList.remove('deep-focus-active'); // Remove blur
+            }
+        }
 
         function switchAddMode(mode) {
             addMode = mode;
@@ -1166,8 +1365,20 @@
 
                 // Content
                 let raw = t.desc || 'No notes.';
-                let html = raw.replace(/\n/g, '<br>').replace(/- (.*)/g, '<li>$1</li>');
+                
+                // MARKDOWN PARSER (SIMPLE)
+                let html = raw
+                    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+                    .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+                    .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+                    .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
+                    .replace(/\*(.*)\*/gim, '<em>$1</em>')
+                    .replace(/`([^`]+)`/gim, '<code>$1</code>')
+                    .replace(/\n/g, '<br>')
+                    .replace(/- (.*)/g, '<li>$1</li>');
+                    
                 if(html.includes('<li>')) html = `<ul>${html}</ul>`;
+                
                 document.getElementById('read-content').innerHTML = html;
                 
                 openModal('read-modal');
@@ -1188,7 +1399,25 @@
         async function syncDown() {
             renderSkeleton(); 
             if (GOOGLE_SCRIPT_URL) {
-                try { const res = await fetch(GOOGLE_SCRIPT_URL + '?hex=' + state.hex); const data = await res.json(); if(Array.isArray(data)) { state.topics = data; renderGrid(); } } catch(e) { console.error(e); }
+                try { 
+                    const res = await fetch(GOOGLE_SCRIPT_URL + '?hex=' + state.hex); 
+                    const data = await res.json(); 
+                    if(Array.isArray(data)) { 
+                        state.topics = data; 
+                        
+                        // EXTRACT SUBJECTS FROM CONFIG_TOPIC
+                        const configTopic = data.find(t => t.id === 'config_subjects');
+                        if (configTopic) {
+                            try {
+                                state.subjects = JSON.parse(configTopic.desc);
+                                renderSubjectList();
+                                populateSubjectSelects();
+                            } catch(e) { console.error('Failed to parse subjects'); }
+                        }
+
+                        renderGrid(); 
+                    } 
+                } catch(e) { console.error(e); }
             } else {
                 const stored = localStorage.getItem('nexus_data'); await new Promise(r => setTimeout(r, 600));
                 if(stored) state.topics = JSON.parse(stored); else state.topics = [{ id: '1', name: 'UI Principles', category: 'Design', level: 3, nextReview: Date.now() - 100000, desc: 'Hierarchy, Balance, Contrast' }];
@@ -1292,6 +1521,11 @@
         function scrollToTop() { document.getElementById('main-scroll').scrollTo({ top: 0, behavior: 'smooth' }); }
 
         function renderCharts() {
+            // Check for elements before accessing
+            const c1 = document.getElementById('chart-levels');
+            const c2 = document.getElementById('chart-forecast');
+            if (!c1 || !c2) return;
+
             const isDark = document.documentElement.classList.contains('dark'), style = getComputedStyle(document.body), brandColor = style.getPropertyValue('--color-brand-500').trim().replace(/ /g, ',') || '99, 102, 241';
             const levels = [0,0,0,0,0,0,0], forecast = []; state.topics.forEach(t => { if(!t.archived && t.level <= 6) levels[t.level]++; });
             const labels = []; const now = new Date();
@@ -1301,25 +1535,49 @@
                 if (i===0) forecast.push(state.topics.filter(t => !t.archived && t.nextReview <= e).length); else forecast.push(state.topics.filter(t => !t.archived && t.nextReview >= s && t.nextReview <= e).length);
             }
             if(retentionChart) retentionChart.destroy();
-            retentionChart = new Chart(document.getElementById('chart-levels').getContext('2d'), {
+            retentionChart = new Chart(c1.getContext('2d'), {
                 type: 'doughnut', data: { labels: ['New','L1','L2','L3','L4','L5','Master'], datasets: [{ data: levels, backgroundColor: [`rgba(${brandColor},0.2)`,`rgba(${brandColor},0.3)`,`rgba(${brandColor},0.4)`,`rgba(${brandColor},0.6)`,`rgba(${brandColor},0.7)`,`rgba(${brandColor},0.8)`,`rgba(${brandColor},1)`], borderWidth: 0, hoverOffset: 4 }] },
                 options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: {display: false} } }
             });
             if(forecastChart) forecastChart.destroy();
-            const grad = document.getElementById('chart-forecast').getContext('2d').createLinearGradient(0,0,0,200); grad.addColorStop(0, `rgba(${brandColor},0.4)`); grad.addColorStop(1, `rgba(${brandColor},0.0)`);
-            forecastChart = new Chart(document.getElementById('chart-forecast').getContext('2d'), {
+            const grad = c2.getContext('2d').createLinearGradient(0,0,0,200); grad.addColorStop(0, `rgba(${brandColor},0.4)`); grad.addColorStop(1, `rgba(${brandColor},0.0)`);
+            forecastChart = new Chart(c2.getContext('2d'), {
                 type: 'line', data: { labels: labels, datasets: [{ data: forecast, borderColor: `rgb(${brandColor})`, backgroundColor: grad, borderWidth: 3, fill: true, tension: 0.4, pointRadius: 2 }] },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: {display:false} }, scales: { y: { beginAtZero: true, grid: { color: isDark ? '#334155' : '#e2e8f0', borderDash: [5,5] } }, x: { grid: {display: false} } } }
             });
         }
+        
+        function renderHeatmap() {
+             const grid = document.getElementById('heatmap-grid');
+             if(!grid) return;
+             grid.innerHTML = '';
+             
+             // Create fake contribution data for visual appeal (since we don't have real historical data stored yet)
+             // In a real app, this would pull from state.history
+             for(let i=0; i<60; i++) {
+                 const cell = document.createElement('div');
+                 const intensity = Math.random();
+                 let styleClass = 'hm-cell'; // default gray
+                 if(intensity > 0.8) styleClass += ' hm-l3';
+                 else if (intensity > 0.5) styleClass += ' hm-l2';
+                 else if (intensity > 0.2) styleClass += ' hm-l1';
+                 
+                 cell.className = styleClass;
+                 grid.appendChild(cell);
+             }
+        }
 
         function renderGrid() {
+            // renderHeatmap(); // Also refresh heatmap
             const grid = document.getElementById('topic-grid'); grid.innerHTML = '';
             const search = (document.getElementById('search-input').value || document.getElementById('search-input-mobile').value).toLowerCase();
             const sortMode = document.getElementById('sort-select').value;
             const subjectFilter = window.innerWidth < 768 ? document.getElementById('filter-subject-mobile').value : document.getElementById('filter-subject').value;
             
             let filtered = state.topics.filter(t => {
+                // Filter out the config file from grid
+                if(t.id === 'config_subjects') return false;
+
                 const matchesSearch = t.name.toLowerCase().includes(search) || (t.category && t.category.toLowerCase().includes(search));
                 const matchesSubject = subjectFilter === 'all' || t.category === subjectFilter;
                 const matchesArchive = state.showArchived ? true : !t.archived;
