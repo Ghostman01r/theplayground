@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXUS // PRO v11.0 (Final)</title>
+    <title>NEXUS // PRO v11.1 (Scheduling Fix)</title>
     
     <!-- FONTS -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -254,6 +254,13 @@
         #focus-modal-wrapper {
             z-index: 9999;
         }
+        
+        /* Heatmap Grid */
+        .heatmap-grid { display: grid; grid-template-columns: repeat(20, 1fr); gap: 4px; }
+        .hm-cell { width: 10px; height: 10px; border-radius: 2px; background: rgb(var(--color-bg-base)); border: 1px solid rgb(var(--color-border)); }
+        .hm-l1 { background: rgb(var(--color-brand-100)); border-color: rgb(var(--color-brand-200)); }
+        .hm-l2 { background: rgb(var(--color-brand-500)); border-color: rgb(var(--color-brand-600)); }
+        .hm-l3 { background: rgb(var(--color-brand-900)); border-color: rgb(var(--color-brand-900)); }
     </style>
 </head>
 <body class="h-screen flex flex-col overflow-hidden font-sans selection:bg-brand-100 selection:text-brand-900 transition-theme">
@@ -272,7 +279,7 @@
                     <i data-lucide="layers" class="w-7 h-7"></i>
                 </div>
                 <h1 class="text-3xl font-bold tracking-tight">Nexus</h1>
-                <p class="text-skin-muted mt-2 text-sm">Active Space Repetition System v11.0</p>
+                <p class="text-skin-muted mt-2 text-sm">Active Space Repetition System v11.1</p>
             </div>
 
             <div class="flex p-1 bg-skin-base rounded-theme mb-6 transition-theme">
@@ -1470,25 +1477,54 @@
             const t = state.topics.find(x => x.id === id);
             if(t) {
                 const prev = { ...t }; const prevDaily = state.dailyProgress; const prevXp = state.xp; const prevLvl = state.level;
+                
+                // Calculate new level first
+                let newLevel = t.level;
+                if(success) newLevel = Math.min(t.level+1, 6);
+                else newLevel = Math.max(t.level-1, 0);
+
+                // Calculate NEW date immediately
+                const newNextReview = calculateNextReview(newLevel);
+
                 if(success) { 
-                    t.level = Math.min(t.level+1, 6); sfx.celebrate(); fireConfetti(); 
-                    state.dailyProgress++; localStorage.setItem('nexus_daily_progress', state.dailyProgress); updateDailyProgress();
+                    t.level = newLevel; 
+                    sfx.celebrate(); 
+                    fireConfetti(); 
+                    state.dailyProgress++; 
+                    localStorage.setItem('nexus_daily_progress', state.dailyProgress); 
+                    updateDailyProgress();
                     addXP(10);
-                    openCalendar(t); showToast('Retention +', 'success', true);
+                    
+                    // Update the topic with the new date BEFORE opening calendar
+                    t.nextReview = newNextReview;
+                    openCalendar(t); 
+                    
+                    showToast('Retention +', 'success', true);
                 } else { 
-                    t.level = Math.max(t.level-1, 0); sfx.click(); showToast('Scheduled sooner.', 'success', true);
+                    t.level = newLevel;
+                    t.nextReview = newNextReview; // Update for failure case too
+                    sfx.click(); 
+                    showToast('Scheduled sooner.', 'success', true);
                 } 
-                t.nextReview = calculateNextReview(t.level); 
                 
                 lastUndoAction = () => {
                     const target = state.topics.find(x => x.id === id);
                     if(target) { 
-                        target.level = prev.level; target.nextReview = prev.nextReview; state.dailyProgress = prevDaily; localStorage.setItem('nexus_daily_progress', state.dailyProgress); updateDailyProgress(); 
-                        state.xp = prevXp; state.level = prevLvl; updateLevelDisplay();
-                        syncUp(); renderGrid(); showToast('Undone'); 
+                        target.level = prev.level; 
+                        target.nextReview = prev.nextReview; // Revert date
+                        state.dailyProgress = prevDaily; 
+                        localStorage.setItem('nexus_daily_progress', state.dailyProgress); 
+                        updateDailyProgress(); 
+                        state.xp = prevXp; 
+                        state.level = prevLvl; 
+                        updateLevelDisplay();
+                        syncUp(); 
+                        renderGrid(); 
+                        showToast('Undone'); 
                     }
                 };
-                renderGrid(); syncUp(); 
+                renderGrid(); 
+                syncUp(); 
             }
         }
         
@@ -1545,26 +1581,6 @@
                 type: 'line', data: { labels: labels, datasets: [{ data: forecast, borderColor: `rgb(${brandColor})`, backgroundColor: grad, borderWidth: 3, fill: true, tension: 0.4, pointRadius: 2 }] },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: {display:false} }, scales: { y: { beginAtZero: true, grid: { color: isDark ? '#334155' : '#e2e8f0', borderDash: [5,5] } }, x: { grid: {display: false} } } }
             });
-        }
-        
-        function renderHeatmap() {
-             const grid = document.getElementById('heatmap-grid');
-             if(!grid) return;
-             grid.innerHTML = '';
-             
-             // Create fake contribution data for visual appeal (since we don't have real historical data stored yet)
-             // In a real app, this would pull from state.history
-             for(let i=0; i<60; i++) {
-                 const cell = document.createElement('div');
-                 const intensity = Math.random();
-                 let styleClass = 'hm-cell'; // default gray
-                 if(intensity > 0.8) styleClass += ' hm-l3';
-                 else if (intensity > 0.5) styleClass += ' hm-l2';
-                 else if (intensity > 0.2) styleClass += ' hm-l1';
-                 
-                 cell.className = styleClass;
-                 grid.appendChild(cell);
-             }
         }
 
         function renderGrid() {
