@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXUS // PRO v5.3 (Skeleton Loader)</title>
+    <title>NEXUS // PRO v8.2 (Stable)</title>
     
     <!-- FONTS -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -75,7 +75,7 @@
         :root { --radius-theme: 0.75rem; --font-main: 'Outfit'; }
 
         /* Global Smooth Transition */
-        .transition-theme, body, .card-surface, .modern-input, .btn-secondary, header, aside, .nav-item, button, .modal-backdrop {
+        .transition-theme, body, .card-surface, .modern-input, .btn-secondary, header, aside, .nav-item, button, .modal-backdrop, select {
             transition-property: background-color, border-color, color, fill, stroke, box-shadow;
             transition-duration: 300ms;
             transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
@@ -220,6 +220,20 @@
             background: rgb(var(--color-bg-base));
             border-radius: 4px;
         }
+        
+        .cram-active {
+            background: rgb(var(--color-brand-50));
+            border-color: rgb(var(--color-brand-500));
+            color: rgb(var(--color-brand-600));
+        }
+        
+        /* Highlight search */
+        .highlight-text {
+            background-color: rgba(255, 255, 0, 0.2);
+            color: inherit;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
     </style>
 </head>
 <body class="h-screen flex flex-col overflow-hidden font-sans selection:bg-brand-100 selection:text-brand-900 transition-theme">
@@ -238,7 +252,7 @@
                     <i data-lucide="layers" class="w-7 h-7"></i>
                 </div>
                 <h1 class="text-3xl font-bold tracking-tight">Nexus</h1>
-                <p class="text-skin-muted mt-2 text-sm">Active Space Repetition System v5.3</p>
+                <p class="text-skin-muted mt-2 text-sm">Active Space Repetition System v8.2</p>
             </div>
 
             <div class="flex p-1 bg-skin-base rounded-theme mb-6 transition-theme">
@@ -282,14 +296,26 @@
         
         <!-- SIDEBAR -->
         <aside class="hidden md:flex flex-col w-64 card-surface border-r-0 border-r border-skin-border h-full p-6 shadow-sm z-20 rounded-none transition-theme">
-            <div class="flex items-center gap-3 mb-10 px-2">
+            <div class="flex items-center gap-3 mb-8 px-2">
                 <div class="w-8 h-8 rounded-theme bg-brand-600 text-white flex items-center justify-center shadow-lg shadow-brand-500/20">
                     <i data-lucide="layers" class="w-5 h-5"></i>
                 </div>
                 <span class="font-bold text-xl tracking-tight">Nexus</span>
             </div>
+
+            <!-- LEVEL & XP BAR -->
+            <div class="mb-6 px-2">
+                <div class="flex justify-between items-end mb-1">
+                    <span class="text-xs font-bold text-brand-600">Lvl <span id="user-level">1</span></span>
+                    <span class="text-[10px] text-skin-muted" id="user-xp-text">0/100 XP</span>
+                </div>
+                <div class="w-full h-1.5 bg-skin-border rounded-full overflow-hidden">
+                    <div id="xp-bar" class="h-full bg-brand-500 transition-all duration-700" style="width: 0%"></div>
+                </div>
+            </div>
+
             <nav class="space-y-2 flex-1">
-                <button onclick="scrollToTop()" class="w-full flex items-center gap-3 px-4 py-3 bg-brand-50 text-brand-600 rounded-theme font-medium transition-colors border border-brand-100 transition-theme"><i data-lucide="layout-grid" class="w-5 h-5"></i> Dashboard</button>
+                <button onclick="scrollToTop()" class="w-full flex items-center gap-3 px-4 py-3 bg-brand-50 text-brand-600 rounded-theme font-medium transition-colors border border-brand-100 transition-theme"><i data-lucide="layout-grid" class="w-6 h-6"></i> Dashboard</button>
                 <button onclick="openModal('focus-modal')" class="w-full flex items-center gap-3 px-4 py-3 text-skin-muted hover:bg-skin-base hover:text-skin-text rounded-theme font-medium transition-colors transition-theme"><i data-lucide="timer" class="w-5 h-5"></i> Focus Mode</button>
                 <button onclick="openModal('profile-modal')" class="w-full flex items-center gap-3 px-4 py-3 text-skin-muted hover:bg-skin-base hover:text-skin-text rounded-theme font-medium transition-colors transition-theme"><i data-lucide="settings" class="w-5 h-5"></i> Settings</button>
                 <button onclick="openModal('help-modal')" class="w-full flex items-center gap-3 px-4 py-3 text-skin-muted hover:bg-skin-base hover:text-skin-text rounded-theme font-medium transition-colors transition-theme"><i data-lucide="keyboard" class="w-5 h-5"></i> Shortcuts</button>
@@ -304,6 +330,11 @@
                 <div class="w-full h-2 bg-skin-border rounded-full overflow-hidden">
                     <div id="daily-progress-bar" class="h-full bg-brand-500 transition-all duration-500" style="width: 0%"></div>
                 </div>
+            </div>
+
+            <!-- QUOTE AREA -->
+            <div class="mb-4 px-2">
+                <p id="daily-quote" class="text-xs text-skin-muted italic text-center">"Consistency is the key to mastery."</p>
             </div>
 
             <div class="mt-auto pt-6 border-t border-skin-border transition-theme">
@@ -341,7 +372,19 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-3 md:gap-4">
-                    <select id="sort-select" onchange="renderGrid()" class="hidden md:block bg-transparent text-sm font-medium text-skin-muted border-none focus:ring-0 cursor-pointer transition-theme"><option value="urgency">Sort: Urgency</option><option value="level">Sort: Mastery</option><option value="newest">Sort: Newest</option></select>
+                    <!-- CRAM MODE -->
+                    <button onclick="toggleCram()" id="btn-cram" class="p-2.5 rounded-theme bg-skin-base text-skin-muted hover:bg-skin-border transition-theme flex items-center gap-2 border border-transparent" title="Cram Mode (Review Ahead)">
+                        <i data-lucide="zap" class="w-5 h-5"></i>
+                        <span class="hidden lg:inline text-xs font-bold">Cram</span>
+                    </button>
+
+                    <!-- SUBJECT FILTER -->
+                    <select id="filter-subject" onchange="renderGrid()" class="hidden md:block bg-transparent text-sm font-medium text-skin-muted border-none focus:ring-0 cursor-pointer transition-theme max-w-[120px]">
+                        <option value="all">All Subjects</option>
+                        <!-- Populated by JS -->
+                    </select>
+
+                    <select id="sort-select" onchange="renderGrid()" class="hidden md:block bg-transparent text-sm font-medium text-skin-muted border-none focus:ring-0 cursor-pointer transition-theme max-w-[100px]"><option value="urgency">Sort: Urgency</option><option value="level">Sort: Mastery</option><option value="newest">Sort: Newest</option></select>
                     <button onclick="toggleThemeMode()" class="p-2.5 rounded-theme bg-skin-base text-skin-muted hover:bg-skin-border transition-theme"><i data-lucide="moon" class="w-5 h-5 hidden dark:block"></i><i data-lucide="sun" class="w-5 h-5 block dark:hidden"></i></button>
                     <div class="hidden lg:flex items-center gap-6 mr-2 ml-2 transition-theme">
                         <div class="text-right"><div class="text-xs font-semibold text-skin-muted uppercase tracking-wide">Pending</div><div class="text-lg font-bold text-brand-600" id="stat-pending">0</div></div>
@@ -352,8 +395,9 @@
                 </div>
             </header>
             
-            <div class="md:hidden px-6 py-2 card-surface border-b border-skin-border z-20 rounded-none transition-theme">
-                <div class="relative"><i data-lucide="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-skin-muted"></i><input type="text" id="search-input-mobile" onkeyup="handleSearch(this.value)" class="modern-input pl-10 transition-theme" placeholder="Search..."></div>
+            <div class="md:hidden px-6 py-2 card-surface border-b border-skin-border z-20 rounded-none transition-theme flex gap-2">
+                <div class="relative flex-1"><i data-lucide="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-skin-muted"></i><input type="text" id="search-input-mobile" onkeyup="handleSearch(this.value)" class="modern-input pl-10 transition-theme" placeholder="Search..."></div>
+                <select id="filter-subject-mobile" onchange="renderGrid()" class="modern-input w-24 text-xs p-2"><option value="all">All</option></select>
             </div>
 
             <div id="main-scroll" class="flex-1 overflow-y-auto p-4 md:p-10 scroll-smooth">
@@ -393,30 +437,70 @@
                 <button onclick="closeModal('add-modal')" class="p-2 bg-skin-base rounded-full hover:bg-skin-border transition-colors transition-theme"><i data-lucide="x" class="w-4 h-4 text-skin-muted"></i></button>
             </div>
             <input type="hidden" id="edit-topic-id">
-            <div class="space-y-5">
+            
+            <!-- TABS FOR ADD MODE -->
+            <div id="add-tabs" class="flex gap-2 mb-4 border-b border-skin-border pb-2">
+                <button onclick="switchAddMode('single')" id="tab-single" class="text-sm font-bold text-brand-600 border-b-2 border-brand-500 pb-1">Single</button>
+                <button onclick="switchAddMode('bulk')" id="tab-bulk" class="text-sm font-bold text-skin-muted hover:text-skin-text pb-1">Bulk Add</button>
+            </div>
+
+            <!-- SINGLE ADD FORM -->
+            <div id="form-single" class="space-y-5">
                 <div>
                     <label class="block text-sm font-semibold text-skin-muted mb-2">Topic Name</label>
                     <input type="text" id="new-topic-name" class="modern-input transition-theme" placeholder="e.g. React Hooks">
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-skin-muted mb-2">Category</label>
-                    <select id="new-topic-category" class="modern-input transition-theme">
-                        <option value="General">General</option>
-                        <option value="Development">Development</option>
-                        <option value="Design">Design</option>
-                        <option value="Science">Science</option>
-                        <option value="Language">Language</option>
-                        <option value="Business">Business</option>
-                    </select>
+                    <label class="block text-sm font-semibold text-skin-muted mb-2">Subject</label>
+                    <div class="flex gap-2">
+                        <select id="new-topic-subject" class="modern-input transition-theme flex-1">
+                            <!-- Populated by JS -->
+                        </select>
+                        <button onclick="openSubjectModal()" class="btn-secondary w-10 flex items-center justify-center !text-brand-600 hover:bg-brand-50" title="Add new subject">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                        </button>
+                    </div>
+                </div>
+                <!-- RESOURCE LINK -->
+                <div>
+                    <label class="block text-sm font-semibold text-skin-muted mb-2">Resource Link (Optional)</label>
+                    <div class="flex gap-2">
+                        <div class="flex items-center justify-center w-10 bg-skin-base border border-skin-border rounded-l-theme text-skin-muted"><i data-lucide="link" class="w-4 h-4"></i></div>
+                        <input type="url" id="new-topic-link" class="modern-input rounded-l-none transition-theme" placeholder="https://youtube.com/...">
+                    </div>
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-skin-muted mb-2">Description / Notes (Supports - bullets)</label>
                     <textarea id="new-topic-desc" class="modern-input h-32 resize-none transition-theme" placeholder="Brief details about this topic..."></textarea>
                 </div>
             </div>
+
+            <!-- BULK ADD FORM -->
+            <div id="form-bulk" class="hidden space-y-4">
+                <p class="text-xs text-skin-muted">Paste lines in format: <strong>Topic Name | Subject</strong></p>
+                <textarea id="bulk-input" class="modern-input h-48 resize-none font-mono text-xs" placeholder="React Hooks | Development&#10;Color Theory | Design&#10;Photosynthesis | Science"></textarea>
+            </div>
+
             <div class="mt-8 flex gap-3">
+                <div id="reset-btn-container" class="hidden">
+                    <button onclick="resetTopicLevel()" class="px-4 py-2 bg-red-50 text-red-600 rounded-theme text-sm font-bold border border-red-100 hover:bg-red-100 transition-colors">Reset Lvl</button>
+                </div>
+                <div class="flex-1"></div>
                 <button onclick="closeModal('add-modal')" class="flex-1 btn-secondary justify-center transition-theme">Cancel</button>
-                <button onclick="saveTopic()" class="flex-1 btn-primary shadow-glow transition-theme">Save Topic</button>
+                <button onclick="saveTopic()" class="flex-1 btn-primary shadow-glow transition-theme">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- QUICK SUBJECT MODAL -->
+    <div id="subject-modal" class="fixed inset-0 z-[200] hidden flex items-center justify-center">
+        <div class="absolute inset-0 modal-backdrop transition-opacity" onclick="closeModal('subject-modal')"></div>
+        <div class="w-full max-w-sm card-surface p-6 relative z-10 animate-pop-in shadow-2xl m-4 transition-theme">
+            <h3 class="text-lg font-bold mb-4">Add New Subject</h3>
+            <input type="text" id="quick-subject-input" class="modern-input mb-4" placeholder="Subject Name...">
+            <div class="flex gap-2 justify-end">
+                <button onclick="closeModal('subject-modal')" class="btn-secondary text-xs">Cancel</button>
+                <button onclick="saveQuickSubject()" class="btn-primary text-xs shadow-glow">Add</button>
             </div>
         </div>
     </div>
@@ -426,13 +510,31 @@
         <div class="absolute inset-0 modal-backdrop transition-opacity" onclick="closeModal('read-modal')"></div>
         <div class="w-full max-w-2xl card-surface p-8 relative z-10 animate-pop-in shadow-2xl m-4 transition-theme max-h-[80vh] overflow-y-auto">
             <div class="flex justify-between items-start mb-6">
-                <div>
-                    <span id="read-category" class="text-xs font-bold uppercase tracking-wider px-2 py-1 rounded-md border mb-2 inline-block"></span>
-                    <h3 class="text-2xl font-bold transition-theme" id="read-title"></h3>
+                <div class="flex-1">
+                    <span id="read-subject" class="text-xs font-bold uppercase tracking-wider px-2 py-1 rounded-md border mb-2 inline-block"></span>
+                    <h3 class="text-2xl font-bold transition-theme mb-2" id="read-title"></h3>
+                    
+                    <!-- New Meta Row -->
+                    <div class="flex flex-wrap items-center gap-4 text-sm text-skin-muted mt-2" id="read-meta-row">
+                        <span id="read-date" class="flex items-center gap-1 font-medium text-skin-text"><i data-lucide="calendar" class="w-4 h-4"></i> <span></span></span>
+                        <span id="read-level" class="flex items-center gap-1"><i data-lucide="bar-chart" class="w-4 h-4"></i> <span></span></span>
+                        <span id="read-status" class="flex gap-2"></span>
+                    </div>
                 </div>
-                <button onclick="closeModal('read-modal')" class="p-2 bg-skin-base rounded-full hover:bg-skin-border transition-colors transition-theme"><i data-lucide="x" class="w-4 h-4 text-skin-muted"></i></button>
+                <button onclick="closeModal('read-modal')" class="p-2 bg-skin-base rounded-full hover:bg-skin-border transition-colors transition-theme ml-4"><i data-lucide="x" class="w-4 h-4 text-skin-muted"></i></button>
             </div>
+
+            <!-- Resource Link Button -->
+            <div id="read-link-section" class="mb-6 hidden">
+                <a id="read-link-action" href="#" target="_blank" class="flex items-center gap-2 p-3 rounded-theme bg-brand-50 dark:bg-brand-900/30 text-brand-600 dark:text-brand-400 border border-brand-100 dark:border-brand-800 hover:bg-brand-100 dark:hover:bg-brand-900/50 transition-colors w-full justify-center font-medium">
+                    <i data-lucide="external-link" class="w-4 h-4"></i> Open Resource
+                </a>
+            </div>
+
+            <div class="w-full h-px bg-skin-border mb-6"></div>
+
             <div id="read-content" class="desc-text text-skin-text leading-relaxed text-lg whitespace-pre-line"></div>
+            
             <div class="mt-8 flex justify-end">
                 <button onclick="closeModal('read-modal')" class="btn-primary shadow-glow transition-theme">Close</button>
             </div>
@@ -448,6 +550,20 @@
                 <svg class="w-full h-full -rotate-90" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" stroke-width="6" class="text-skin-border transition-theme" /><circle id="timer-progress" cx="50" cy="50" r="45" fill="none" stroke="currentColor" stroke-width="6" class="text-brand-500 timer-circle" stroke-dasharray="283" stroke-dashoffset="0" stroke-linecap="round" /></svg>
                 <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-4xl font-mono font-bold" id="timer-display">25:00</div>
             </div>
+            
+            <div class="flex flex-col gap-3 mb-6 bg-skin-base p-4 rounded-theme border border-skin-border">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-bold text-skin-text">Rain Mode</span>
+                    <button id="noise-toggle" onclick="toggleNoise()" class="w-12 h-6 bg-skin-border rounded-full relative transition-colors duration-300">
+                        <div id="noise-knob" class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform duration-300"></div>
+                    </button>
+                </div>
+                <div class="w-full h-px bg-skin-border"></div>
+                <a href="https://rainymood.com" target="_blank" class="text-xs text-skin-muted hover:text-brand-500 flex items-center justify-center gap-1 transition-colors">
+                    Open RainyMood.com <i data-lucide="external-link" class="w-3 h-3"></i>
+                </a>
+            </div>
+
             <div class="flex gap-4 justify-center">
                 <button id="btn-timer-toggle" onclick="toggleTimer()" class="btn-primary w-32 shadow-glow transition-theme">Start</button>
                 <button onclick="resetTimer()" class="btn-secondary w-32 transition-theme">Reset</button>
@@ -478,6 +594,20 @@
                         <div onclick="setTheme('forest')" class="theme-btn group"><div class="theme-preview bg-green-600"></div><span class="text-xs font-bold text-skin-text">Forest</span></div>
                     </div>
                 </div>
+
+                <!-- MANAGE SUBJECTS -->
+                <div class="bg-skin-base rounded-theme p-4 border border-skin-border transition-theme">
+                    <label class="block text-xs font-semibold text-skin-muted uppercase tracking-wide mb-3 text-center">Manage Subjects</label>
+                    <div id="subject-list" class="flex flex-wrap gap-2 mb-3">
+                        <!-- Populated by JS -->
+                    </div>
+                    <div class="flex gap-2">
+                        <input type="text" id="new-subject-input" class="modern-input text-xs h-9" placeholder="New Subject name...">
+                        <button onclick="addNewSubject()" class="btn-secondary h-9 w-9 flex items-center justify-center p-0"><i data-lucide="plus" class="w-4 h-4"></i></button>
+                    </div>
+                </div>
+
+                <!-- PREFERENCES -->
                 <div class="bg-skin-base rounded-theme p-4 border border-skin-border transition-theme space-y-4">
                     <div>
                         <label class="block text-xs font-semibold text-skin-muted uppercase tracking-wide mb-2 text-center">Grid Density</label>
@@ -491,11 +621,21 @@
                         <span class="text-sm font-medium text-skin-text">Sound Effects</span>
                         <button onclick="toggleMute()" id="mute-btn" class="p-2 rounded-lg bg-skin-surface border border-skin-border text-skin-muted hover:text-skin-text"><i data-lucide="volume-2" class="w-4 h-4"></i></button>
                     </div>
+                    <div class="flex justify-between items-center px-2">
+                        <span class="text-sm font-medium text-skin-text">Show Archived</span>
+                        <button onclick="toggleShowArchive()" id="archive-toggle-btn" class="p-2 rounded-lg bg-skin-surface border border-skin-border text-skin-muted hover:text-skin-text"><i data-lucide="eye-off" class="w-4 h-4"></i></button>
+                    </div>
                     <div>
                         <label class="block text-xs font-semibold text-skin-muted uppercase tracking-wide mb-2 text-center">Daily Goal</label>
                         <input type="number" id="goal-input" onchange="updateGoal(this.value)" class="modern-input text-center" value="10" min="1">
                     </div>
+                    <!-- COPY JSON BUTTON (NEW) -->
+                    <div class="flex justify-between items-center px-2">
+                         <span class="text-sm font-medium text-skin-text">Quick Backup</span>
+                         <button onclick="copyData()" class="text-xs bg-skin-surface border border-skin-border px-3 py-1.5 rounded-lg hover:border-brand-500 transition-colors">Copy JSON</button>
+                    </div>
                 </div>
+                
                 <div class="bg-skin-base rounded-theme p-4 border border-skin-border transition-theme">
                     <label class="block text-xs font-semibold text-skin-muted uppercase tracking-wide mb-3 text-center">Data</label>
                     <div class="flex gap-2">
@@ -520,7 +660,7 @@
                 <div class="flex justify-between"><span>New Topic</span><span class="font-mono bg-skin-base px-2 rounded border border-skin-border">N</span></div>
                 <div class="flex justify-between"><span>Search</span><span class="font-mono bg-skin-base px-2 rounded border border-skin-border">/</span></div>
                 <div class="flex justify-between"><span>Close Modal</span><span class="font-mono bg-skin-base px-2 rounded border border-skin-border">Esc</span></div>
-                <div class="flex justify-between"><span>Save Topic</span><span class="font-mono bg-skin-base px-2 rounded border border-skin-border">Ctrl+Ent</span></div>
+                <div class="flex justify-between"><span>Save Topic</span><span class="font-mono bg-skin-base px-2 rounded border border-skin-border">Enter</span></div>
                 <div class="flex justify-between"><span>Help</span><span class="font-mono bg-skin-base px-2 rounded border border-skin-border">?</span></div>
             </div>
             <button onclick="closeModal('help-modal')" class="absolute top-4 right-4 p-2 text-skin-muted hover:text-skin-text"><i data-lucide="x" class="w-5 h-5"></i></button>
@@ -536,17 +676,61 @@
         
         const wordsA = ["Alpha", "Beta", "Gamma", "Delta", "Neo", "Prime", "Flux", "Core", "Zen", "Nova"];
         const wordsB = ["Pilot", "Scout", "Mind", "Flow", "Spark", "Wave", "Link", "Sync", "Pulse", "Drift"];
-        const categoryColors = {
-            'General': 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
-            'Development': 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
-            'Design': 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300',
-            'Science': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
-            'Language': 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300',
-            'Business': 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
-        };
+        
+        // Styles for dynamic subjects. We'll cycle through these.
+        const subjectStyles = [
+            'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border-blue-200 dark:border-blue-800',
+            'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 border-green-200 dark:border-green-800',
+            'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 border-purple-200 dark:border-purple-800',
+            'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300 border-pink-200 dark:border-pink-800',
+            'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800',
+            'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300 border-orange-200 dark:border-orange-800',
+            'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300 border-teal-200 dark:border-teal-800',
+            'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800',
+        ];
 
-        let state = { user: null, hex: null, time: "09:00", topics: [], lastLogin: null, streak: 0, theme: 'modern', gridCols: 4, mute: false, dailyGoal: 10, dailyProgress: 0 };
+        const defaultSubjects = ['General', 'Development', 'Design', 'Science', 'Language', 'Business'];
+
+        const quotes = [
+            "Consistency is the key to mastery.",
+            "Review a little, remember a lot.",
+            "Knowledge is power.",
+            "Progress, not perfection.",
+            "Build your second brain."
+        ];
+
+        let state = { 
+            user: null, 
+            hex: null, 
+            time: "09:00", 
+            topics: [], 
+            lastLogin: null, 
+            streak: 0, 
+            theme: 'modern', 
+            gridCols: 4, 
+            mute: false, 
+            dailyGoal: 10, 
+            dailyProgress: 0, 
+            cramMode: false, 
+            showArchived: false,
+            subjects: [],
+            xp: 0,
+            level: 1
+        };
         let retentionChart = null, forecastChart = null, timerInterval, timeLeft = 25 * 60, isTimerRunning = false;
+        let lastUndoAction = null; 
+        let addMode = 'single';
+        
+        // Audio Context for Pink Noise
+        let audioCtx, noiseNode, gainNode, isNoisePlaying = false;
+
+        // --- STYLE HELPER ---
+        function getSubjectStyle(name) {
+            let hash = 0;
+            for (let i = 0; i < name.length; i++) { hash = name.charCodeAt(i) + ((hash << 5) - hash); }
+            const index = Math.abs(hash) % subjectStyles.length;
+            return subjectStyles[index];
+        }
 
         const sfx = {
             ctx: null,
@@ -563,56 +747,233 @@
             success: () => { sfx.play(440, 'sine', 0.1, 0.05); setTimeout(() => sfx.play(554, 'sine', 0.2, 0.05), 100); },
             celebrate: () => { sfx.play(523.25, 'triangle', 0.1, 0.05); setTimeout(() => sfx.play(659.25, 'triangle', 0.1, 0.05), 100); setTimeout(() => sfx.play(783.99, 'triangle', 0.2, 0.05), 200); },
             error: () => sfx.play(150, 'sawtooth', 0.2, 0.05),
-            bell: () => sfx.play(880, 'sine', 1.5, 0.1)
+            bell: () => sfx.play(880, 'sine', 1.5, 0.1),
+            levelup: () => {
+                sfx.play(440, 'sine', 0.1, 0.05); setTimeout(() => sfx.play(554, 'sine', 0.1, 0.05), 100);
+                setTimeout(() => sfx.play(659, 'sine', 0.1, 0.05), 200); setTimeout(() => sfx.play(880, 'sine', 0.3, 0.05), 300);
+            }
         };
 
-        function showToast(message, type = 'success') {
+        // --- NOISE GENERATOR (Pink Noise with Low Pass - Rain) ---
+        function toggleNoise() {
+            if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const toggle = document.getElementById('noise-toggle');
+            const knob = document.getElementById('noise-knob');
+            
+            if(isNoisePlaying) {
+                // Stop
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+                setTimeout(() => { noiseNode.stop(); isNoisePlaying = false; }, 500);
+                toggle.classList.remove('bg-brand-500'); toggle.classList.add('bg-skin-border');
+                knob.style.transform = 'translateX(0)';
+            } else {
+                // Start
+                const bufferSize = 4096;
+                const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                const output = buffer.getChannelData(0);
+                let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+                
+                // Pink Noise Gen
+                for (let i = 0; i < bufferSize; i++) {
+                    const white = Math.random() * 2 - 1;
+                    b0 = 0.99886 * b0 + white * 0.0555179;
+                    b1 = 0.99332 * b1 + white * 0.0750759;
+                    b2 = 0.96900 * b2 + white * 0.1538520;
+                    b3 = 0.86650 * b3 + white * 0.3104856;
+                    b4 = 0.55000 * b4 + white * 0.5329522;
+                    b5 = -0.7616 * b5 - white * 0.0168980;
+                    output[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
+                    output[i] *= 0.11; 
+                    b6 = white * 0.115926;
+                }
+
+                noiseNode = audioCtx.createBufferSource();
+                noiseNode.buffer = buffer;
+                noiseNode.loop = true;
+                
+                // Create Gain (Volume)
+                gainNode = audioCtx.createGain();
+                gainNode.gain.setValueAtTime(0.001, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.5, audioCtx.currentTime + 2); // Fade in
+
+                // Create Lowpass Filter (Muffle high hiss -> Rain sound)
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.value = 800; // Cutoff frequency
+
+                // Connect: Noise -> Filter -> Gain -> Output
+                noiseNode.connect(filter);
+                filter.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                noiseNode.start();
+                isNoisePlaying = true;
+                
+                toggle.classList.add('bg-brand-500'); toggle.classList.remove('bg-skin-border');
+                knob.style.transform = 'translateX(1.5rem)';
+            }
+        }
+
+        function showToast(message, type = 'success', hasUndo = false) {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
             const bgClass = type === 'success' ? 'bg-slate-900 text-white' : 'bg-red-500 text-white';
             toast.className = `${bgClass} shadow-xl rounded-xl px-4 py-3 flex items-center gap-3 min-w-[300px] animate-slide-in-right pointer-events-auto transition-all`;
-            toast.innerHTML = `<i data-lucide="${type === 'success' ? 'check-circle' : 'alert-circle'}" class="w-5 h-5"></i><span class="text-sm font-medium">${message}</span>`;
+            let html = `<div class="flex items-center gap-2 flex-1"><i data-lucide="${type === 'success' ? 'check-circle' : 'alert-circle'}" class="w-5 h-5"></i><span class="text-sm font-medium">${message}</span></div>`;
+            if(hasUndo && lastUndoAction) html += `<button onclick="triggerUndo()" class="ml-4 text-xs font-bold underline hover:opacity-80">UNDO</button>`;
+            toast.innerHTML = html;
             container.appendChild(toast); lucide.createIcons();
-            setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateY(10px)'; setTimeout(() => toast.remove(), 300); }, 3000);
+            setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateY(10px)'; setTimeout(() => toast.remove(), 300); }, 4000);
         }
+
+        function triggerUndo() { if(lastUndoAction) { lastUndoAction(); lastUndoAction = null; } }
 
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons(); checkSession();
             document.getElementById('current-date').innerText = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+            document.getElementById('daily-quote').innerText = `"${quotes[Math.floor(Math.random() * quotes.length)]}"`;
             
             document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') { closeModal('add-modal'); closeModal('profile-modal'); closeModal('focus-modal'); closeModal('help-modal'); closeModal('read-modal'); }
-                if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { if(!document.getElementById('add-modal').classList.contains('hidden')) saveTopic(); }
+                if (e.key === 'Escape') { closeModal('add-modal'); closeModal('profile-modal'); closeModal('focus-modal'); closeModal('help-modal'); closeModal('read-modal'); closeModal('subject-modal'); }
+                if (e.key === 'Enter') { 
+                    const isAddModalOpen = !document.getElementById('add-modal').classList.contains('hidden');
+                    const isSettingsOpen = !document.getElementById('profile-modal').classList.contains('hidden');
+                    const isSubjectModalOpen = !document.getElementById('subject-modal').classList.contains('hidden');
+                    const isTextarea = e.target.tagName === 'TEXTAREA';
+                    if(isAddModalOpen && !isTextarea) { e.preventDefault(); saveTopic(); }
+                    if(isSettingsOpen && e.target.id === 'new-subject-input') { e.preventDefault(); addNewSubject(); }
+                    if(isSubjectModalOpen) { e.preventDefault(); saveQuickSubject(); }
+                }
                 if (e.key === 'n' && document.body.classList.contains('app-active') && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') { e.preventDefault(); openModal('add-modal'); }
                 if (e.key === '/' && document.body.classList.contains('app-active') && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') { e.preventDefault(); document.getElementById('search-input').focus(); }
                 if (e.key === '?' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') openModal('help-modal');
             });
         });
 
-        // --- SETTINGS ---
+        // --- CORE FUNCTIONS ---
         function updateGridDensity(val) { state.gridCols = parseInt(val); localStorage.setItem('nexus_grid_cols', val); renderGrid(); }
-        function toggleMute() {
-            state.mute = !state.mute; localStorage.setItem('nexus_mute', state.mute);
-            const btn = document.getElementById('mute-btn');
-            btn.innerHTML = state.mute ? '<i data-lucide="volume-x" class="w-4 h-4"></i>' : '<i data-lucide="volume-2" class="w-4 h-4"></i>';
-            lucide.createIcons();
-        }
+        function toggleMute() { state.mute = !state.mute; localStorage.setItem('nexus_mute', state.mute); document.getElementById('mute-btn').innerHTML = state.mute ? '<i data-lucide="volume-x" class="w-4 h-4"></i>' : '<i data-lucide="volume-2" class="w-4 h-4"></i>'; lucide.createIcons(); }
         function updateGoal(val) { state.dailyGoal = parseInt(val); localStorage.setItem('nexus_daily_goal', val); updateDailyProgress(); }
         function toggleLoader(show) { document.getElementById('auth-loader').classList.toggle('hidden', !show); }
         
+        function toggleShowArchive() {
+            state.showArchived = !state.showArchived;
+            document.getElementById('archive-toggle-btn').innerHTML = state.showArchived ? '<i data-lucide="eye" class="w-4 h-4"></i>' : '<i data-lucide="eye-off" class="w-4 h-4"></i>';
+            renderGrid(); lucide.createIcons();
+        }
+
+        function toggleArchive(id) {
+            const t = state.topics.find(x => x.id === id);
+            if(t) { t.archived = !t.archived; syncUp(); renderGrid(); showToast(t.archived ? "Archived" : "Unarchived"); }
+        }
+
+        function toggleCram() {
+            state.cramMode = !state.cramMode;
+            const btn = document.getElementById('btn-cram');
+            if(state.cramMode) { btn.classList.add('cram-active'); showToast('Cram Mode Active: Reviewing next 24h'); } else { btn.classList.remove('cram-active'); }
+            renderGrid();
+        }
+
+        function togglePin(id) {
+            const t = state.topics.find(x => x.id === id);
+            if(t) { t.pinned = !t.pinned; syncUp(); renderGrid(); sfx.click(); }
+        }
+
+        // --- LEVEL & XP ---
+        function updateLevelDisplay() {
+            document.getElementById('user-level').innerText = state.level;
+            const xpForNext = state.level * 100;
+            const progress = (state.xp / xpForNext) * 100;
+            document.getElementById('xp-bar').style.width = `${progress}%`;
+            document.getElementById('user-xp-text').innerText = `${state.xp}/${xpForNext} XP`;
+        }
+
+        function addXP(amount) {
+            state.xp += amount;
+            const xpForNext = state.level * 100;
+            if(state.xp >= xpForNext) {
+                state.xp -= xpForNext;
+                state.level++;
+                sfx.levelup();
+                showToast(`Leveled Up! Welcome to Lvl ${state.level}`);
+                fireConfetti();
+            }
+            localStorage.setItem('nexus_xp', state.xp);
+            localStorage.setItem('nexus_level', state.level);
+            updateLevelDisplay();
+        }
+
+        // --- SUBJECT MANAGEMENT ---
+        function loadSubjects() {
+            const stored = localStorage.getItem('nexus_subjects');
+            state.subjects = stored ? JSON.parse(stored) : [...defaultSubjects];
+            renderSubjectList(); populateSubjectSelects();
+        }
+
+        function renderSubjectList() {
+            const container = document.getElementById('subject-list'); container.innerHTML = '';
+            state.subjects.forEach(sub => {
+                const tag = document.createElement('div');
+                tag.className = 'px-2 py-1 bg-skin-surface border border-skin-border rounded-md text-xs font-medium text-skin-text flex items-center gap-2';
+                tag.innerHTML = `<span>${sub}</span> <button onclick="removeSubject('${sub}')" class="hover:text-red-500"><i data-lucide="x" class="w-3 h-3"></i></button>`;
+                container.appendChild(tag);
+            });
+            lucide.createIcons();
+        }
+
+        function populateSubjectSelects() {
+            const selects = ['new-topic-subject', 'filter-subject', 'filter-subject-mobile'];
+            selects.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                const isFilter = id.includes('filter');
+                const firstOpt = isFilter ? '<option value="all">All Subjects</option>' : '';
+                let opts = state.subjects.map(s => `<option value="${s}">${s}</option>`).join('');
+                el.innerHTML = firstOpt + opts;
+            });
+        }
+
+        function addNewSubject() {
+            const input = document.getElementById('new-subject-input');
+            const val = input.value.trim();
+            if (val && !state.subjects.includes(val)) {
+                state.subjects.push(val); localStorage.setItem('nexus_subjects', JSON.stringify(state.subjects));
+                input.value = ''; renderSubjectList(); populateSubjectSelects(); showToast('Subject added');
+            }
+        }
+
+        function removeSubject(name) {
+            if (confirm(`Delete subject "${name}"?`)) {
+                state.subjects = state.subjects.filter(s => s !== name);
+                localStorage.setItem('nexus_subjects', JSON.stringify(state.subjects));
+                renderSubjectList(); populateSubjectSelects();
+            }
+        }
+
+        function openSubjectModal() {
+            document.getElementById('quick-subject-input').value = '';
+            openModal('subject-modal'); setTimeout(() => document.getElementById('quick-subject-input').focus(), 50);
+        }
+
+        function saveQuickSubject() {
+            const val = document.getElementById('quick-subject-input').value.trim();
+            if(val && !state.subjects.includes(val)) {
+                state.subjects.push(val); localStorage.setItem('nexus_subjects', JSON.stringify(state.subjects));
+                renderSubjectList(); populateSubjectSelects();
+                document.getElementById('new-topic-subject').value = val;
+                showToast('Subject added'); closeModal('subject-modal');
+            } else if (state.subjects.includes(val)) { showToast('Subject already exists', 'error'); }
+        }
+
         // --- THEME ---
         function setTheme(themeName, silent=false) { 
-            document.documentElement.setAttribute('data-theme', themeName); 
-            state.theme = themeName; 
-            localStorage.setItem('nexus_theme_style', themeName);
+            document.documentElement.setAttribute('data-theme', themeName); state.theme = themeName; localStorage.setItem('nexus_theme_style', themeName);
             document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
-            renderCharts(); 
-            if(!silent) sfx.click(); 
+            renderCharts(); if(!silent) sfx.click(); 
         }
         function toggleThemeMode() { document.documentElement.classList.toggle('dark'); localStorage.setItem('nexus_dark_mode', document.documentElement.classList.contains('dark')); renderCharts(); sfx.click(); }
         function restoreTheme() {
-            const theme = localStorage.getItem('nexus_theme_style') || 'modern';
-            setTheme(theme, true);
+            const theme = localStorage.getItem('nexus_theme_style') || 'modern'; setTheme(theme, true);
             if(localStorage.getItem('nexus_dark_mode') === 'true') document.documentElement.classList.add('dark');
             if(localStorage.getItem('nexus_mute') === 'true') toggleMute(); 
             const savedGrid = localStorage.getItem('nexus_grid_cols');
@@ -646,9 +1007,8 @@
             document.getElementById('streak-count').innerText = window.innerWidth < 768 ? ` ${state.streak}` : `${state.streak} Day Streak`;
             
             const savedDate = localStorage.getItem('nexus_daily_date');
-            if (savedDate !== new Date().toDateString()) {
-                state.dailyProgress = 0; localStorage.setItem('nexus_daily_progress', 0); localStorage.setItem('nexus_daily_date', new Date().toDateString());
-            } else { state.dailyProgress = parseInt(localStorage.getItem('nexus_daily_progress')) || 0; }
+            if (savedDate !== new Date().toDateString()) { state.dailyProgress = 0; localStorage.setItem('nexus_daily_progress', 0); localStorage.setItem('nexus_daily_date', new Date().toDateString()); } 
+            else { state.dailyProgress = parseInt(localStorage.getItem('nexus_daily_progress')) || 0; }
             updateDailyProgress();
         }
         function updateDailyProgress() {
@@ -668,7 +1028,12 @@
         }
         function generateCodename() { document.getElementById('signup-user').value = `${wordsA[Math.floor(Math.random()*wordsA.length)]}${wordsB[Math.floor(Math.random()*wordsB.length)]}${Math.floor(Math.random()*999)}`; }
         function checkSession() {
-            restoreTheme();
+            restoreTheme(); loadSubjects();
+            // Load XP
+            state.xp = parseInt(localStorage.getItem('nexus_xp')) || 0;
+            state.level = parseInt(localStorage.getItem('nexus_level')) || 1;
+            updateLevelDisplay();
+
             if(localStorage.getItem('nexus_hex')) {
                 state.hex = localStorage.getItem('nexus_hex'); state.user = localStorage.getItem('nexus_name'); state.time = localStorage.getItem('nexus_time') || "09:00";
                 state.streak = parseInt(localStorage.getItem('nexus_streak')) || 0; state.lastLogin = parseInt(localStorage.getItem('nexus_lastLogin')) || null;
@@ -684,12 +1049,9 @@
                 if (GOOGLE_SCRIPT_URL) {
                     const res = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'LOGIN', email: u, password: p }) });
                     const data = await res.json();
-                    if (data.status === 'SUCCESS') {
-                        saveSession(data.hex, u, data.time || '09:00'); sfx.success(); checkStreak(); loadApp(); syncDown();
-                    } else { showToast(data.message || 'Login failed', 'error'); sfx.error(); }
-                } else {
-                    await new Promise(r => setTimeout(r, 800)); saveSession('DEMO_HEX', u, '09:00'); sfx.success(); checkStreak(); loadApp(); syncDown();
-                }
+                    if (data.status === 'SUCCESS') { saveSession(data.hex, u, data.time || '09:00'); sfx.success(); checkStreak(); loadApp(); syncDown(); } 
+                    else { showToast(data.message || 'Login failed', 'error'); sfx.error(); }
+                } else { await new Promise(r => setTimeout(r, 800)); saveSession('DEMO_HEX', u, '09:00'); sfx.success(); checkStreak(); loadApp(); syncDown(); }
             } catch(e) { console.error(e); showToast('Connection Error', 'error'); }
             toggleLoader(false);
         }
@@ -701,11 +1063,8 @@
                 if(GOOGLE_SCRIPT_URL) {
                     const res = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'SIGNUP', email: u, password: p }) });
                     const data = await res.json();
-                    if(data.status === 'SUCCESS') { saveSession(data.hex, u, "09:00"); sfx.success(); checkStreak(); loadApp(); } 
-                    else { showToast(data.message || 'Signup failed', 'error'); }
-                } else {
-                    await new Promise(r => setTimeout(r, 800)); saveSession('DEMO_HEX_'+Date.now(), u, "09:00"); sfx.success(); checkStreak(); loadApp();
-                }
+                    if(data.status === 'SUCCESS') { saveSession(data.hex, u, "09:00"); sfx.success(); checkStreak(); loadApp(); } else { showToast(data.message || 'Signup failed', 'error'); }
+                } else { await new Promise(r => setTimeout(r, 800)); saveSession('DEMO_HEX_'+Date.now(), u, "09:00"); sfx.success(); checkStreak(); loadApp(); }
             } catch(e) { console.error(e); showToast('Connection Error', 'error'); }
             toggleLoader(false);
         }
@@ -722,108 +1081,188 @@
         }
         
         function openModal(id, topicId=null) { 
-            sfx.click(); document.getElementById(id).classList.remove('hidden'); document.getElementById(id).classList.add('flex');
+            sfx.click(); 
+            const m = document.getElementById(id); if(m) { m.classList.remove('hidden'); m.classList.remove('animate-pop-in'); void m.offsetWidth; m.classList.add('flex'); m.classList.add('animate-pop-in'); }
+            lucide.createIcons();
             if(id === 'add-modal') {
+                document.getElementById('form-single').classList.remove('hidden'); document.getElementById('form-bulk').classList.add('hidden');
+                document.getElementById('tab-single').classList.add('text-brand-600', 'border-b-2', 'border-brand-500'); document.getElementById('tab-single').classList.remove('text-skin-muted');
+                document.getElementById('tab-bulk').classList.remove('text-brand-600', 'border-b-2', 'border-brand-500'); document.getElementById('tab-bulk').classList.add('text-skin-muted');
+                addMode = 'single';
+                const resetBtn = document.getElementById('reset-btn-container');
                 if(topicId) {
                     const t = state.topics.find(x => x.id === topicId);
                     document.getElementById('modal-title').innerText = "Edit Topic"; document.getElementById('edit-topic-id').value = topicId;
-                    document.getElementById('new-topic-name').value = t.name; document.getElementById('new-topic-category').value = t.category || 'General'; document.getElementById('new-topic-desc').value = t.desc;
+                    document.getElementById('new-topic-name').value = t.name; document.getElementById('new-topic-subject').value = t.category || 'General'; document.getElementById('new-topic-desc').value = t.desc; document.getElementById('new-topic-link').value = t.link || '';
+                    if(resetBtn) resetBtn.classList.remove('hidden');
                 } else {
                     document.getElementById('modal-title').innerText = "New Topic"; document.getElementById('edit-topic-id').value = "";
-                    document.getElementById('new-topic-name').value = ""; document.getElementById('new-topic-desc').value = ""; setTimeout(() => document.getElementById('new-topic-name').focus(), 50);
+                    document.getElementById('new-topic-name').value = ""; document.getElementById('new-topic-desc').value = ""; document.getElementById('new-topic-link').value = "";
+                    if(resetBtn) resetBtn.classList.add('hidden');
+                    setTimeout(() => document.getElementById('new-topic-name').focus(), 50);
                 }
             }
         }
-        function closeModal(id) { sfx.click(); document.getElementById(id).classList.add('hidden'); document.getElementById(id).classList.remove('flex'); if(id==='focus-modal'&&isTimerRunning) toggleTimer(); }
+        function closeModal(id) { sfx.click(); const m = document.getElementById(id); if(m) { m.classList.add('hidden'); m.classList.remove('flex'); } if(id==='focus-modal'&&isTimerRunning) toggleTimer(); }
 
-        // --- READ MODE ---
+        function switchAddMode(mode) {
+            addMode = mode;
+            if (mode === 'single') {
+                document.getElementById('form-single').classList.remove('hidden');
+                document.getElementById('form-bulk').classList.add('hidden');
+                document.getElementById('tab-single').classList.add('text-brand-600', 'border-b-2', 'border-brand-500');
+                document.getElementById('tab-single').classList.remove('text-skin-muted');
+                document.getElementById('tab-bulk').classList.remove('text-brand-600', 'border-b-2', 'border-brand-500');
+                document.getElementById('tab-bulk').classList.add('text-skin-muted');
+            } else {
+                document.getElementById('form-single').classList.add('hidden');
+                document.getElementById('form-bulk').classList.remove('hidden');
+                document.getElementById('tab-bulk').classList.add('text-brand-600', 'border-b-2', 'border-brand-500');
+                document.getElementById('tab-bulk').classList.remove('text-skin-muted');
+                document.getElementById('tab-single').classList.remove('text-brand-600', 'border-b-2', 'border-brand-500');
+                document.getElementById('tab-single').classList.add('text-skin-muted');
+                document.getElementById('bulk-input').focus();
+            }
+        }
+
+        // --- READ MODE (ENHANCED) ---
         function openReadMode(id) {
             const t = state.topics.find(x => x.id === id);
             if(t) {
+                // Basic Info
                 document.getElementById('read-title').innerText = t.name;
-                document.getElementById('read-category').innerText = t.category || 'General';
-                document.getElementById('read-category').className = `text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md border inline-block mb-2 ${categoryColors[t.category]||categoryColors['General']}`;
+                const style = getSubjectStyle(t.category || 'General');
+                document.getElementById('read-subject').innerText = t.category || 'General';
+                document.getElementById('read-subject').className = `text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md border inline-block mb-2 ${style}`;
+                
+                // Meta Info
+                const dateStr = new Date(t.nextReview).toLocaleDateString(undefined, {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'});
+                document.querySelector('#read-date span').innerText = `Due: ${dateStr}`;
+                
+                const levelNames = ['New', 'Learning', 'Developing', 'Competent', 'Proficient', 'Expert', 'Master'];
+                document.querySelector('#read-level span').innerText = `Lvl ${t.level} (${levelNames[t.level] || 'Unknown'})`;
+                
+                // Status Badges
+                const statusContainer = document.getElementById('read-status');
+                statusContainer.innerHTML = '';
+                if(t.pinned) statusContainer.innerHTML += `<span class="px-2 py-0.5 rounded-full bg-brand-100 dark:bg-brand-900/30 text-brand-600 dark:text-brand-400 text-xs font-bold border border-brand-200 dark:border-brand-800">Pinned</span>`;
+                if(t.archived) statusContainer.innerHTML += `<span class="px-2 py-0.5 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 text-xs font-bold border border-orange-200 dark:border-orange-800">Archived</span>`;
+
+                // Link
+                const linkSection = document.getElementById('read-link-section');
+                const linkBtn = document.getElementById('read-link-action');
+                if(t.link) {
+                    linkSection.classList.remove('hidden');
+                    linkBtn.href = t.link;
+                    try {
+                        const hostname = new URL(t.link).hostname.replace('www.', '');
+                        linkBtn.innerHTML = `<i data-lucide="external-link" class="w-4 h-4"></i> Open Resource: ${hostname}`;
+                    } catch(e) {
+                        linkBtn.innerHTML = `<i data-lucide="external-link" class="w-4 h-4"></i> Open Resource`;
+                    }
+                } else {
+                    linkSection.classList.add('hidden');
+                }
+
+                // Content
                 let raw = t.desc || 'No notes.';
                 let html = raw.replace(/\n/g, '<br>').replace(/- (.*)/g, '<li>$1</li>');
                 if(html.includes('<li>')) html = `<ul>${html}</ul>`;
                 document.getElementById('read-content').innerHTML = html;
+                
                 openModal('read-modal');
+                lucide.createIcons();
             }
         }
 
         // --- SKELETON RENDERER ---
         function renderSkeleton() {
-            const grid = document.getElementById('topic-grid');
-            grid.innerHTML = '';
+            const grid = document.getElementById('topic-grid'); grid.innerHTML = '';
             for(let i=0; i<8; i++) {
-                const skel = document.createElement('div');
-                skel.className = 'card-surface p-6 shadow-soft h-48 animate-pulse flex flex-col justify-between';
-                skel.innerHTML = `
-                    <div class="w-full h-1.5 bg-gray-200 dark:bg-gray-700 rounded mb-4"></div>
-                    <div class="flex justify-between mb-4">
-                        <div class="h-4 w-16 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                        <div class="h-6 w-12 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                    </div>
-                    <div class="flex-1 space-y-3">
-                        <div class="h-6 w-3/4 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                        <div class="h-4 w-full bg-gray-200 dark:bg-gray-700 rounded"></div>
-                        <div class="h-4 w-5/6 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                    </div>
-                    <div class="h-10 w-full bg-gray-200 dark:bg-gray-700 rounded mt-4"></div>
-                `;
+                const skel = document.createElement('div'); skel.className = 'card-surface p-6 shadow-soft h-48 animate-pulse flex flex-col justify-between';
+                skel.innerHTML = `<div class="w-full h-1.5 bg-gray-200 dark:bg-gray-700 rounded mb-4"></div><div class="flex justify-between mb-4"><div class="h-4 w-16 bg-gray-200 dark:bg-gray-700 rounded"></div><div class="h-6 w-12 bg-gray-200 dark:bg-gray-700 rounded"></div></div><div class="flex-1 space-y-3"><div class="h-6 w-3/4 bg-gray-200 dark:bg-gray-700 rounded"></div><div class="h-4 w-full bg-gray-200 dark:bg-gray-700 rounded"></div></div>`;
                 grid.appendChild(skel);
             }
         }
 
         async function syncDown() {
-            renderSkeleton(); // Show skeleton immediately
+            renderSkeleton(); 
             if (GOOGLE_SCRIPT_URL) {
-                try {
-                    const res = await fetch(GOOGLE_SCRIPT_URL + '?hex=' + state.hex);
-                    const data = await res.json();
-                    if(Array.isArray(data)) { state.topics = data; renderGrid(); }
-                } catch(e) { console.error(e); }
+                try { const res = await fetch(GOOGLE_SCRIPT_URL + '?hex=' + state.hex); const data = await res.json(); if(Array.isArray(data)) { state.topics = data; renderGrid(); } } catch(e) { console.error(e); }
             } else {
-                const stored = localStorage.getItem('nexus_data');
-                await new Promise(r => setTimeout(r, 600)); // Fake delay for skeleton demo
+                const stored = localStorage.getItem('nexus_data'); await new Promise(r => setTimeout(r, 600));
                 if(stored) state.topics = JSON.parse(stored); else state.topics = [{ id: '1', name: 'UI Principles', category: 'Design', level: 3, nextReview: Date.now() - 100000, desc: 'Hierarchy, Balance, Contrast' }];
                 renderGrid();
             }
         }
 
         async function syncUp() { 
-            if (GOOGLE_SCRIPT_URL) {
-                try {
-                    await fetch(GOOGLE_SCRIPT_URL, {
-                        method: 'POST',
-                        body: JSON.stringify({ action: 'SYNC_UP', hex: state.hex, topics: state.topics })
-                    });
-                } catch(e) { console.error("Save failed"); }
-            } else {
-                localStorage.setItem('nexus_data', JSON.stringify(state.topics)); 
-            }
+            if (GOOGLE_SCRIPT_URL) { try { await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'SYNC_UP', hex: state.hex, topics: state.topics }) }); } catch(e) { console.error("Save failed"); } } 
+            else { localStorage.setItem('nexus_data', JSON.stringify(state.topics)); }
+        }
+
+        function resetTopicLevel() {
+            const id = document.getElementById('edit-topic-id').value;
+            const t = state.topics.find(x => x.id === id);
+            if(t) { t.level = 0; t.nextReview = Date.now(); syncUp(); renderGrid(); closeModal('add-modal'); showToast('Level reset'); }
         }
 
         function saveTopic() {
-            const id = document.getElementById('edit-topic-id').value, name = document.getElementById('new-topic-name').value.trim(), cat = document.getElementById('new-topic-category').value, desc = document.getElementById('new-topic-desc').value.trim();
+            if(addMode === 'bulk') {
+                const text = document.getElementById('bulk-input').value;
+                if(!text.trim()) return;
+                const lines = text.split('\n');
+                let count = 0;
+                lines.forEach(line => {
+                    const parts = line.split('|');
+                    if(parts.length > 0 && parts[0].trim()) {
+                        const name = parts[0].trim();
+                        let cat = parts[1] ? parts[1].trim() : 'General';
+                        if(!state.subjects.includes(cat)) cat = 'General';
+                        const desc = parts[2] ? parts[2].trim() : '';
+                        state.topics.push({ id: 'top_'+Date.now()+Math.random(), name: name, category: cat, desc: desc, level: 0, nextReview: Date.now(), pinned: false, archived: false, link: '' });
+                        count++;
+                    }
+                });
+                renderGrid(); syncUp(); closeModal('add-modal'); sfx.success(); showToast(`Added ${count} topics`);
+                document.getElementById('bulk-input').value = '';
+                return;
+            }
+
+            const id = document.getElementById('edit-topic-id').value, name = document.getElementById('new-topic-name').value.trim(), cat = document.getElementById('new-topic-subject').value, desc = document.getElementById('new-topic-desc').value.trim(), link = document.getElementById('new-topic-link').value.trim();
             if(!name) return;
-            if(id) { const t = state.topics.find(x => x.id === id); if(t) { t.name = name; t.category = cat; t.desc = desc; } showToast('Topic updated'); }
-            else { state.topics.push({ id: 'top_'+Date.now(), name: name, category: cat, desc: desc, level: 0, nextReview: Date.now() }); showToast('New topic created'); }
+            if(id) { const t = state.topics.find(x => x.id === id); if(t) { t.name = name; t.category = cat; t.desc = desc; t.link = link; } showToast('Topic updated'); }
+            else { state.topics.push({ id: 'top_'+Date.now(), name: name, category: cat, desc: desc, level: 0, nextReview: Date.now(), pinned: false, archived: false, link: link }); showToast('New topic created'); }
             renderGrid(); syncUp(); closeModal('add-modal'); sfx.success();
         }
-        function deleteTopic(id) { if(confirm("Remove topic?")) { state.topics = state.topics.filter(t => t.id !== id); renderGrid(); syncUp(); sfx.click(); showToast('Deleted', 'error'); } }
+        function deleteTopic(id) { if(confirm("Permanently delete topic?")) { state.topics = state.topics.filter(t => t.id !== id); renderGrid(); syncUp(); sfx.click(); showToast('Deleted', 'error'); } }
+        
         function processReview(id, success) {
             const t = state.topics.find(x => x.id === id);
-            if(t) { 
+            if(t) {
+                const prev = { ...t }; const prevDaily = state.dailyProgress; const prevXp = state.xp; const prevLvl = state.level;
                 if(success) { 
-                    t.level = Math.min(t.level+1, 6); sfx.celebrate(); fireConfetti(); showToast('Retention +'); openCalendar(t); 
+                    t.level = Math.min(t.level+1, 6); sfx.celebrate(); fireConfetti(); 
                     state.dailyProgress++; localStorage.setItem('nexus_daily_progress', state.dailyProgress); updateDailyProgress();
+                    addXP(10);
+                    openCalendar(t); showToast('Retention +', 'success', true);
                 } else { 
-                    t.level = Math.max(t.level-1, 0); sfx.click(); showToast('Scheduled sooner.'); 
+                    t.level = Math.max(t.level-1, 0); sfx.click(); showToast('Scheduled sooner.', 'success', true);
                 } 
-                t.nextReview = calculateNextReview(t.level); renderGrid(); syncUp(); 
+                t.nextReview = calculateNextReview(t.level); 
+                
+                lastUndoAction = () => {
+                    const target = state.topics.find(x => x.id === id);
+                    if(target) { 
+                        target.level = prev.level; target.nextReview = prev.nextReview; state.dailyProgress = prevDaily; localStorage.setItem('nexus_daily_progress', state.dailyProgress); updateDailyProgress(); 
+                        state.xp = prevXp; state.level = prevLvl; updateLevelDisplay();
+                        syncUp(); renderGrid(); showToast('Undone'); 
+                    }
+                };
+                renderGrid(); syncUp(); 
             }
         }
+        
         function fireConfetti() { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#6366f1', '#10b981', '#f43f5e'] }); }
         function calculateNextReview(lvl) { return new Date().setDate(new Date().getDate() + [0,1,3,7,14,30,90][Math.min(lvl,6)]); }
         function openCalendar(t) {
@@ -831,31 +1270,22 @@
             const start = d.toISOString().replace(/-|:|\.\d\d\d/g, ""); d.setMinutes(d.getMinutes() + 30);
             window.open(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('NEXUS: '+t.name)}&dates=${start}/${d.toISOString().replace(/-|:|\.\d\d\d/g, "")}&details=${encodeURIComponent(t.desc||'')}&sf=true&output=xml`, '_blank');
         }
-        function saveSettings() { 
-            state.time = document.getElementById('setting-time').value; 
-            localStorage.setItem('nexus_time', state.time); 
-            if (GOOGLE_SCRIPT_URL) { fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'UPDATE_SETTINGS', hex: state.hex, time: state.time }) }).catch(console.error); }
-            sfx.success(); closeModal('profile-modal'); showToast('Saved'); 
-        }
+        function saveSettings() { state.time = document.getElementById('setting-time').value; localStorage.setItem('nexus_time', state.time); if (GOOGLE_SCRIPT_URL) { fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'UPDATE_SETTINGS', hex: state.hex, time: state.time }) }).catch(console.error); } sfx.success(); closeModal('profile-modal'); showToast('Saved'); }
         
+        function copyData() { navigator.clipboard.writeText(JSON.stringify(state.topics)).then(() => showToast('Copied to Clipboard')); }
+
         function exportData(type) {
             let dataStr, name;
             if(type === 'csv') {
-                const header = ['ID','Name','Category','Level','NextReview','Description'].join(',');
-                const rows = state.topics.map(t => [t.id, `"${t.name}"`, t.category, t.level, new Date(t.nextReview).toISOString(), `"${(t.desc||'').replace(/"/g,'""')}"`].join(','));
-                dataStr = "data:text/csv;charset=utf-8," + encodeURIComponent([header, ...rows].join('\n'));
-                name = "nexus_export.csv";
-            } else {
-                dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state.topics));
-                name = "nexus_backup.json";
-            }
-            const dl = document.createElement('a'); dl.setAttribute("href", dataStr); dl.setAttribute("download", name);
-            document.body.appendChild(dl); dl.click(); dl.remove(); showToast('Export downloaded');
+                const header = ['ID','Name','Subject','Level','NextReview','Description','Link'].join(',');
+                const rows = state.topics.map(t => [t.id, `"${t.name}"`, t.category, t.level, new Date(t.nextReview).toISOString(), `"${(t.desc||'').replace(/"/g,'""')}"`, t.link||''].join(','));
+                dataStr = "data:text/csv;charset=utf-8," + encodeURIComponent([header, ...rows].join('\n')); name = "nexus_export.csv";
+            } else { dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state.topics)); name = "nexus_backup.json"; }
+            const dl = document.createElement('a'); dl.setAttribute("href", dataStr); dl.setAttribute("download", name); document.body.appendChild(dl); dl.click(); dl.remove(); showToast('Export downloaded');
         }
         function importData(input) {
             const file = input.files[0]; if(!file) return;
-            const r = new FileReader(); r.onload = function(e) { try { state.topics = JSON.parse(e.target.result); syncUp(); renderGrid(); showToast('Restored'); } catch(err) { showToast('Error', 'error'); } };
-            r.readAsText(file);
+            const r = new FileReader(); r.onload = function(e) { try { state.topics = JSON.parse(e.target.result); syncUp(); renderGrid(); showToast('Restored'); } catch(err) { showToast('Error', 'error'); } }; r.readAsText(file);
         }
         function handleSearch(val) { const btn = document.getElementById('clear-search-btn'); if(val) btn.classList.remove('hidden'); else btn.classList.add('hidden'); renderGrid(); }
         function clearSearch() { document.getElementById('search-input').value = ''; document.getElementById('search-input-mobile').value = ''; document.getElementById('clear-search-btn').classList.add('hidden'); renderGrid(); }
@@ -863,12 +1293,12 @@
 
         function renderCharts() {
             const isDark = document.documentElement.classList.contains('dark'), style = getComputedStyle(document.body), brandColor = style.getPropertyValue('--color-brand-500').trim().replace(/ /g, ',') || '99, 102, 241';
-            const levels = [0,0,0,0,0,0,0], forecast = []; state.topics.forEach(t => { if(t.level <= 6) levels[t.level]++; });
+            const levels = [0,0,0,0,0,0,0], forecast = []; state.topics.forEach(t => { if(!t.archived && t.level <= 6) levels[t.level]++; });
             const labels = []; const now = new Date();
             for(let i=0; i<7; i++) {
                 const d = new Date(now); d.setDate(d.getDate() + i); labels.push(d.toLocaleDateString('en-US', {weekday: 'short'}));
                 const s = new Date(d).setHours(0,0,0,0), e = new Date(d).setHours(23,59,59,999);
-                if (i===0) forecast.push(state.topics.filter(t => t.nextReview <= e).length); else forecast.push(state.topics.filter(t => t.nextReview >= s && t.nextReview <= e).length);
+                if (i===0) forecast.push(state.topics.filter(t => !t.archived && t.nextReview <= e).length); else forecast.push(state.topics.filter(t => !t.archived && t.nextReview >= s && t.nextReview <= e).length);
             }
             if(retentionChart) retentionChart.destroy();
             retentionChart = new Chart(document.getElementById('chart-levels').getContext('2d'), {
@@ -887,7 +1317,14 @@
             const grid = document.getElementById('topic-grid'); grid.innerHTML = '';
             const search = (document.getElementById('search-input').value || document.getElementById('search-input-mobile').value).toLowerCase();
             const sortMode = document.getElementById('sort-select').value;
-            let filtered = state.topics.filter(t => t.name.toLowerCase().includes(search) || (t.category && t.category.toLowerCase().includes(search)));
+            const subjectFilter = window.innerWidth < 768 ? document.getElementById('filter-subject-mobile').value : document.getElementById('filter-subject').value;
+            
+            let filtered = state.topics.filter(t => {
+                const matchesSearch = t.name.toLowerCase().includes(search) || (t.category && t.category.toLowerCase().includes(search));
+                const matchesSubject = subjectFilter === 'all' || t.category === subjectFilter;
+                const matchesArchive = state.showArchived ? true : !t.archived;
+                return matchesSearch && matchesSubject && matchesArchive;
+            });
             
             let gridClass = 'grid gap-4 md:gap-6 pb-24 transition-all duration-300 ';
             if (state.gridCols === 3) gridClass += 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3';
@@ -895,7 +1332,12 @@
             else gridClass += 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'; 
             grid.className = gridClass;
 
+            const now = new Date();
+            const next24h = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+
             filtered.sort((a, b) => {
+                if (a.pinned && !b.pinned) return -1;
+                if (!a.pinned && b.pinned) return 1;
                 if (sortMode === 'urgency') return a.nextReview - b.nextReview;
                 if (sortMode === 'level') return a.level - b.level;
                 if (sortMode === 'newest') return parseInt(b.id.split('_')[1]||0) - parseInt(a.id.split('_')[1]||0);
@@ -907,22 +1349,36 @@
 
             let dueCount=0, totalLevel=0, today=new Date().setHours(0,0,0,0);
             filtered.forEach((t, i) => {
-                const isDue = today >= new Date(t.nextReview).setHours(0,0,0,0); if(isDue) dueCount++; totalLevel += t.level;
+                let isDue = today >= new Date(t.nextReview).setHours(0,0,0,0); 
+                if(state.cramMode && !isDue) { if (new Date(t.nextReview) <= next24h) isDue = true; }
+                if(isDue && !t.archived) dueCount++; 
+                if (!t.archived) totalLevel += t.level;
+                
+                const style = getSubjectStyle(t.category || 'General');
                 const card = document.createElement('div');
-                card.className = `card-surface p-6 shadow-soft card-hover flex flex-col relative overflow-hidden group animate-slide-up stagger-${(i%5)+1} transition-theme cursor-pointer`;
+                const pinClass = t.pinned ? 'border-brand-500 ring-1 ring-brand-500 shadow-glow' : 'border-skin-border';
+                const archiveClass = t.archived ? 'opacity-60 grayscale' : '';
+                
+                card.className = `card-surface p-6 shadow-soft card-hover flex flex-col relative overflow-hidden group animate-slide-up stagger-${(i%5)+1} transition-theme cursor-pointer border ${pinClass} ${archiveClass}`;
                 card.onclick = (e) => { if(!e.target.closest('button')) openReadMode(t.id); };
+                
+                const nameHtml = search ? t.name.replace(new RegExp(search, 'gi'), match => `<span class="highlight-text">${match}</span>`) : t.name;
                 
                 card.innerHTML = `
                     <div class="absolute top-0 left-0 w-full h-1.5 bg-gray-100 dark:bg-gray-800 transition-theme"><div class="h-full bg-brand-500 transition-all duration-1000" style="width: ${(t.level/6)*100}%"></div></div>
                     <div class="flex justify-between items-start mb-4">
-                         <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md border ${categoryColors[t.category]||categoryColors['General']} transition-theme">${t.category||'General'}</span>
+                         <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md border ${style} transition-theme flex items-center gap-1">
+                            ${t.category||'General'}
+                        </span>
                         <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                             <button onclick="togglePin('${t.id}')" class="text-skin-muted hover:text-brand-600 p-2 hover:bg-skin-base rounded-lg transition-colors" title="${t.pinned ? 'Unpin' : 'Pin to Top'}"><i data-lucide="${t.pinned ? 'pin-off' : 'pin'}" class="w-4 h-4 ${t.pinned ? 'fill-current' : ''}"></i></button>
+                             <button onclick="toggleArchive('${t.id}')" class="text-skin-muted hover:text-orange-500 p-2 hover:bg-skin-base rounded-lg transition-colors" title="${t.archived ? 'Unarchive' : 'Archive'}"><i data-lucide="${t.archived ? 'archive-restore' : 'archive'}" class="w-4 h-4"></i></button>
                              <button onclick="openModal('add-modal', '${t.id}')" class="text-skin-muted hover:text-brand-600 p-2 hover:bg-skin-base rounded-lg transition-colors"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
                              <button onclick="deleteTopic('${t.id}')" class="text-skin-muted hover:text-red-500 p-2 hover:bg-skin-base rounded-lg transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                         </div>
                     </div>
                     <div class="flex-1 mb-5">
-                        <div class="flex justify-between items-start"><h3 class="font-bold text-lg mb-1.5 leading-tight transition-theme">${t.name}</h3>${isDue?'<span class="flex h-2.5 w-2.5 rounded-full bg-red-500 animate-pulse"></span>':''}</div>
+                        <div class="flex justify-between items-start"><h3 class="font-bold text-lg mb-1.5 leading-tight transition-theme">${nameHtml}</h3>${isDue?'<span class="flex h-2.5 w-2.5 rounded-full bg-red-500 animate-pulse"></span>':''}</div>
                         <p class="text-sm text-skin-muted line-clamp-2 leading-relaxed transition-theme">${t.desc||'No additional notes provided.'}</p>
                     </div>
                     <div class="flex gap-3 mt-auto">
@@ -931,7 +1387,8 @@
                 grid.appendChild(card);
             });
             document.getElementById('stat-pending').innerText = dueCount;
-            document.getElementById('stat-retention').innerText = (state.topics.length ? Math.round((totalLevel/(state.topics.length*6))*100) : 0) + "%";
+            const totalActive = state.topics.filter(t => !t.archived).length;
+            document.getElementById('stat-retention').innerText = (totalActive ? Math.round((totalLevel/(totalActive*6))*100) : 0) + "%";
             lucide.createIcons();
         }
     </script>
