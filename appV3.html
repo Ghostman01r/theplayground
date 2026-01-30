@@ -2,8 +2,8 @@
 <html lang="en" class="light" data-theme="modern">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXUS // PRO v11.1 (Scheduling Fix)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NEXUS // PRO v13.3 (Graph Collapse Fix)</title>
     
     <!-- FONTS -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -79,6 +79,13 @@
             transition-property: background-color, border-color, color, fill, stroke, box-shadow, transform, filter, opacity;
             transition-duration: 300ms;
             transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* Body Overflow Fix */
+        body { 
+            background-color: rgb(var(--color-bg-base)); 
+            color: rgb(var(--color-text-main));
+            overflow-x: hidden; 
         }
 
         /* 1. MODERN (Default) */
@@ -236,31 +243,49 @@
         }
 
         /* DEEP FOCUS STATES */
-        /* Blur the entire app view when deep focus is active */
         body.deep-focus-active #view-app > *:not(#focus-modal-wrapper) {
             filter: blur(12px) brightness(0.5) grayscale(0.5);
             pointer-events: none;
             transition: all 0.8s ease;
         }
         
-        /* Hide distractions inside the modal itself when Zen is active */
         body.deep-focus-active .zen-fade {
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.5s ease;
         }
         
-        /* Ensure modal is visible during zen */
         #focus-modal-wrapper {
             z-index: 9999;
         }
         
-        /* Heatmap Grid */
-        .heatmap-grid { display: grid; grid-template-columns: repeat(20, 1fr); gap: 4px; }
-        .hm-cell { width: 10px; height: 10px; border-radius: 2px; background: rgb(var(--color-bg-base)); border: 1px solid rgb(var(--color-border)); }
-        .hm-l1 { background: rgb(var(--color-brand-100)); border-color: rgb(var(--color-brand-200)); }
-        .hm-l2 { background: rgb(var(--color-brand-500)); border-color: rgb(var(--color-brand-600)); }
-        .hm-l3 { background: rgb(var(--color-brand-900)); border-color: rgb(var(--color-brand-900)); }
+        /* List View Styles */
+        .list-row {
+            display: grid;
+            grid-template-columns: 4px 2fr 1fr 1fr 1fr 120px;
+            align-items: center;
+            gap: 16px;
+            padding: 12px 16px;
+            border-bottom: 1px solid rgb(var(--color-border));
+            transition: background-color 0.2s;
+        }
+        .list-row:hover { background-color: rgb(var(--color-brand-50) / 0.3); }
+        .list-row:last-child { border-bottom: none; }
+        
+        /* Mobile List View */
+        @media (max-width: 768px) {
+            .list-row {
+                grid-template-columns: 4px 1fr auto;
+                gap: 8px;
+                padding: 8px 12px;
+            }
+            .list-row > *:nth-child(3), .list-row > *:nth-child(4), .list-row > *:nth-child(5) {
+                display: none; /* Hide intermediate cols on mobile */
+            }
+            .list-row > *:last-child {
+                display: flex; /* Ensure actions are shown */
+            }
+        }
     </style>
 </head>
 <body class="h-screen flex flex-col overflow-hidden font-sans selection:bg-brand-100 selection:text-brand-900 transition-theme">
@@ -279,7 +304,7 @@
                     <i data-lucide="layers" class="w-7 h-7"></i>
                 </div>
                 <h1 class="text-3xl font-bold tracking-tight">Nexus</h1>
-                <p class="text-skin-muted mt-2 text-sm">Active Space Repetition System v11.1</p>
+                <p class="text-skin-muted mt-2 text-sm">Active Space Repetition System v13.3</p>
             </div>
 
             <div class="flex p-1 bg-skin-base rounded-theme mb-6 transition-theme">
@@ -399,6 +424,10 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-3 md:gap-4">
+                    <!-- VIEW TOGGLE -->
+                    <button onclick="toggleViewMode()" id="view-toggle-btn" class="p-2.5 rounded-theme bg-skin-base text-skin-muted hover:bg-skin-border transition-theme border border-transparent" title="Toggle List/Grid View">
+                        <i data-lucide="layout-grid" class="w-5 h-5"></i>
+                    </button>
                     <!-- CRAM MODE -->
                     <button onclick="toggleCram()" id="btn-cram" class="p-2.5 rounded-theme bg-skin-base text-skin-muted hover:bg-skin-border transition-theme flex items-center gap-2 border border-transparent" title="Cram Mode (Review Ahead)">
                         <i data-lucide="zap" class="w-5 h-5"></i>
@@ -430,14 +459,28 @@
             <div id="main-scroll" class="flex-1 overflow-y-auto p-4 md:p-10 scroll-smooth">
                 <!-- CHARTS -->
                 <div id="analytics-section" class="mb-10 hidden animate-fade-in">
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div class="card-surface p-6 shadow-soft transition-theme">
-                            <div class="flex items-center justify-between mb-4"><h3 class="font-bold flex items-center gap-2"><i data-lucide="pie-chart" class="w-5 h-5 text-brand-500"></i> Mastery</h3><span class="text-xs font-medium bg-skin-base text-skin-muted px-2 py-1 rounded-md transition-theme">Distribution</span></div>
-                            <div class="h-48 md:h-56 w-full relative flex justify-center"><canvas id="chart-levels"></canvas></div>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                        <!-- Chart 1 -->
+                        <div class="card-surface p-6 shadow-soft transition-theme relative" id="chart-card-levels">
+                            <div class="chart-header flex items-center justify-between mb-4">
+                                <h3 class="font-bold flex items-center gap-2"><i data-lucide="pie-chart" class="w-5 h-5 text-brand-500"></i> Mastery</h3>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs font-medium bg-skin-base text-skin-muted px-2 py-1 rounded-md transition-theme">Distribution</span>
+                                    <button onclick="toggleGraph('chart-card-levels')" class="toggle-btn text-skin-muted hover:text-brand-600 transition-colors"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                                </div>
+                            </div>
+                            <div class="chart-wrapper h-48 md:h-56 w-full relative flex justify-center transition-all duration-300"><canvas id="chart-levels"></canvas></div>
                         </div>
-                        <div class="card-surface p-6 shadow-soft transition-theme">
-                            <div class="flex items-center justify-between mb-4"><h3 class="font-bold flex items-center gap-2"><i data-lucide="activity" class="w-5 h-5 text-brand-500"></i> Forecast</h3><span class="text-xs font-medium bg-brand-50 text-brand-600 px-2 py-1 rounded-md transition-theme">Next 7 Days</span></div>
-                            <div class="h-48 md:h-56 w-full relative"><canvas id="chart-forecast"></canvas></div>
+                        <!-- Chart 2 -->
+                        <div class="card-surface p-6 shadow-soft transition-theme relative" id="chart-card-forecast">
+                            <div class="chart-header flex items-center justify-between mb-4">
+                                <h3 class="font-bold flex items-center gap-2"><i data-lucide="activity" class="w-5 h-5 text-brand-500"></i> Forecast</h3>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs font-medium bg-brand-50 text-brand-600 px-2 py-1 rounded-md transition-theme">Next 7 Days</span>
+                                    <button onclick="toggleGraph('chart-card-forecast')" class="toggle-btn text-skin-muted hover:text-brand-600 transition-colors"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                                </div>
+                            </div>
+                            <div class="chart-wrapper h-48 md:h-56 w-full relative transition-all duration-300"><canvas id="chart-forecast"></canvas></div>
                         </div>
                     </div>
                 </div>
@@ -447,9 +490,11 @@
                 <div id="empty-state" class="hidden h-96 flex flex-col items-center justify-center text-center animate-fade-in"><div class="w-32 h-32 bg-skin-base rounded-full flex items-center justify-center mb-6 relative transition-theme"><div class="absolute inset-0 border-4 border-skin-surface rounded-full shadow-sm transition-theme"></div><i data-lucide="inbox" class="w-12 h-12 text-skin-muted"></i></div><h3 class="text-xl font-bold">All clear for now</h3><p class="text-skin-muted mt-2 max-w-xs mx-auto">No topics match your filter.</p><button onclick="openModal('add-modal')" class="mt-8 text-brand-600 font-semibold hover:text-brand-700 flex items-center gap-2">Create first topic <i data-lucide="arrow-right" class="w-4 h-4"></i></button></div>
             </div>
 
+            <!-- MOBILE BOTTOM NAV -->
             <div class="md:hidden card-surface border-t border-skin-border px-6 py-3 flex justify-around items-center sticky bottom-0 z-30 pb-safe shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] transition-theme rounded-none">
                 <button onclick="scrollToTop()" class="flex flex-col items-center gap-1 text-brand-600 transition-transform active:scale-95"><i data-lucide="layout-grid" class="w-6 h-6"></i><span class="text-[10px] font-medium">Home</span></button>
                 <button onclick="openModal('add-modal')" class="bg-brand-600 text-white p-3.5 rounded-full -mt-10 shadow-lg shadow-brand-500/40 border-4 border-skin-base transition-transform active:scale-90 transition-theme"><i data-lucide="plus" class="w-6 h-6"></i></button>
+                <button onclick="openModal('focus-modal-wrapper')" class="flex flex-col items-center gap-1 text-skin-muted hover:text-skin-text transition-transform active:scale-95"><i data-lucide="timer" class="w-6 h-6"></i><span class="text-[10px] font-medium">Focus</span></button>
                 <button onclick="openModal('profile-modal')" class="flex flex-col items-center gap-1 text-skin-muted hover:text-skin-text transition-transform active:scale-95"><i data-lucide="user" class="w-6 h-6"></i><span class="text-[10px] font-medium">Profile</span></button>
             </div>
         </main>
@@ -686,6 +731,18 @@
                          <span class="text-sm font-medium text-skin-text">Quick Backup</span>
                          <button onclick="copyData()" class="text-xs bg-skin-surface border border-skin-border px-3 py-1.5 rounded-lg hover:border-brand-500 transition-colors">Copy JSON</button>
                     </div>
+                    
+                    <!-- NOTIFICATION BUTTON -->
+                    <div class="flex justify-between items-center px-2">
+                         <span class="text-sm font-medium text-skin-text">Reminders</span>
+                         <button onclick="requestNotificationPermission()" class="text-xs bg-skin-surface border border-skin-border px-3 py-1.5 rounded-lg hover:border-brand-500 transition-colors">Enable Alerts</button>
+                    </div>
+
+                    <!-- ICS DOWNLOAD BUTTON -->
+                    <div class="flex justify-between items-center px-2">
+                        <span class="text-sm font-medium text-skin-text">Sync Calendar</span>
+                        <button onclick="downloadSchedule()" class="text-xs bg-skin-surface border border-skin-border px-3 py-1.5 rounded-lg hover:border-brand-500 transition-colors flex items-center gap-1"><i data-lucide="download" class="w-3 h-3"></i> Get .ics</button>
+                   </div>
                 </div>
                 
                 <div class="bg-skin-base rounded-theme p-4 border border-skin-border transition-theme">
@@ -773,11 +830,13 @@
             subjects: [],
             xp: 0,
             level: 1,
-            focusSessionCount: 0
+            focusSessionCount: 0,
+            viewMode: 'grid'
         };
         let retentionChart = null, forecastChart = null, timerInterval, timeLeft = 25 * 60, isTimerRunning = false, currentTimerMode = 25;
         let lastUndoAction = null; 
         let addMode = 'single';
+        let lastReviewedTopicId = null; 
         
         // Simple HTML5 Audio
         let focusAudio = new Audio(FOCUS_AUDIO_URL);
@@ -858,6 +917,99 @@
 
         function triggerUndo() { if(lastUndoAction) { lastUndoAction(); lastUndoAction = null; } }
 
+        function toggleGraph(cardId) {
+            const card = document.getElementById(cardId);
+            const wrapper = card.querySelector('.chart-wrapper');
+            const header = card.querySelector('.chart-header');
+            const btn = card.querySelector('.toggle-btn');
+            
+            const isHidden = wrapper.classList.contains('hidden');
+            
+            if (isHidden) {
+                // Show
+                wrapper.classList.remove('hidden');
+                header.classList.replace('mb-0', 'mb-4');
+                btn.innerHTML = '<i data-lucide="eye" class="w-4 h-4"></i>';
+            } else {
+                // Hide (Collapse)
+                wrapper.classList.add('hidden');
+                header.classList.replace('mb-4', 'mb-0');
+                btn.innerHTML = '<i data-lucide="eye-off" class="w-4 h-4"></i>';
+            }
+            lucide.createIcons();
+        }
+
+        // --- NOTIFICATIONS ---
+        function requestNotificationPermission() {
+            if (!("Notification" in window)) {
+                alert("This browser does not support desktop notification");
+            } else if (Notification.permission === "granted") {
+                showToast("Notifications already active");
+            } else if (Notification.permission !== "denied") {
+                Notification.requestPermission().then(function (permission) {
+                    if (permission === "granted") {
+                        showToast("Notifications enabled!");
+                        new Notification("Nexus Pro", { body: "You will be reminded to study!" });
+                    }
+                });
+            }
+        }
+
+        function checkScheduledNotifications() {
+             if (Notification.permission !== "granted") return;
+             const now = new Date();
+             const currentHour = now.getHours();
+             const currentMin = now.getMinutes();
+             
+             // Simple check: Is it 9:00 AM? (state.time)
+             if(state.time) {
+                 const [h, m] = state.time.split(':').map(Number);
+                 if(currentHour === h && currentMin === m) {
+                     // Check if notification already sent today to avoid spam
+                     const lastSent = localStorage.getItem('nexus_last_notif');
+                     const todayStr = now.toDateString();
+                     if(lastSent !== todayStr) {
+                         const pendingCount = state.topics.filter(t => !t.archived && new Date() >= new Date(t.nextReview).setHours(0,0,0,0)).length;
+                         if(pendingCount > 0) {
+                             new Notification("Study Time!", { body: `You have ${pendingCount} topics to review today.`, icon: "https://cdn.jsdelivr.net/npm/lucide-static@0.447.0/icons/layers.svg" });
+                             localStorage.setItem('nexus_last_notif', todayStr);
+                         }
+                     }
+                 }
+             }
+        }
+        
+        // Check every minute
+        setInterval(checkScheduledNotifications, 60000);
+
+        // --- ICS GENERATOR (Offline Calendar) ---
+        function downloadSchedule() {
+            let ics = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Nexus//Study//EN\n";
+            let count = 0;
+            state.topics.forEach(t => {
+                if(!t.archived && t.level < 6) {
+                    const d = new Date(t.nextReview);
+                    // Format date as YYYYMMDD
+                    const dateStr = d.toISOString().replace(/-|:|\.\d\d\d/g, "").substring(0,8);
+                    
+                    // Create all day event
+                    ics += `BEGIN:VEVENT\nSUMMARY:Review: ${t.name}\nDTSTART;VALUE=DATE:${dateStr}\nDESCRIPTION:${(t.desc||'').replace(/\n/g, '\\n')}\nEND:VEVENT\n`;
+                    count++;
+                }
+            });
+            ics += "END:VCALENDAR";
+            
+            const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.setAttribute('download', 'nexus_study_schedule.ics');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showToast(`Exported ${count} reviews to Calendar`);
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons(); checkSession();
             
@@ -909,12 +1061,37 @@
         });
 
         // --- CORE FUNCTIONS ---
+        // NEW: Ensure openCalendar is globally accessible and safe
+        function openCalendar(id) {
+            const t = state.topics.find(x => x.id === id);
+            if (!t) return;
+            
+            const d = new Date(t.nextReview), time = state.time || "09:00", parts = time.split(':'); 
+            d.setHours(parseInt(parts[0]), parseInt(parts[1]), 0, 0);
+            const start = d.toISOString().replace(/-|:|\.\d\d\d/g, ""); 
+            d.setMinutes(d.getMinutes() + 30);
+            
+            // Construct Google Calendar URL safely
+            const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('Review: '+t.name)}&dates=${start}/${d.toISOString().replace(/-|:|\.\d\d\d/g, "")}&details=${encodeURIComponent(t.desc||'')}&sf=true&output=xml`;
+            
+            window.open(url, '_blank');
+        }
+
         function updateGridDensity(val) { state.gridCols = parseInt(val); localStorage.setItem('nexus_grid_cols', val); renderGrid(); }
         function toggleMute() { state.mute = !state.mute; localStorage.setItem('nexus_mute', state.mute); document.getElementById('mute-btn').innerHTML = state.mute ? '<i data-lucide="volume-x" class="w-4 h-4"></i>' : '<i data-lucide="volume-2" class="w-4 h-4"></i>'; lucide.createIcons(); }
         function updateGoal(val) { state.dailyGoal = parseInt(val); localStorage.setItem('nexus_daily_goal', val); updateDailyProgress(); }
         function toggleLoader(show) { 
             const loader = document.getElementById('auth-loader');
             if (loader) loader.classList.toggle('hidden', !show); 
+        }
+        
+        function toggleViewMode() {
+            state.viewMode = state.viewMode === 'grid' ? 'list' : 'grid';
+            const btn = document.getElementById('view-toggle-btn');
+            btn.innerHTML = state.viewMode === 'grid' ? '<i data-lucide="list" class="w-5 h-5"></i>' : '<i data-lucide="layout-grid" class="w-5 h-5"></i>';
+            renderGrid();
+            lucide.createIcons();
+            sfx.click();
         }
         
         function toggleShowArchive() {
@@ -1181,7 +1358,13 @@
             if (savedDate !== new Date().toDateString()) { state.dailyProgress = 0; localStorage.setItem('nexus_daily_progress', 0); localStorage.setItem('nexus_daily_date', new Date().toDateString()); } 
             else { state.dailyProgress = parseInt(localStorage.getItem('nexus_daily_progress')) || 0; }
             updateDailyProgress();
+            
+            // UPDATE TITLE WITH DUE COUNT
+            const pendingCount = state.topics.filter(t => !t.archived && new Date() >= new Date(t.nextReview).setHours(0,0,0,0)).length;
+            if(pendingCount > 0) document.title = `(${pendingCount}) Due - NEXUS PRO`;
+            else document.title = `NEXUS PRO`;
         }
+        
         function updateDailyProgress() {
             const pct = Math.min((state.dailyProgress / state.dailyGoal) * 100, 100);
             if(document.getElementById('daily-progress-bar')) {
@@ -1480,14 +1663,25 @@
                 
                 // Calculate new level first
                 let newLevel = t.level;
-                if(success) newLevel = Math.min(t.level+1, 6);
-                else newLevel = Math.max(t.level-1, 0);
+                if(success) newLevel = Math.min(t.level+1, 6); // Max Level 6
+                else newLevel = Math.max(t.level-1, 0); // Drop level on fail
 
-                // Calculate NEW date immediately
-                const newNextReview = calculateNextReview(newLevel);
+                // Calculate NEW date (SRS Logic)
+                const intervals = [0, 1, 3, 7, 14, 30, 90];
+                const daysToAdd = intervals[newLevel];
+                
+                // Normalize to midnight
+                const nextDate = new Date();
+                nextDate.setHours(0,0,0,0); 
+                nextDate.setDate(nextDate.getDate() + daysToAdd);
+                
+                const newNextReview = nextDate.getTime(); // Define it here
+
+                // Update topic state
+                t.level = newLevel;
+                t.nextReview = newNextReview; 
 
                 if(success) { 
-                    t.level = newLevel; 
                     sfx.celebrate(); 
                     fireConfetti(); 
                     state.dailyProgress++; 
@@ -1495,29 +1689,28 @@
                     updateDailyProgress();
                     addXP(10);
                     
-                    // Update the topic with the new date BEFORE opening calendar
-                    t.nextReview = newNextReview;
-                    openCalendar(t); 
-                    
                     showToast('Retention +', 'success', true);
                 } else { 
-                    t.level = newLevel;
-                    t.nextReview = newNextReview; // Update for failure case too
                     sfx.click(); 
                     showToast('Scheduled sooner.', 'success', true);
                 } 
+                
+                lastReviewedTopicId = id; // Set ID
                 
                 lastUndoAction = () => {
                     const target = state.topics.find(x => x.id === id);
                     if(target) { 
                         target.level = prev.level; 
-                        target.nextReview = prev.nextReview; // Revert date
+                        target.nextReview = prev.nextReview; 
                         state.dailyProgress = prevDaily; 
                         localStorage.setItem('nexus_daily_progress', state.dailyProgress); 
                         updateDailyProgress(); 
                         state.xp = prevXp; 
                         state.level = prevLvl; 
                         updateLevelDisplay();
+                        
+                        lastReviewedTopicId = null; // Clear ID on undo
+                        
                         syncUp(); 
                         renderGrid(); 
                         showToast('Undone'); 
@@ -1528,13 +1721,13 @@
             }
         }
         
+        function undoLastReview() {
+            if (lastUndoAction) lastUndoAction();
+        }
+        
         function fireConfetti() { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#6366f1', '#10b981', '#f43f5e'] }); }
         function calculateNextReview(lvl) { return new Date().setDate(new Date().getDate() + [0,1,3,7,14,30,90][Math.min(lvl,6)]); }
-        function openCalendar(t) {
-            const d = new Date(t.nextReview), time = state.time || "09:00", parts = time.split(':'); d.setHours(parseInt(parts[0]), parseInt(parts[1]), 0, 0);
-            const start = d.toISOString().replace(/-|:|\.\d\d\d/g, ""); d.setMinutes(d.getMinutes() + 30);
-            window.open(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('NEXUS: '+t.name)}&dates=${start}/${d.toISOString().replace(/-|:|\.\d\d\d/g, "")}&details=${encodeURIComponent(t.desc||'')}&sf=true&output=xml`, '_blank');
-        }
+        
         function saveSettings() { state.time = document.getElementById('setting-time').value; localStorage.setItem('nexus_time', state.time); if (GOOGLE_SCRIPT_URL) { fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'UPDATE_SETTINGS', hex: state.hex, time: state.time }) }).catch(console.error); } sfx.success(); closeModal('profile-modal'); showToast('Saved'); }
         
         function copyData() { navigator.clipboard.writeText(JSON.stringify(state.topics)).then(() => showToast('Copied to Clipboard')); }
@@ -1582,6 +1775,48 @@
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: {display:false} }, scales: { y: { beginAtZero: true, grid: { color: isDark ? '#334155' : '#e2e8f0', borderDash: [5,5] } }, x: { grid: {display: false} } } }
             });
         }
+        
+        function renderHeatmap() {
+             const grid = document.getElementById('heatmap-grid');
+             if(!grid) return;
+             grid.innerHTML = '';
+             
+             // Create fake contribution data for visual appeal (since we don't have real historical data stored yet)
+             // In a real app, this would pull from state.history
+             for(let i=0; i<60; i++) {
+                 const cell = document.createElement('div');
+                 const intensity = Math.random();
+                 let styleClass = 'hm-cell'; // default gray
+                 if(intensity > 0.8) styleClass += ' hm-l3';
+                 else if (intensity > 0.5) styleClass += ' hm-l2';
+                 else if (intensity > 0.2) styleClass += ' hm-l1';
+                 
+                 cell.className = styleClass;
+                 grid.appendChild(cell);
+             }
+        }
+
+        function toggleGraph(cardId) {
+            const card = document.getElementById(cardId);
+            const wrapper = card.querySelector('.chart-wrapper');
+            const header = card.querySelector('.chart-header');
+            const btn = card.querySelector('.toggle-btn');
+            
+            const isHidden = wrapper.classList.contains('hidden');
+            
+            if (isHidden) {
+                // Show
+                wrapper.classList.remove('hidden');
+                header.classList.replace('mb-0', 'mb-4');
+                btn.innerHTML = '<i data-lucide="eye" class="w-4 h-4"></i>';
+            } else {
+                // Hide (Collapse)
+                wrapper.classList.add('hidden');
+                header.classList.replace('mb-4', 'mb-0');
+                btn.innerHTML = '<i data-lucide="eye-off" class="w-4 h-4"></i>';
+            }
+            lucide.createIcons();
+        }
 
         function renderGrid() {
             // renderHeatmap(); // Also refresh heatmap
@@ -1600,12 +1835,7 @@
                 return matchesSearch && matchesSubject && matchesArchive;
             });
             
-            let gridClass = 'grid gap-4 md:gap-6 pb-24 transition-all duration-300 ';
-            if (state.gridCols === 3) gridClass += 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3';
-            else if (state.gridCols === 5) gridClass += 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5';
-            else gridClass += 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'; 
-            grid.className = gridClass;
-
+            // SORT LOGIC (Applied before rendering)
             const now = new Date();
             const next24h = new Date(now.getTime() + 24 * 60 * 60 * 1000);
 
@@ -1621,9 +1851,61 @@
             if(filtered.length === 0 && search === "") { document.getElementById('empty-state').classList.remove('hidden'); document.getElementById('analytics-section').classList.add('hidden'); }
             else if (state.topics.length > 0) { document.getElementById('empty-state').classList.add('hidden'); document.getElementById('analytics-section').classList.remove('hidden'); if(search==="") renderCharts(); }
 
-            let dueCount=0, totalLevel=0, today=new Date().setHours(0,0,0,0);
+            // List View Logic
+            if(state.viewMode === 'list') {
+                grid.className = 'flex flex-col gap-2 pb-24 transition-all duration-300';
+                
+                filtered.forEach(t => {
+                    const card = document.createElement('div');
+                    card.className = 'list-row bg-skin-surface cursor-pointer group hover:shadow-md';
+                    card.onclick = (e) => { if(!e.target.closest('button')) openReadMode(t.id); };
+                    
+                    const style = getSubjectStyle(t.category || 'General');
+                    const colorClass = style.split(' ')[0].replace('bg-', 'bg-'); 
+
+                    const dateStr = new Date(t.nextReview).toLocaleDateString(undefined, {month:'short', day:'numeric'});
+                    const isDue = new Date() >= new Date(t.nextReview).setHours(0,0,0,0);
+                    const isJustReviewed = t.id === lastReviewedTopicId;
+                    
+                    card.innerHTML = `
+                        <div class="h-full w-1 rounded-full ${colorClass}"></div>
+                        <div class="font-bold text-sm truncate">${t.name}</div>
+                        <div class="text-xs text-skin-muted truncate">${t.category}</div>
+                        <div class="flex items-center gap-2">
+                             <div class="flex-1 h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                                 <div class="h-full bg-brand-500" style="width: ${(t.level/6)*100}%"></div>
+                             </div>
+                        </div>
+                        <div class="text-xs font-medium ${isDue ? 'text-red-500' : 'text-skin-muted'}">${isDue ? 'Due Now' : dateStr}</div>
+                        <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                             <!-- Calendar Button -->
+                             <button onclick="openCalendar('${t.id}'); event.stopPropagation();" class="p-1 hover:text-brand-600" title="Calendar"><i data-lucide="calendar" class="w-3.5 h-3.5"></i></button>
+                             <!-- Undo Button (New) -->
+                             ${isJustReviewed ? `<button onclick="undoLastReview(); event.stopPropagation();" class="p-1 hover:text-orange-500" title="Undo"><i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i></button>` : ''}
+                             <!-- Quick Review Button (Only if due) -->
+                             ${isDue ? `<button onclick="processReview('${t.id}', true); event.stopPropagation();" class="p-1 hover:text-green-600" title="Quick Review"><i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i></button>` : ''}
+                             
+                             <button onclick="togglePin('${t.id}'); event.stopPropagation();" class="p-1 hover:text-brand-600"><i data-lucide="${t.pinned ? 'pin-off' : 'pin'}" class="w-3.5 h-3.5 ${t.pinned?'fill-current' : ''}"></i></button>
+                             <button onclick="openModal('add-modal', '${t.id}'); event.stopPropagation();" class="p-1 hover:text-brand-600"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
+                             <button onclick="deleteTopic('${t.id}'); event.stopPropagation();" class="p-1 hover:text-red-500"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+                lucide.createIcons();
+                return;
+            }
+
+            // Grid View Logic
+            let gridClass = 'grid gap-4 md:gap-6 pb-24 transition-all duration-300 ';
+            if (state.gridCols === 3) gridClass += 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3';
+            else if (state.gridCols === 5) gridClass += 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5';
+            else gridClass += 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'; 
+            grid.className = gridClass;
+
+            let dueCount=0, totalLevel=0;
             filtered.forEach((t, i) => {
-                let isDue = today >= new Date(t.nextReview).setHours(0,0,0,0); 
+                let isDue = now >= new Date(t.nextReview).setHours(0,0,0,0); 
                 if(state.cramMode && !isDue) { if (new Date(t.nextReview) <= next24h) isDue = true; }
                 if(isDue && !t.archived) dueCount++; 
                 if (!t.archived) totalLevel += t.level;
@@ -1637,26 +1919,28 @@
                 card.onclick = (e) => { if(!e.target.closest('button')) openReadMode(t.id); };
                 
                 const nameHtml = search ? t.name.replace(new RegExp(search, 'gi'), match => `<span class="highlight-text">${match}</span>`) : t.name;
-                
+                const isJustReviewed = t.id === lastReviewedTopicId;
+
                 card.innerHTML = `
                     <div class="absolute top-0 left-0 w-full h-1.5 bg-gray-100 dark:bg-gray-800 transition-theme"><div class="h-full bg-brand-500 transition-all duration-1000" style="width: ${(t.level/6)*100}%"></div></div>
-                    <div class="flex justify-between items-start mb-4">
+                    <div class="flex justify-between items-start mb-3">
                          <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md border ${style} transition-theme flex items-center gap-1">
                             ${t.category||'General'}
                         </span>
                         <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                             <button onclick="togglePin('${t.id}')" class="text-skin-muted hover:text-brand-600 p-2 hover:bg-skin-base rounded-lg transition-colors" title="${t.pinned ? 'Unpin' : 'Pin to Top'}"><i data-lucide="${t.pinned ? 'pin-off' : 'pin'}" class="w-4 h-4 ${t.pinned ? 'fill-current' : ''}"></i></button>
-                             <button onclick="toggleArchive('${t.id}')" class="text-skin-muted hover:text-orange-500 p-2 hover:bg-skin-base rounded-lg transition-colors" title="${t.archived ? 'Unarchive' : 'Archive'}"><i data-lucide="${t.archived ? 'archive-restore' : 'archive'}" class="w-4 h-4"></i></button>
-                             <button onclick="openModal('add-modal', '${t.id}')" class="text-skin-muted hover:text-brand-600 p-2 hover:bg-skin-base rounded-lg transition-colors"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
-                             <button onclick="deleteTopic('${t.id}')" class="text-skin-muted hover:text-red-500 p-2 hover:bg-skin-base rounded-lg transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                             <button onclick="togglePin('${t.id}'); event.stopPropagation();" class="text-skin-muted hover:text-brand-600 p-2 hover:bg-skin-base rounded-lg transition-colors" title="${t.pinned ? 'Unpin' : 'Pin to Top'}"><i data-lucide="${t.pinned ? 'pin-off' : 'pin'}" class="w-4 h-4 ${t.pinned ? 'fill-current' : ''}"></i></button>
+                             <button onclick="toggleArchive('${t.id}'); event.stopPropagation();" class="text-skin-muted hover:text-orange-500 p-2 hover:bg-skin-base rounded-lg transition-colors" title="${t.archived ? 'Unarchive' : 'Archive'}"><i data-lucide="${t.archived ? 'archive-restore' : 'archive'}" class="w-4 h-4"></i></button>
+                             <button onclick="openModal('add-modal', '${t.id}'); event.stopPropagation();" class="text-skin-muted hover:text-brand-600 p-2 hover:bg-skin-base rounded-lg transition-colors"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
+                             <button onclick="deleteTopic('${t.id}'); event.stopPropagation();" class="text-skin-muted hover:text-red-500 p-2 hover:bg-skin-base rounded-lg transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                         </div>
                     </div>
                     <div class="flex-1 mb-5">
-                        <div class="flex justify-between items-start"><h3 class="font-bold text-lg mb-1.5 leading-tight transition-theme">${nameHtml}</h3>${isDue?'<span class="flex h-2.5 w-2.5 rounded-full bg-red-500 animate-pulse"></span>':''}</div>
+                        <h3 class="font-bold text-lg mb-1.5 leading-tight transition-theme">${nameHtml}</h3>
                         <p class="text-sm text-skin-muted line-clamp-2 leading-relaxed transition-theme">${t.desc||'No additional notes provided.'}</p>
                     </div>
                     <div class="flex gap-3 mt-auto">
-                        ${isDue?`<button onclick="processReview('${t.id}', true)" class="flex-1 btn-primary py-2.5 text-sm shadow-glow w-full transition-theme">Review Now</button>`:`<div class="w-full py-2.5 bg-skin-base rounded-theme border border-skin-border flex items-center justify-center gap-2 text-xs text-skin-muted font-medium transition-theme"><i data-lucide="clock" class="w-3.5 h-3.5"></i>Next: ${new Date(t.nextReview).toLocaleDateString(undefined, {month:'short', day:'numeric'})}</div>`}
+                        ${isDue?`<button onclick="processReview('${t.id}', true); event.stopPropagation();" class="flex-1 btn-primary py-2.5 text-sm shadow-glow w-full transition-theme">Review Now</button>`:`<div class="w-full py-2.5 bg-skin-base rounded-theme border border-skin-border flex items-center justify-center gap-2 text-xs text-skin-muted font-medium transition-theme"><i data-lucide="clock" class="w-3.5 h-3.5"></i>Next: ${new Date(t.nextReview).toLocaleDateString(undefined, {month:'short', day:'numeric'})}</div>`}
+                        <button onclick="openCalendar('${t.id}'); event.stopPropagation();" class="p-2.5 rounded-theme bg-skin-base border border-skin-border hover:border-brand-500 text-skin-muted hover:text-brand-600 transition-colors" title="Schedule in Calendar"><i data-lucide="calendar" class="w-4 h-4"></i></button>
                     </div>`;
                 grid.appendChild(card);
             });
