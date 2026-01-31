@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEXUS // PRO v13.5 (Mobile UX Polish)</title>
+    <title>NEXUS // PRO v13.6 (Mobile Actions)</title>
     
     <!-- FONTS -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -85,7 +85,7 @@
         body { 
             background-color: rgb(var(--color-bg-base)); 
             color: rgb(var(--color-text-main));
-            overflow-x: hidden; /* Prevent horizontal scrolling */
+            overflow-x: hidden; 
         }
 
         /* 1. MODERN (Default) */
@@ -270,7 +270,7 @@
         .list-row:hover { background-color: rgb(var(--color-brand-50) / 0.3); }
         .list-row:last-child { border-bottom: none; }
         
-        /* Mobile List View & Layout Fixes */
+        /* Mobile List View */
         @media (max-width: 768px) {
             .list-row {
                 grid-template-columns: 4px 1fr auto;
@@ -304,7 +304,7 @@
                     <i data-lucide="layers" class="w-7 h-7"></i>
                 </div>
                 <h1 class="text-3xl font-bold tracking-tight">Nexus</h1>
-                <p class="text-skin-muted mt-2 text-sm">Active Space Repetition System v13.5</p>
+                <p class="text-skin-muted mt-2 text-sm">Active Space Repetition System v13.6</p>
             </div>
 
             <div class="flex p-1 bg-skin-base rounded-theme mb-6 transition-theme">
@@ -582,7 +582,7 @@
     <!-- ZEN READER MODAL -->
     <div id="read-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center">
         <div class="absolute inset-0 modal-backdrop transition-opacity" onclick="closeModal('read-modal')"></div>
-        <div class="w-full max-w-2xl card-surface p-8 relative z-10 animate-pop-in shadow-2xl m-4 transition-theme max-h-[80vh] overflow-y-auto">
+        <div class="w-full max-w-2xl card-surface p-8 relative z-10 animate-pop-in shadow-2xl m-4 transition-theme max-h-[80vh] overflow-y-auto flex flex-col">
             <div class="flex justify-between items-start mb-6">
                 <div class="flex-1">
                     <span id="read-subject" class="text-xs font-bold uppercase tracking-wider px-2 py-1 rounded-md border mb-2 inline-block"></span>
@@ -607,11 +607,20 @@
 
             <div class="w-full h-px bg-skin-border mb-6"></div>
 
-            <div id="read-content" class="desc-text text-skin-text leading-relaxed text-lg whitespace-pre-line"></div>
+            <div id="read-content" class="desc-text text-skin-text leading-relaxed text-lg whitespace-pre-line flex-1"></div>
             
-            <div class="mt-8 flex justify-end">
-                <button onclick="closeModal('read-modal')" class="btn-primary shadow-glow transition-theme">Close</button>
+            <!-- ACTION BAR (New for Mobile) -->
+            <div id="read-action-bar" class="mt-8 pt-4 border-t border-skin-border flex justify-between items-center">
+                <div class="flex gap-2">
+                     <button onclick="handleEditFromModal()" class="p-2.5 rounded-theme bg-skin-base border border-skin-border hover:bg-skin-surface text-skin-muted hover:text-brand-600 transition-colors" title="Edit"><i data-lucide="edit-3" class="w-5 h-5"></i></button>
+                     <button onclick="handleArchiveFromModal()" class="p-2.5 rounded-theme bg-skin-base border border-skin-border hover:bg-skin-surface text-skin-muted hover:text-orange-500 transition-colors" title="Archive"><i data-lucide="archive" class="w-5 h-5"></i></button>
+                     <button onclick="handleDeleteFromModal()" class="p-2.5 rounded-theme bg-skin-base border border-skin-border hover:bg-skin-surface text-skin-muted hover:text-red-500 transition-colors" title="Delete"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
+                </div>
+                <button onclick="closeModal('read-modal')" class="btn-primary shadow-glow transition-theme px-6">Close</button>
             </div>
+            
+            <!-- Hidden Input to store current ID -->
+            <input type="hidden" id="read-current-id">
         </div>
     </div>
 
@@ -781,12 +790,12 @@
         // =================================================================
         // 🎵 PASTE YOUR AUDIO LINK HERE (MP3/OGG)
         // =================================================================
-        const FOCUS_AUDIO_URL = 'https://upload.wikimedia.org/wikipedia/commons/e/e6/Rain_sound.ogg';
+        const FOCUS_AUDIO_URL = '0.ogg';
 
         // ---------------------------------------------------------
         // PASTE YOUR V6.7 GOOGLE SCRIPT URL HERE
         // ---------------------------------------------------------
-        const GOOGLE_SCRIPT_URL = ''; 
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxqhlq19-8l-RmOVVGlzaOLhxm3g_cEiPzReXOF1__qGs0h8_qmAmUfnW14Q1k5kI1-Iw/exec'; 
         // ---------------------------------------------------------
         
         const wordsA = ["Alpha", "Beta", "Gamma", "Delta", "Neo", "Prime", "Flux", "Core", "Zen", "Nova"];
@@ -1518,6 +1527,9 @@
         function openReadMode(id) {
             const t = state.topics.find(x => x.id === id);
             if(t) {
+                // Set Current ID for actions
+                document.getElementById('read-current-id').value = id;
+
                 // Basic Info
                 document.getElementById('read-title').innerText = t.name;
                 const style = getSubjectStyle(t.category || 'General');
@@ -1573,6 +1585,32 @@
                 
                 openModal('read-modal');
                 lucide.createIcons();
+            }
+        }
+
+        // --- ACTION HANDLERS FROM MODAL ---
+        function handleEditFromModal() {
+            const id = document.getElementById('read-current-id').value;
+            if(id) {
+                closeModal('read-modal');
+                // Small delay to allow modal close animation
+                setTimeout(() => openModal('add-modal', id), 200);
+            }
+        }
+
+        function handleArchiveFromModal() {
+            const id = document.getElementById('read-current-id').value;
+            if(id) {
+                toggleArchive(id);
+                closeModal('read-modal');
+            }
+        }
+
+        function handleDeleteFromModal() {
+            const id = document.getElementById('read-current-id').value;
+            if(id) {
+                deleteTopic(id);
+                closeModal('read-modal');
             }
         }
 
@@ -1941,12 +1979,17 @@
                          <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md border ${style} transition-theme flex items-center gap-1">
                             ${t.category||'General'}
                         </span>
-                        <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        
+                        <!-- Actions Container: Only show PIN on mobile here. Others in Detail View. -->
+                        <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity md:flex hidden"> 
                              <button onclick="togglePin('${t.id}'); event.stopPropagation();" class="text-skin-muted hover:text-brand-600 p-2 hover:bg-skin-base rounded-lg transition-colors" title="${t.pinned ? 'Unpin' : 'Pin to Top'}"><i data-lucide="${t.pinned ? 'pin-off' : 'pin'}" class="w-4 h-4 ${t.pinned ? 'fill-current' : ''}"></i></button>
                              <button onclick="toggleArchive('${t.id}'); event.stopPropagation();" class="text-skin-muted hover:text-orange-500 p-2 hover:bg-skin-base rounded-lg transition-colors" title="${t.archived ? 'Unarchive' : 'Archive'}"><i data-lucide="${t.archived ? 'archive-restore' : 'archive'}" class="w-4 h-4"></i></button>
                              <button onclick="openModal('add-modal', '${t.id}'); event.stopPropagation();" class="text-skin-muted hover:text-brand-600 p-2 hover:bg-skin-base rounded-lg transition-colors"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
                              <button onclick="deleteTopic('${t.id}'); event.stopPropagation();" class="text-skin-muted hover:text-red-500 p-2 hover:bg-skin-base rounded-lg transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                         </div>
+                        <!-- Mobile Specific PIN button (Always visible on mobile) -->
+                        <button onclick="togglePin('${t.id}'); event.stopPropagation();" class="md:hidden text-skin-muted p-1"><i data-lucide="${t.pinned ? 'pin-off' : 'pin'}" class="w-4 h-4 ${t.pinned ? 'fill-current' : ''}"></i></button>
+
                     </div>
                     <div class="flex-1 ${marginBContent}">
                         <h3 class="font-bold ${titleSize} mb-1.5 leading-tight transition-theme">${nameHtml}</h3>
@@ -1954,8 +1997,11 @@
                     </div>
                     <div class="flex gap-2 mt-auto items-center">
                         ${isDue
-                            ? `<button onclick="processReview('${t.id}', true); event.stopPropagation();" class="flex-1 btn-primary py-2.5 text-sm shadow-glow w-full transition-theme">Review Now</button>`
-                            : `<div class="w-full py-2.5 bg-skin-base rounded-theme border border-skin-border flex items-center justify-center gap-2 text-xs text-skin-muted font-medium transition-theme flex-1"><i data-lucide="clock" class="w-3.5 h-3.5"></i>Next: ${new Date(t.nextReview).toLocaleDateString(undefined, {month:'short', day:'numeric'})}</div>`
+                            ? `<button onclick="processReview('${t.id}', true); event.stopPropagation();" class="flex-1 btn-primary py-2.5 text-sm shadow-glow w-full transition-theme"><span class="md:hidden">Review</span><span class="hidden md:inline">Review Now</span></button>`
+                            : `<div class="w-full py-2.5 bg-skin-base rounded-theme border border-skin-border flex items-center justify-center gap-2 text-xs text-skin-muted font-medium transition-theme flex-1">
+                                <span class="md:hidden text-lg font-bold text-brand-600">${new Date(t.nextReview).getDate()}</span>
+                                <span class="hidden md:flex items-center gap-1"><i data-lucide="clock" class="w-3.5 h-3.5"></i>Next: ${new Date(t.nextReview).toLocaleDateString(undefined, {month:'short', day:'numeric'})}</span>
+                               </div>`
                         }
                         
                         ${isJustReviewed ? `<button onclick="undoLastReview(); event.stopPropagation();" class="p-2.5 rounded-theme bg-skin-base border border-skin-border hover:border-brand-500 text-orange-500 hover:text-orange-600 transition-colors" title="Undo Last Review"><i data-lucide="rotate-ccw" class="w-4 h-4"></i></button>` : ''}
