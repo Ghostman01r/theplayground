@@ -1,0 +1,1953 @@
+<!DOCTYPE html>
+<html lang="en" class="light" data-theme="modern">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NEXUS // PRO v13.4 (Mobile Compact)</title>
+    
+    <!-- FONTS -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&family=Lora:ital,wght@0,400;0,600;1,400&family=Work+Sans:wght@400;600&family=DM+Sans:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- TAILWIND CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- ICONS -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- CONFETTI -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <!-- CHART.JS -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- CONFIG -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['var(--font-main)', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                        serif: ['"Lora"', 'serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: 'rgb(var(--color-brand-50) / <alpha-value>)',
+                            100: 'rgb(var(--color-brand-100) / <alpha-value>)',
+                            500: 'rgb(var(--color-brand-500) / <alpha-value>)',
+                            600: 'rgb(var(--color-brand-600) / <alpha-value>)',
+                            900: 'rgb(var(--color-brand-900) / <alpha-value>)',
+                        },
+                        skin: {
+                            base: 'rgb(var(--color-bg-base) / <alpha-value>)',
+                            surface: 'rgb(var(--color-bg-surface) / <alpha-value>)',
+                            border: 'rgb(var(--color-border) / <alpha-value>)',
+                            text: 'rgb(var(--color-text-main) / <alpha-value>)',
+                            muted: 'rgb(var(--color-text-muted) / <alpha-value>)',
+                            accent: 'rgb(var(--color-accent) / <alpha-value>)',
+                        }
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'glow': '0 0 20px -5px rgb(var(--color-brand-500) / 0.4)',
+                    },
+                    borderRadius: {
+                        'theme': 'var(--radius-theme)',
+                    },
+                    animation: {
+                        'pop-in': 'popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'slide-up': 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                    },
+                    keyframes: {
+                        popIn: { '0%': { opacity: '0', transform: 'scale(0.95)' }, '100%': { opacity: '1', transform: 'scale(1)' } },
+                        slideUp: { '0%': { transform: 'translateY(20px)', opacity: '0' }, '100%': { transform: 'translateY(0)', opacity: '1' } }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* --- THEME VARIABLES --- */
+        :root { --radius-theme: 0.75rem; --font-main: 'Outfit'; }
+
+        /* Global Smooth Transition */
+        .transition-theme, body, .card-surface, .modern-input, .btn-secondary, header, aside, .nav-item, button, .modal-backdrop, select {
+            transition-property: background-color, border-color, color, fill, stroke, box-shadow, transform, filter, opacity;
+            transition-duration: 300ms;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* Body Overflow Fix - Prevents Mobile Horizontal Scroll */
+        body { 
+            background-color: rgb(var(--color-bg-base)); 
+            color: rgb(var(--color-text-main));
+            overflow-x: hidden; 
+        }
+
+        /* 1. MODERN (Default) */
+        [data-theme="modern"] {
+            --color-brand-50: 238 242 255; --color-brand-100: 224 231 255; --color-brand-500: 99 102 241; --color-brand-600: 79 70 229; --color-brand-900: 49 46 129;
+            --color-bg-base: 248 250 252; --color-bg-surface: 255 255 255; --color-border: 226 232 240;
+            --color-text-main: 15 23 42; --color-text-muted: 100 116 139; --radius-theme: 1rem; --font-main: 'Outfit';
+        }
+        [data-theme="modern"].dark {
+            --color-bg-base: 15 23 42; --color-bg-surface: 30 41 59; --color-border: 51 65 85;
+            --color-text-main: 241 245 249; --color-text-muted: 148 163 184;
+        }
+
+        /* 2. CYBER */
+        [data-theme="cyber"] {
+            --color-brand-50: 6 78 59; --color-brand-100: 6 95 70; --color-brand-500: 16 185 129; --color-brand-600: 5 150 105; --color-brand-900: 236 253 245;
+            --color-bg-base: 24 24 27; --color-bg-surface: 9 9 11; --color-border: 63 63 70;
+            --color-text-main: 228 228 231; --color-text-muted: 161 161 170; --radius-theme: 0px; --font-main: 'JetBrains Mono';
+        }
+        [data-theme="cyber"].light {
+            --color-bg-base: 245 245 245; --color-bg-surface: 255 255 255; --color-border: 212 212 212;
+            --color-text-main: 23 23 23; --color-text-muted: 82 82 82;
+        }
+
+        /* 3. LATTE */
+        [data-theme="latte"] {
+            --color-brand-50: 255 241 242; --color-brand-100: 255 228 230; --color-brand-500: 225 29 72; --color-brand-600: 190 18 60; --color-brand-900: 136 19 55;
+            --color-bg-base: 250 245 240; --color-bg-surface: 255 255 255; --color-border: 231 229 228;
+            --color-text-main: 68 64 60; --color-text-muted: 120 113 108; --radius-theme: 1.5rem; --font-main: 'Lora';
+        }
+        [data-theme="latte"].dark {
+            --color-bg-base: 41 37 36; --color-bg-surface: 28 25 23; --color-border: 68 64 60;
+            --color-text-main: 231 229 228; --color-text-muted: 168 162 158;
+        }
+
+        /* 4. OCEAN */
+        [data-theme="ocean"] {
+            --color-brand-50: 236 254 255; --color-brand-100: 207 250 254; --color-brand-500: 6 182 212; --color-brand-600: 8 145 178; --color-brand-900: 21 94 117;
+            --color-bg-base: 240 249 255; --color-bg-surface: 255 255 255; --color-border: 186 230 253;
+            --color-text-main: 12 74 110; --color-text-muted: 82 110 130; --radius-theme: 0.5rem; --font-main: 'Work Sans';
+        }
+        [data-theme="ocean"].dark {
+            --color-bg-base: 8 47 73; --color-bg-surface: 12 74 110; --color-border: 7 89 133;
+            --color-text-main: 224 242 254; --color-text-muted: 125 211 252;
+        }
+
+        /* 5. SUNSET */
+        [data-theme="sunset"] {
+            --color-brand-50: 255 247 237; --color-brand-100: 255 237 213; --color-brand-500: 249 115 22; --color-brand-600: 234 88 12; --color-brand-900: 154 52 18;
+            --color-bg-base: 255 250 245; --color-bg-surface: 255 255 255; --color-border: 254 215 170;
+            --color-text-main: 67 20 7; --color-text-muted: 154 52 18; --radius-theme: 1.25rem; --font-main: 'DM Sans';
+        }
+        [data-theme="sunset"].dark {
+            --color-bg-base: 67 20 7; --color-bg-surface: 124 45 18; --color-border: 154 52 18;
+            --color-text-main: 255 237 213; --color-text-muted: 253 186 116;
+        }
+
+        /* 6. FOREST */
+        [data-theme="forest"] {
+            --color-brand-50: 240 253 244; --color-brand-100: 220 252 231; --color-brand-500: 34 197 94; --color-brand-600: 22 163 74; --color-brand-900: 20 83 45;
+            --color-bg-base: 242 245 240; --color-bg-surface: 255 255 255; --color-border: 209 220 205;
+            --color-text-main: 20 83 45; --color-text-muted: 74 105 85; --radius-theme: 0.25rem; --font-main: 'Outfit';
+        }
+        [data-theme="forest"].dark {
+            --color-bg-base: 20 39 27; --color-bg-surface: 22 101 52; --color-border: 34 85 55;
+            --color-text-main: 240 253 244; --color-text-muted: 187 247 208;
+        }
+
+        .modern-input {
+            width: 100%; padding: 12px 16px;
+            background: rgb(var(--color-bg-base));
+            border: 1px solid rgb(var(--color-border));
+            border-radius: var(--radius-theme);
+            font-size: 0.95rem; outline: none;
+            color: rgb(var(--color-text-main));
+            font-family: var(--font-main);
+        }
+        .modern-input:focus {
+            border-color: rgb(var(--color-brand-500));
+            box-shadow: 0 0 0 3px rgb(var(--color-brand-500) / 0.15);
+        }
+
+        .btn-primary {
+            background: rgb(var(--color-brand-600)); color: white;
+            padding: 10px 20px; border-radius: var(--radius-theme);
+            font-weight: 500; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            transition: all 0.2s;
+        }
+        .btn-primary:hover {
+            filter: brightness(1.1); transform: translateY(-1px);
+            box-shadow: 0 8px 16px -4px rgb(var(--color-brand-500) / 0.4);
+        }
+
+        .btn-secondary {
+            background: rgb(var(--color-bg-surface)); color: rgb(var(--color-text-muted));
+            border: 1px solid rgb(var(--color-border));
+            padding: 10px 20px; border-radius: var(--radius-theme);
+            font-weight: 500; 
+        }
+        .btn-secondary:hover {
+            border-color: rgb(var(--color-brand-500) / 0.5);
+            color: rgb(var(--color-text-main));
+        }
+
+        .card-surface {
+            background-color: rgb(var(--color-bg-surface));
+            border: 1px solid rgb(var(--color-border));
+            border-radius: var(--radius-theme);
+        }
+        
+        .nav-item { border-radius: var(--radius-theme); }
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+        .timer-circle circle { transition: stroke-dashoffset 1s linear; }
+        
+        /* Modal Overlay centering */
+        .modal-backdrop {
+            background-color: rgba(0,0,0,0.4);
+            backdrop-filter: blur(4px);
+        }
+        
+        /* Theme Button styling */
+        .theme-btn {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 8px; border: 1px solid rgb(var(--color-border)); border-radius: var(--radius-theme);
+            cursor: pointer; transition: all 0.2s;
+        }
+        .theme-btn:hover { border-color: rgb(var(--color-brand-500)); background: rgb(var(--color-bg-base)); }
+        .theme-btn.active { border-color: rgb(var(--color-brand-500)); background: rgb(var(--color-brand-50)); }
+        .theme-preview { width: 100%; height: 8px; border-radius: 4px; margin-bottom: 4px; }
+        
+        /* Markdown bullet fix */
+        .desc-text ul { list-style-type: disc; padding-left: 1.5rem; }
+        .desc-text li { margin-bottom: 0.25rem; }
+        
+        /* Skeleton Pulse */
+        .skeleton {
+            background: rgb(var(--color-bg-base));
+            border-radius: 4px;
+        }
+        
+        .cram-active {
+            background: rgb(var(--color-brand-50));
+            border-color: rgb(var(--color-brand-500));
+            color: rgb(var(--color-brand-600));
+        }
+        
+        /* Highlight search */
+        .highlight-text {
+            background-color: rgba(255, 255, 0, 0.2);
+            color: inherit;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        /* DEEP FOCUS STATES */
+        body.deep-focus-active #view-app > *:not(#focus-modal-wrapper) {
+            filter: blur(12px) brightness(0.5) grayscale(0.5);
+            pointer-events: none;
+            transition: all 0.8s ease;
+        }
+        
+        body.deep-focus-active .zen-fade {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+        
+        #focus-modal-wrapper {
+            z-index: 9999;
+        }
+        
+        /* List View Styles */
+        .list-row {
+            display: grid;
+            grid-template-columns: 4px 2fr 1fr 1fr 1fr 120px;
+            align-items: center;
+            gap: 16px;
+            padding: 12px 16px;
+            border-bottom: 1px solid rgb(var(--color-border));
+            transition: background-color 0.2s;
+        }
+        .list-row:hover { background-color: rgb(var(--color-brand-50) / 0.3); }
+        .list-row:last-child { border-bottom: none; }
+        
+        /* Mobile List View */
+        @media (max-width: 768px) {
+            .list-row {
+                grid-template-columns: 4px 1fr auto;
+                gap: 8px;
+                padding: 8px 12px;
+            }
+            .list-row > *:nth-child(3), .list-row > *:nth-child(4), .list-row > *:nth-child(5) {
+                display: none; /* Hide intermediate cols on mobile */
+            }
+            .list-row > *:last-child {
+                display: flex; /* Ensure actions are shown */
+            }
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden font-sans selection:bg-brand-100 selection:text-brand-900 transition-theme">
+
+    <!-- AUDIO ENGINE -->
+    <div id="audio-engine"></div>
+
+    <!-- TOAST CONTAINER -->
+    <div id="toast-container" class="fixed bottom-24 md:bottom-6 right-4 md:right-6 z-[80] flex flex-col gap-3 pointer-events-none w-[90vw] md:w-auto max-w-sm"></div>
+
+    <!-- ================= AUTH VIEW ================= -->
+    <div id="view-auth" class="fixed inset-0 z-50 flex items-center justify-center p-6 bg-skin-base transition-theme">
+        <div class="w-full max-w-md card-surface p-8 relative z-10 animate-slide-up shadow-soft transition-theme">
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center justify-center w-14 h-14 rounded-theme bg-brand-600 text-white mb-4 shadow-lg shadow-brand-500/30">
+                    <i data-lucide="layers" class="w-7 h-7"></i>
+                </div>
+                <h1 class="text-3xl font-bold tracking-tight">Nexus</h1>
+                <p class="text-skin-muted mt-2 text-sm">Active Space Repetition System v13.4</p>
+            </div>
+
+            <div class="flex p-1 bg-skin-base rounded-theme mb-6 transition-theme">
+                <button onclick="switchAuthTab('login')" id="tab-login" class="flex-1 py-2.5 text-sm font-semibold rounded-theme shadow-sm card-surface transition-all">Sign In</button>
+                <button onclick="switchAuthTab('signup')" id="tab-signup" class="flex-1 py-2.5 text-sm font-medium text-skin-muted hover:text-skin-text transition-all">Register</button>
+            </div>
+
+            <div id="form-login" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-skin-muted mb-1.5 ml-1">CODENAME</label>
+                    <input type="text" id="login-user" class="modern-input transition-theme" placeholder="Enter your ID">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-skin-muted mb-1.5 ml-1">ACCESS KEY</label>
+                    <input type="password" id="login-pass" class="modern-input transition-theme" placeholder="••••••••">
+                </div>
+                <button onclick="performLogin()" class="btn-primary w-full mt-2 py-3 shadow-glow transition-theme">Start Session <i data-lucide="arrow-right" class="w-4 h-4"></i></button>
+            </div>
+
+            <div id="form-signup" class="space-y-4 hidden">
+                <div>
+                    <label class="block text-xs font-semibold text-skin-muted mb-1.5 ml-1">GENERATED ID</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="signup-user" class="modern-input font-mono font-medium text-brand-600 bg-brand-50 border-brand-100 transition-theme" readonly>
+                        <button onclick="generateCodename()" class="p-3 rounded-theme border border-skin-border hover:bg-skin-base transition-colors text-skin-muted"><i data-lucide="refresh-cw" class="w-5 h-5"></i></button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-skin-muted mb-1.5 ml-1">CREATE KEY</label>
+                    <input type="password" id="signup-pass" class="modern-input transition-theme" placeholder="New Password">
+                </div>
+                <button onclick="performSignup()" class="btn-primary w-full mt-2 py-3 shadow-glow transition-theme">Initialize System</button>
+            </div>
+            
+            <div id="auth-loader" class="hidden mt-6 flex justify-center"><div class="flex space-x-2"><div class="w-2 h-2 bg-brand-600 rounded-full animate-bounce"></div><div class="w-2 h-2 bg-brand-600 rounded-full animate-bounce delay-75"></div><div class="w-2 h-2 bg-brand-600 rounded-full animate-bounce delay-150"></div></div></div>
+        </div>
+    </div>
+
+    <!-- ================= APP VIEW ================= -->
+    <div id="view-app" class="hidden flex h-full relative z-10 bg-skin-base transition-theme">
+        
+        <!-- SIDEBAR -->
+        <aside class="hidden md:flex flex-col w-64 card-surface border-r-0 border-r border-skin-border h-full p-6 shadow-sm z-20 rounded-none transition-theme">
+            <div class="flex items-center gap-3 mb-8 px-2">
+                <div class="w-8 h-8 rounded-theme bg-brand-600 text-white flex items-center justify-center shadow-lg shadow-brand-500/20">
+                    <i data-lucide="layers" class="w-5 h-5"></i>
+                </div>
+                <span class="font-bold text-xl tracking-tight">Nexus</span>
+            </div>
+
+            <!-- LEVEL & XP BAR -->
+            <div class="mb-6 px-2">
+                <div class="flex justify-between items-end mb-1">
+                    <span class="text-xs font-bold text-brand-600">Lvl <span id="user-level">1</span></span>
+                    <span class="text-[10px] text-skin-muted" id="user-xp-text">0/100 XP</span>
+                </div>
+                <div class="w-full h-1.5 bg-skin-border rounded-full overflow-hidden">
+                    <div id="xp-bar" class="h-full bg-brand-500 transition-all duration-700" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <nav class="space-y-2 flex-1">
+                <button onclick="scrollToTop()" class="w-full flex items-center gap-3 px-4 py-3 bg-brand-50 text-brand-600 rounded-theme font-medium transition-colors border border-brand-100 transition-theme"><i data-lucide="layout-grid" class="w-6 h-6"></i> Dashboard</button>
+                <button onclick="openModal('focus-modal-wrapper')" class="w-full flex items-center gap-3 px-4 py-3 text-skin-muted hover:bg-skin-base hover:text-skin-text rounded-theme font-medium transition-colors transition-theme"><i data-lucide="timer" class="w-5 h-5"></i> Focus Mode</button>
+                <button onclick="openModal('profile-modal')" class="w-full flex items-center gap-3 px-4 py-3 text-skin-muted hover:bg-skin-base hover:text-skin-text rounded-theme font-medium transition-colors transition-theme"><i data-lucide="settings" class="w-5 h-5"></i> Settings</button>
+                <button onclick="openModal('help-modal')" class="w-full flex items-center gap-3 px-4 py-3 text-skin-muted hover:bg-skin-base hover:text-skin-text rounded-theme font-medium transition-colors transition-theme"><i data-lucide="keyboard" class="w-5 h-5"></i> Shortcuts</button>
+            </nav>
+            
+            <!-- DAILY GOAL WIDGET -->
+            <div class="p-4 mb-4 bg-skin-base rounded-theme border border-skin-border">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-xs font-bold text-skin-muted uppercase">Daily Goal</span>
+                    <span class="text-xs font-bold text-brand-600" id="daily-progress-text">0/10</span>
+                </div>
+                <div class="w-full h-2 bg-skin-border rounded-full overflow-hidden">
+                    <div id="daily-progress-bar" class="h-full bg-brand-500 transition-all duration-500" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- QUOTE AREA -->
+            <div class="mb-4 px-2">
+                <p id="daily-quote" class="text-xs text-skin-muted italic text-center">"Consistency is the key to mastery."</p>
+            </div>
+
+            <div class="mt-auto pt-6 border-t border-skin-border transition-theme">
+                <div class="flex items-center gap-3 mb-4 px-2">
+                    <div class="w-10 h-10 rounded-full bg-skin-base flex items-center justify-center text-skin-muted font-bold border border-skin-border transition-theme" id="sidebar-avatar">U</div>
+                    <div class="overflow-hidden">
+                        <div class="text-sm font-bold truncate" id="sidebar-name">User</div>
+                        <div class="text-xs text-skin-muted">Pro Plan</div>
+                    </div>
+                </div>
+                <button onclick="logout()" class="w-full flex items-center gap-2 text-sm text-red-500 hover:text-red-600 px-2 py-1 rounded-theme hover:bg-red-50 transition-colors"><i data-lucide="log-out" class="w-4 h-4"></i> Sign Out</button>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="flex-1 flex flex-col h-full overflow-hidden">
+            <header class="h-16 md:h-20 flex items-center justify-between px-6 md:px-10 border-b border-skin-border card-surface rounded-none sticky top-0 z-30 transition-theme">
+                <div class="flex items-center gap-6 flex-1 max-w-2xl">
+                    <div>
+                        <h2 class="text-xl md:text-2xl font-bold">Dashboard</h2>
+                        <div class="flex items-center gap-2 text-sm text-skin-muted"><span id="current-date">Fetching...</span>
+                            <!-- STREAK COUNTER (Mobile Visible) -->
+                            <div class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-50/50 border border-orange-200">
+                                <i data-lucide="flame" class="w-3.5 h-3.5 text-orange-500 fill-orange-500 animate-pulse"></i>
+                                <span class="text-xs font-bold text-orange-600" id="streak-count">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hidden md:block flex-1 max-w-sm ml-6">
+                        <div class="relative">
+                            <i data-lucide="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-skin-muted"></i>
+                            <input type="text" id="search-input" onkeyup="handleSearch(this.value)" class="modern-input pl-10 pr-9 transition-theme" placeholder="Search topics (or /cmd)...">
+                            <button class="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-skin-muted hover:text-skin-text hidden" id="clear-search-btn" onclick="clearSearch()"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 md:gap-4">
+                    <!-- VIEW TOGGLE -->
+                    <button onclick="toggleViewMode()" id="view-toggle-btn" class="p-2.5 rounded-theme bg-skin-base text-skin-muted hover:bg-skin-border transition-theme border border-transparent" title="Toggle List/Grid View">
+                        <i data-lucide="layout-grid" class="w-5 h-5"></i>
+                    </button>
+                    <!-- CRAM MODE -->
+                    <button onclick="toggleCram()" id="btn-cram" class="p-2.5 rounded-theme bg-skin-base text-skin-muted hover:bg-skin-border transition-theme flex items-center gap-2 border border-transparent" title="Cram Mode (Review Ahead)">
+                        <i data-lucide="zap" class="w-5 h-5"></i>
+                        <span class="hidden lg:inline text-xs font-bold">Cram</span>
+                    </button>
+
+                    <!-- SUBJECT FILTER -->
+                    <select id="filter-subject" onchange="renderGrid()" class="hidden md:block bg-transparent text-sm font-medium text-skin-muted border-none focus:ring-0 cursor-pointer transition-theme max-w-[120px]">
+                        <option value="all">All Subjects</option>
+                        <!-- Populated by JS -->
+                    </select>
+
+                    <select id="sort-select" onchange="renderGrid()" class="hidden md:block bg-transparent text-sm font-medium text-skin-muted border-none focus:ring-0 cursor-pointer transition-theme max-w-[100px]"><option value="urgency">Sort: Urgency</option><option value="level">Sort: Mastery</option><option value="newest">Sort: Newest</option></select>
+                    <button onclick="toggleThemeMode()" class="p-2.5 rounded-theme bg-skin-base text-skin-muted hover:bg-skin-border transition-theme"><i data-lucide="moon" class="w-5 h-5 hidden dark:block"></i><i data-lucide="sun" class="w-5 h-5 block dark:hidden"></i></button>
+                    <div class="hidden lg:flex items-center gap-6 mr-2 ml-2 transition-theme">
+                        <div class="text-right"><div class="text-xs font-semibold text-skin-muted uppercase tracking-wide">Pending</div><div class="text-lg font-bold text-brand-600" id="stat-pending">0</div></div>
+                        <div class="w-px h-8 bg-skin-border transition-theme"></div>
+                        <div class="text-right"><div class="text-xs font-semibold text-skin-muted uppercase tracking-wide">Retention</div><div class="text-lg font-bold text-skin-text" id="stat-retention">0%</div></div>
+                    </div>
+                    <button onclick="openModal('add-modal')" class="btn-primary shadow-glow transition-theme flex items-center gap-2"><i data-lucide="plus" class="w-5 h-5 !text-white"></i> <span class="hidden sm:inline">New Topic</span></button>
+                </div>
+            </header>
+            
+            <div class="md:hidden px-4 py-2 card-surface border-b border-skin-border z-20 rounded-none transition-theme flex gap-2">
+                <div class="relative flex-1"><i data-lucide="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-skin-muted"></i><input type="text" id="search-input-mobile" onkeyup="handleSearch(this.value)" class="modern-input pl-10 transition-theme" placeholder="Search..."></div>
+                <select id="filter-subject-mobile" onchange="renderGrid()" class="modern-input w-24 text-xs p-2"><option value="all">All</option></select>
+            </div>
+
+            <div id="main-scroll" class="flex-1 overflow-y-auto p-4 md:p-10 scroll-smooth">
+                <!-- CHARTS -->
+                <div id="analytics-section" class="mb-10 hidden animate-fade-in">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                        <!-- Chart 1 -->
+                        <div class="card-surface p-4 md:p-6 shadow-soft transition-theme relative" id="chart-card-levels">
+                            <div class="chart-header flex items-center justify-between mb-4">
+                                <h3 class="font-bold flex items-center gap-2"><i data-lucide="pie-chart" class="w-5 h-5 text-brand-500"></i> Mastery</h3>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs font-medium bg-skin-base text-skin-muted px-2 py-1 rounded-md transition-theme">Distribution</span>
+                                    <button onclick="toggleGraph('chart-card-levels')" class="toggle-btn text-skin-muted hover:text-brand-600 transition-colors"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                                </div>
+                            </div>
+                            <div class="chart-wrapper h-36 md:h-56 w-full relative flex justify-center transition-all duration-300"><canvas id="chart-levels"></canvas></div>
+                        </div>
+                        <!-- Chart 2 -->
+                        <div class="card-surface p-4 md:p-6 shadow-soft transition-theme relative" id="chart-card-forecast">
+                            <div class="chart-header flex items-center justify-between mb-4">
+                                <h3 class="font-bold flex items-center gap-2"><i data-lucide="activity" class="w-5 h-5 text-brand-500"></i> Forecast</h3>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs font-medium bg-brand-50 text-brand-600 px-2 py-1 rounded-md transition-theme">Next 7 Days</span>
+                                    <button onclick="toggleGraph('chart-card-forecast')" class="toggle-btn text-skin-muted hover:text-brand-600 transition-colors"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                                </div>
+                            </div>
+                            <div class="chart-wrapper h-36 md:h-56 w-full relative transition-all duration-300"><canvas id="chart-forecast"></canvas></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="topic-grid" class="grid gap-4 md:gap-6 pb-24 transition-all duration-300"></div>
+                
+                <div id="empty-state" class="hidden h-96 flex flex-col items-center justify-center text-center animate-fade-in"><div class="w-32 h-32 bg-skin-base rounded-full flex items-center justify-center mb-6 relative transition-theme"><div class="absolute inset-0 border-4 border-skin-surface rounded-full shadow-sm transition-theme"></div><i data-lucide="inbox" class="w-12 h-12 text-skin-muted"></i></div><h3 class="text-xl font-bold">All clear for now</h3><p class="text-skin-muted mt-2 max-w-xs mx-auto">No topics match your filter.</p><button onclick="openModal('add-modal')" class="mt-8 text-brand-600 font-semibold hover:text-brand-700 flex items-center gap-2">Create first topic <i data-lucide="arrow-right" class="w-4 h-4"></i></button></div>
+            </div>
+
+            <!-- MOBILE BOTTOM NAV -->
+            <div class="md:hidden card-surface border-t border-skin-border px-6 py-3 flex justify-around items-center sticky bottom-0 z-30 pb-safe shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] transition-theme rounded-none">
+                <button onclick="scrollToTop()" class="flex flex-col items-center gap-1 text-brand-600 transition-transform active:scale-95"><i data-lucide="layout-grid" class="w-6 h-6"></i><span class="text-[10px] font-medium">Home</span></button>
+                <button onclick="openModal('add-modal')" class="bg-brand-600 text-white p-3.5 rounded-full -mt-10 shadow-lg shadow-brand-500/40 border-4 border-skin-base transition-transform active:scale-90 transition-theme"><i data-lucide="plus" class="w-6 h-6"></i></button>
+                <button onclick="openModal('focus-modal-wrapper')" class="flex flex-col items-center gap-1 text-skin-muted hover:text-skin-text transition-transform active:scale-95"><i data-lucide="timer" class="w-6 h-6"></i><span class="text-[10px] font-medium">Focus</span></button>
+                <button onclick="openModal('profile-modal')" class="flex flex-col items-center gap-1 text-skin-muted hover:text-skin-text transition-transform active:scale-95"><i data-lucide="user" class="w-6 h-6"></i><span class="text-[10px] font-medium">Profile</span></button>
+            </div>
+        </main>
+    </div>
+
+    <!-- ================= MODALS ================= -->
+    
+    <!-- ADD/EDIT MODAL -->
+    <div id="add-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center">
+        <div class="absolute inset-0 modal-backdrop transition-opacity" onclick="closeModal('add-modal')"></div>
+        <div class="w-full max-w-lg card-surface p-8 relative z-10 animate-pop-in shadow-2xl m-4 transition-theme">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold flex items-center gap-2"><span id="modal-title">New Topic</span></h3>
+                <button onclick="closeModal('add-modal')" class="p-2 bg-skin-base rounded-full hover:bg-skin-border transition-colors transition-theme"><i data-lucide="x" class="w-4 h-4 text-skin-muted"></i></button>
+            </div>
+            <input type="hidden" id="edit-topic-id">
+            
+            <!-- TABS FOR ADD MODE -->
+            <div id="add-tabs" class="flex gap-2 mb-4 border-b border-skin-border pb-2">
+                <button onclick="switchAddMode('single')" id="tab-single" class="text-sm font-bold text-brand-600 border-b-2 border-brand-500 pb-1">Single</button>
+                <button onclick="switchAddMode('bulk')" id="tab-bulk" class="text-sm font-bold text-skin-muted hover:text-skin-text pb-1">Bulk Add</button>
+            </div>
+
+            <!-- SINGLE ADD FORM -->
+            <div id="form-single" class="space-y-5">
+                <div>
+                    <label class="block text-sm font-semibold text-skin-muted mb-2">Topic Name</label>
+                    <input type="text" id="new-topic-name" class="modern-input transition-theme" placeholder="e.g. React Hooks">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-skin-muted mb-2">Subject</label>
+                    <div class="flex gap-2">
+                        <select id="new-topic-subject" class="modern-input transition-theme flex-1">
+                            <!-- Populated by JS -->
+                        </select>
+                        <button onclick="openSubjectModal()" class="btn-secondary w-10 flex items-center justify-center !text-brand-600 hover:bg-brand-50" title="Add new subject">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                        </button>
+                    </div>
+                </div>
+                <!-- RESOURCE LINK -->
+                <div>
+                    <label class="block text-sm font-semibold text-skin-muted mb-2">Resource Link (Optional)</label>
+                    <div class="flex gap-2">
+                        <div class="flex items-center justify-center w-10 bg-skin-base border border-skin-border rounded-l-theme text-skin-muted"><i data-lucide="link" class="w-4 h-4"></i></div>
+                        <input type="url" id="new-topic-link" class="modern-input rounded-l-none transition-theme" placeholder="https://youtube.com/...">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-skin-muted mb-2">Description / Notes (Supports - bullets)</label>
+                    <textarea id="new-topic-desc" class="modern-input h-32 resize-none transition-theme" placeholder="Brief details about this topic..."></textarea>
+                </div>
+            </div>
+
+            <!-- BULK ADD FORM -->
+            <div id="form-bulk" class="hidden space-y-4">
+                <p class="text-xs text-skin-muted">Paste lines in format: <strong>Topic Name | Subject</strong></p>
+                <textarea id="bulk-input" class="modern-input h-48 resize-none font-mono text-xs" placeholder="React Hooks | Development&#10;Color Theory | Design&#10;Photosynthesis | Science"></textarea>
+            </div>
+
+            <div class="mt-8 flex gap-3">
+                <div id="reset-btn-container" class="hidden">
+                    <button onclick="resetTopicLevel()" class="px-4 py-2 bg-red-50 text-red-600 rounded-theme text-sm font-bold border border-red-100 hover:bg-red-100 transition-colors">Reset Lvl</button>
+                </div>
+                <div class="flex-1"></div>
+                <button onclick="closeModal('add-modal')" class="flex-1 btn-secondary justify-center transition-theme">Cancel</button>
+                <button onclick="saveTopic()" class="flex-1 btn-primary shadow-glow transition-theme">Save (Enter)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- QUICK SUBJECT MODAL -->
+    <div id="subject-modal" class="fixed inset-0 z-[200] hidden flex items-center justify-center">
+        <div class="absolute inset-0 modal-backdrop transition-opacity" onclick="closeModal('subject-modal')"></div>
+        <div class="w-full max-w-sm card-surface p-6 relative z-10 animate-pop-in shadow-2xl m-4 transition-theme">
+            <h3 class="text-lg font-bold mb-4">Add New Subject</h3>
+            <input type="text" id="quick-subject-input" class="modern-input mb-4" placeholder="Subject Name...">
+            <div class="flex gap-2 justify-end">
+                <button onclick="closeModal('subject-modal')" class="btn-secondary text-xs">Cancel</button>
+                <button onclick="saveQuickSubject()" class="btn-primary text-xs shadow-glow">Add</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ZEN READER MODAL -->
+    <div id="read-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center">
+        <div class="absolute inset-0 modal-backdrop transition-opacity" onclick="closeModal('read-modal')"></div>
+        <div class="w-full max-w-2xl card-surface p-8 relative z-10 animate-pop-in shadow-2xl m-4 transition-theme max-h-[80vh] overflow-y-auto">
+            <div class="flex justify-between items-start mb-6">
+                <div class="flex-1">
+                    <span id="read-subject" class="text-xs font-bold uppercase tracking-wider px-2 py-1 rounded-md border mb-2 inline-block"></span>
+                    <h3 class="text-2xl font-bold transition-theme mb-2" id="read-title"></h3>
+                    
+                    <!-- New Meta Row -->
+                    <div class="flex flex-wrap items-center gap-4 text-sm text-skin-muted mt-2" id="read-meta-row">
+                        <span id="read-date" class="flex items-center gap-1 font-medium text-skin-text"><i data-lucide="calendar" class="w-4 h-4"></i> <span></span></span>
+                        <span id="read-level" class="flex items-center gap-1"><i data-lucide="bar-chart" class="w-4 h-4"></i> <span></span></span>
+                        <span id="read-status" class="flex gap-2"></span>
+                    </div>
+                </div>
+                <button onclick="closeModal('read-modal')" class="p-2 bg-skin-base rounded-full hover:bg-skin-border transition-colors transition-theme ml-4"><i data-lucide="x" class="w-4 h-4 text-skin-muted"></i></button>
+            </div>
+
+            <!-- Resource Link Button -->
+            <div id="read-link-section" class="mb-6 hidden">
+                <a id="read-link-action" href="#" target="_blank" class="flex items-center gap-2 p-3 rounded-theme bg-brand-50 dark:bg-brand-900/30 text-brand-600 dark:text-brand-400 border border-brand-100 dark:border-brand-800 hover:bg-brand-100 dark:hover:bg-brand-900/50 transition-colors w-full justify-center font-medium">
+                    <i data-lucide="external-link" class="w-4 h-4"></i> Open Resource
+                </a>
+            </div>
+
+            <div class="w-full h-px bg-skin-border mb-6"></div>
+
+            <div id="read-content" class="desc-text text-skin-text leading-relaxed text-lg whitespace-pre-line"></div>
+            
+            <div class="mt-8 flex justify-end">
+                <button onclick="closeModal('read-modal')" class="btn-primary shadow-glow transition-theme">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOCUS MODAL (ZEN) -->
+    <div id="focus-modal-wrapper" class="fixed inset-0 z-[200] hidden flex items-center justify-center pointer-events-none">
+        <div id="focus-modal" class="w-full max-w-sm card-surface rounded-theme shadow-2xl p-8 relative z-10 animate-pop-in text-center m-4 transition-theme pointer-events-auto">
+            <div class="zen-fade mb-6 transition-opacity duration-300">
+                <h3 class="text-2xl font-bold">Focus Mode</h3>
+                <p class="text-skin-muted text-sm" id="focus-status-text">Deep work session</p>
+            </div>
+            
+            <div class="relative w-48 h-48 mx-auto mb-8 cursor-pointer group" onclick="if(isTimerRunning) toggleTimer()">
+                <svg class="w-full h-full -rotate-90" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" stroke-width="6" class="text-skin-border transition-theme" /><circle id="timer-progress" cx="50" cy="50" r="45" fill="none" stroke="currentColor" stroke-width="6" class="text-brand-500 timer-circle" stroke-dasharray="283" stroke-dashoffset="0" stroke-linecap="round" /></svg>
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-4xl font-mono font-bold transition-transform group-hover:scale-105" id="timer-display">25:00</div>
+                <!-- Hidden Pause Icon Overlay for Zen Mode -->
+                <div id="zen-pause-overlay" class="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 transition-opacity duration-300 pointer-events-none">
+                    <i data-lucide="pause" class="w-12 h-12 text-white"></i>
+                </div>
+            </div>
+            
+            <div class="zen-fade transition-opacity duration-300 space-y-6">
+                <!-- MODE TOGGLES -->
+                <div class="flex justify-center gap-2">
+                    <button onclick="setTimerMode(25)" class="px-3 py-1 rounded-theme text-xs font-bold border border-skin-border hover:bg-skin-base transition-colors">Focus</button>
+                    <button onclick="setTimerMode(5)" class="px-3 py-1 rounded-theme text-xs font-bold border border-skin-border hover:bg-skin-base transition-colors">Short</button>
+                    <button onclick="setTimerMode(15)" class="px-3 py-1 rounded-theme text-xs font-bold border border-skin-border hover:bg-skin-base transition-colors">Long</button>
+                </div>
+                
+                <div class="flex flex-col gap-3 bg-skin-base p-4 rounded-theme border border-skin-border">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-bold text-skin-text">Rain Mode</span>
+                        <div class="flex items-center gap-2">
+                            <input type="range" min="0" max="1" step="0.1" value="0.5" class="w-16 h-1 bg-skin-border rounded-lg appearance-none cursor-pointer accent-brand-600" oninput="updateVolume(this.value)">
+                            <button id="noise-toggle" onclick="toggleNoise()" class="w-10 h-5 bg-skin-border rounded-full relative transition-colors duration-300">
+                                <div id="noise-knob" class="absolute left-1 top-1 w-3 h-3 bg-white rounded-full transition-transform duration-300"></div>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="w-full h-px bg-skin-border"></div>
+                    <a href="https://rainymood.com" target="_blank" class="text-xs text-skin-muted hover:text-brand-500 flex items-center justify-center gap-1 transition-colors">
+                        Open RainyMood.com <i data-lucide="external-link" class="w-3 h-3"></i>
+                    </a>
+                </div>
+
+                <div class="flex gap-4 justify-center">
+                    <button id="btn-timer-toggle" onclick="toggleTimer()" class="btn-primary w-32 shadow-glow transition-theme">Start</button>
+                    <button onclick="resetTimer()" class="btn-secondary w-32 transition-theme">Reset</button>
+                </div>
+                
+                <div class="mt-4 text-xs text-skin-muted">Sessions Completed: <span id="session-counter" class="font-bold text-brand-600">0</span></div>
+            </div>
+            
+            <button onclick="closeModal('focus-modal-wrapper')" class="absolute top-4 right-4 p-2 text-skin-muted hover:text-skin-text zen-fade transition-opacity duration-300"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+        <div id="focus-backdrop" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[150] transition-opacity duration-500 opacity-0 pointer-events-none"></div>
+    </div>
+
+    <!-- SETTINGS MODAL -->
+    <div id="profile-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center">
+        <div class="absolute inset-0 modal-backdrop transition-opacity" onclick="closeModal('profile-modal')"></div>
+        <div class="w-full max-w-lg card-surface rounded-theme shadow-2xl p-8 relative z-10 animate-pop-in m-4 transition-theme h-[80vh] overflow-y-auto">
+            <div class="text-center mb-6">
+                <div class="w-20 h-20 bg-brand-100 text-brand-600 rounded-full flex items-center justify-center text-3xl font-bold mx-auto mb-3 border-4 border-skin-surface shadow-lg transition-theme" id="profile-avatar-lg">U</div>
+                <h2 class="text-xl font-bold" id="profile-name-lg">User</h2>
+                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-skin-base text-skin-muted text-xs font-semibold mt-1 transition-theme"><i data-lucide="shield-check" class="w-3 h-3"></i> Pro Account</div>
+            </div>
+            
+            <div class="space-y-4 mb-6">
+                <div class="bg-skin-base rounded-theme p-4 border border-skin-border transition-theme">
+                    <label class="block text-xs font-semibold text-skin-muted uppercase tracking-wide mb-3 text-center">Interface Theme</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div onclick="setTheme('modern')" class="theme-btn group"><div class="theme-preview bg-indigo-500"></div><span class="text-xs font-bold text-skin-text">Modern</span></div>
+                        <div onclick="setTheme('cyber')" class="theme-btn group"><div class="theme-preview bg-emerald-500"></div><span class="text-xs font-bold text-skin-text">Cyber</span></div>
+                        <div onclick="setTheme('latte')" class="theme-btn group"><div class="theme-preview bg-rose-500"></div><span class="text-xs font-bold text-skin-text">Latte</span></div>
+                        <div onclick="setTheme('ocean')" class="theme-btn group"><div class="theme-preview bg-cyan-500"></div><span class="text-xs font-bold text-skin-text">Ocean</span></div>
+                        <div onclick="setTheme('sunset')" class="theme-btn group"><div class="theme-preview bg-orange-500"></div><span class="text-xs font-bold text-skin-text">Sunset</span></div>
+                        <div onclick="setTheme('forest')" class="theme-btn group"><div class="theme-preview bg-green-600"></div><span class="text-xs font-bold text-skin-text">Forest</span></div>
+                    </div>
+                </div>
+
+                <!-- MANAGE SUBJECTS -->
+                <div class="bg-skin-base rounded-theme p-4 border border-skin-border transition-theme">
+                    <label class="block text-xs font-semibold text-skin-muted uppercase tracking-wide mb-3 text-center">Manage Subjects</label>
+                    <div id="subject-list" class="flex flex-wrap gap-2 mb-3">
+                        <!-- Populated by JS -->
+                    </div>
+                    <div class="flex gap-2">
+                        <input type="text" id="new-subject-input" class="modern-input text-xs h-9" placeholder="New Subject name...">
+                        <button onclick="addNewSubject()" class="btn-secondary h-9 w-9 flex items-center justify-center p-0"><i data-lucide="plus" class="w-4 h-4"></i></button>
+                    </div>
+                </div>
+
+                <!-- PREFERENCES -->
+                <div class="bg-skin-base rounded-theme p-4 border border-skin-border transition-theme space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-skin-muted uppercase tracking-wide mb-2 text-center">Grid Density</label>
+                        <div class="flex items-center justify-between gap-4 px-2">
+                            <span class="text-xs text-skin-muted">Wide</span>
+                            <input type="range" min="3" max="5" step="1" id="grid-density-slider" onchange="updateGridDensity(this.value)" class="w-full h-2 bg-skin-border rounded-lg appearance-none cursor-pointer accent-brand-600">
+                            <span class="text-xs text-skin-muted">Compact</span>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center px-2">
+                        <span class="text-sm font-medium text-skin-text">Sound Effects</span>
+                        <button onclick="toggleMute()" id="mute-btn" class="p-2 rounded-lg bg-skin-surface border border-skin-border text-skin-muted hover:text-skin-text"><i data-lucide="volume-2" class="w-4 h-4"></i></button>
+                    </div>
+                    <div class="flex justify-between items-center px-2">
+                        <span class="text-sm font-medium text-skin-text">Show Archived</span>
+                        <button onclick="toggleShowArchive()" id="archive-toggle-btn" class="p-2 rounded-lg bg-skin-surface border border-skin-border text-skin-muted hover:text-skin-text"><i data-lucide="eye-off" class="w-4 h-4"></i></button>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-skin-muted uppercase tracking-wide mb-2 text-center">Daily Goal</label>
+                        <input type="number" id="goal-input" onchange="updateGoal(this.value)" class="modern-input text-center" value="10" min="1">
+                    </div>
+                    <!-- COPY JSON BUTTON (NEW) -->
+                    <div class="flex justify-between items-center px-2">
+                         <span class="text-sm font-medium text-skin-text">Quick Backup</span>
+                         <button onclick="copyData()" class="text-xs bg-skin-surface border border-skin-border px-3 py-1.5 rounded-lg hover:border-brand-500 transition-colors">Copy JSON</button>
+                    </div>
+                    
+                    <!-- NOTIFICATION BUTTON -->
+                    <div class="flex justify-between items-center px-2">
+                         <span class="text-sm font-medium text-skin-text">Reminders</span>
+                         <button onclick="requestNotificationPermission()" class="text-xs bg-skin-surface border border-skin-border px-3 py-1.5 rounded-lg hover:border-brand-500 transition-colors">Enable Alerts</button>
+                    </div>
+
+                    <!-- ICS DOWNLOAD BUTTON -->
+                    <div class="flex justify-between items-center px-2">
+                        <span class="text-sm font-medium text-skin-text">Sync Calendar</span>
+                        <button onclick="downloadSchedule()" class="text-xs bg-skin-surface border border-skin-border px-3 py-1.5 rounded-lg hover:border-brand-500 transition-colors flex items-center gap-1"><i data-lucide="download" class="w-3 h-3"></i> Get .ics</button>
+                   </div>
+                </div>
+                
+                <div class="bg-skin-base rounded-theme p-4 border border-skin-border transition-theme">
+                    <label class="block text-xs font-semibold text-skin-muted uppercase tracking-wide mb-3 text-center">Data</label>
+                    <div class="flex gap-2">
+                        <button onclick="exportData('json')" class="flex-1 py-2 btn-secondary text-xs transition-theme"><i data-lucide="download" class="w-3 h-3 inline mr-1"></i> JSON</button>
+                        <button onclick="exportData('csv')" class="flex-1 py-2 btn-secondary text-xs transition-theme"><i data-lucide="file-text" class="w-3 h-3 inline mr-1"></i> CSV</button>
+                        <button onclick="document.getElementById('import-file').click()" class="flex-1 py-2 btn-secondary text-xs transition-theme"><i data-lucide="upload" class="w-3 h-3 inline mr-1"></i> Restore</button>
+                        <input type="file" id="import-file" class="hidden" accept=".json" onchange="importData(this)">
+                    </div>
+                </div>
+            </div>
+            <button onclick="saveSettings()" class="btn-primary w-full mb-3 py-3 shadow-glow transition-theme">Save & Close</button>
+            <button onclick="logout()" class="w-full py-3 text-red-500 text-sm font-medium hover:bg-red-50 rounded-theme transition-colors">Sign Out</button>
+        </div>
+    </div>
+
+    <!-- HELP MODAL -->
+    <div id="help-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center">
+        <div class="absolute inset-0 modal-backdrop transition-opacity" onclick="closeModal('help-modal')"></div>
+        <div class="w-full max-w-sm card-surface rounded-theme shadow-2xl p-8 relative z-10 animate-pop-in m-4 transition-theme">
+            <h3 class="text-xl font-bold mb-4">Shortcuts</h3>
+            <div class="space-y-3 text-sm text-skin-muted">
+                <div class="flex justify-between"><span>New Topic</span><span class="font-mono bg-skin-base px-2 rounded border border-skin-border">N</span></div>
+                <div class="flex justify-between"><span>Search</span><span class="font-mono bg-skin-base px-2 rounded border border-skin-border">/</span></div>
+                <div class="flex justify-between"><span>Surprise Review</span><span class="font-mono bg-skin-base px-2 rounded border border-skin-border">Shift + R</span></div>
+                <div class="flex justify-between"><span>Close Modal</span><span class="font-mono bg-skin-base px-2 rounded border border-skin-border">Esc</span></div>
+                <div class="flex justify-between"><span>Save Topic</span><span class="font-mono bg-skin-base px-2 rounded border border-skin-border">Enter</span></div>
+                <div class="flex justify-between"><span>Help</span><span class="font-mono bg-skin-base px-2 rounded border border-skin-border">?</span></div>
+            </div>
+            <button onclick="closeModal('help-modal')" class="absolute top-4 right-4 p-2 text-skin-muted hover:text-skin-text"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+    </div>
+
+    <script>
+        // =================================================================
+        // 🎵 PASTE YOUR AUDIO LINK HERE (MP3/OGG)
+        // =================================================================
+        const FOCUS_AUDIO_URL = 'https://upload.wikimedia.org/wikipedia/commons/e/e6/Rain_sound.ogg';
+
+        // ---------------------------------------------------------
+        // PASTE YOUR V6.7 GOOGLE SCRIPT URL HERE
+        // ---------------------------------------------------------
+        const GOOGLE_SCRIPT_URL = ''; 
+        // ---------------------------------------------------------
+        
+        const wordsA = ["Alpha", "Beta", "Gamma", "Delta", "Neo", "Prime", "Flux", "Core", "Zen", "Nova"];
+        const wordsB = ["Pilot", "Scout", "Mind", "Flow", "Spark", "Wave", "Link", "Sync", "Pulse", "Drift"];
+        
+        const subjectStyles = [
+            'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border-blue-200 dark:border-blue-800',
+            'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 border-green-200 dark:border-green-800',
+            'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 border-purple-200 dark:border-purple-800',
+            'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300 border-pink-200 dark:border-pink-800',
+            'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800',
+            'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300 border-orange-200 dark:border-orange-800',
+            'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300 border-teal-200 dark:border-teal-800',
+            'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800',
+        ];
+
+        const defaultSubjects = ['General', 'Development', 'Design', 'Science', 'Language', 'Business'];
+
+        const quotes = [
+            "Consistency is the key to mastery.",
+            "Review a little, remember a lot.",
+            "Knowledge is power.",
+            "Progress, not perfection.",
+            "Build your second brain."
+        ];
+
+        let state = { 
+            user: null, 
+            hex: null, 
+            time: "09:00", 
+            topics: [], 
+            lastLogin: null, 
+            streak: 0, 
+            theme: 'modern', 
+            gridCols: 4, 
+            mute: false, 
+            dailyGoal: 10, 
+            dailyProgress: 0, 
+            cramMode: false, 
+            showArchived: false,
+            subjects: [],
+            xp: 0,
+            level: 1,
+            focusSessionCount: 0,
+            viewMode: 'grid'
+        };
+        let retentionChart = null, forecastChart = null, timerInterval, timeLeft = 25 * 60, isTimerRunning = false, currentTimerMode = 25;
+        let lastUndoAction = null; 
+        let addMode = 'single';
+        let lastReviewedTopicId = null; 
+        
+        // Simple HTML5 Audio
+        let focusAudio = new Audio(FOCUS_AUDIO_URL);
+        focusAudio.loop = true;
+        let isNoisePlaying = false;
+
+        // --- STYLE HELPER ---
+        function getSubjectStyle(name) {
+            let hash = 0;
+            for (let i = 0; i < name.length; i++) { hash = name.charCodeAt(i) + ((hash << 5) - hash); }
+            const index = Math.abs(hash) % subjectStyles.length;
+            return subjectStyles[index];
+        }
+
+        const sfx = {
+            ctx: null,
+            init: function() { try { window.AudioContext = window.AudioContext || window.webkitAudioContext; this.ctx = new AudioContext(); } catch(e) {} },
+            play: function(freq, type, duration, vol=0.05) {
+                if (state.mute) return;
+                try { if (!this.ctx) this.init(); if (!this.ctx) return; 
+                    const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain();
+                    osc.type = type; osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                    gain.gain.setValueAtTime(vol, this.ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+                    osc.connect(gain); gain.connect(this.ctx.destination); osc.start(); osc.stop(this.ctx.currentTime + duration);
+                } catch(e) {}
+            },
+            click: () => sfx.play(600, 'sine', 0.05, 0.02),
+            success: () => { sfx.play(440, 'sine', 0.1, 0.05); setTimeout(() => sfx.play(554, 'sine', 0.2, 0.05), 100); },
+            celebrate: () => { sfx.play(523.25, 'triangle', 0.1, 0.05); setTimeout(() => sfx.play(659.25, 'triangle', 0.1, 0.05), 100); setTimeout(() => sfx.play(783.99, 'triangle', 0.2, 0.05), 200); },
+            error: () => sfx.play(150, 'sawtooth', 0.2, 0.05),
+            bell: () => sfx.play(880, 'sine', 1.5, 0.1),
+            levelup: () => {
+                sfx.play(440, 'sine', 0.1, 0.05); setTimeout(() => sfx.play(554, 'sine', 0.1, 0.05), 100);
+                setTimeout(() => sfx.play(659, 'sine', 0.1, 0.05), 200); setTimeout(() => sfx.play(880, 'sine', 0.3, 0.05), 300);
+            }
+        };
+
+        // --- FOCUS AUDIO ---
+        function toggleNoise() {
+            const toggle = document.getElementById('noise-toggle');
+            const knob = document.getElementById('noise-knob');
+            
+            if(isNoisePlaying) {
+                // Disarm
+                isNoisePlaying = false;
+                toggle.classList.remove('bg-brand-500'); toggle.classList.add('bg-skin-border');
+                knob.style.transform = 'translateX(0)';
+                // Stop audio if it was playing (user paused while armed)
+                focusAudio.pause();
+            } else {
+                // Arm
+                isNoisePlaying = true;
+                toggle.classList.add('bg-brand-500'); toggle.classList.remove('bg-skin-border');
+                knob.style.transform = 'translateX(1.5rem)';
+                // If timer is already running, start sound immediately
+                if(isTimerRunning) {
+                     focusAudio.volume = parseFloat(document.querySelector('input[type="range"][step="0.1"]').value);
+                     focusAudio.play().catch(e => console.log(e));
+                }
+            }
+        }
+
+        function updateVolume(val) {
+            if(focusAudio) focusAudio.volume = parseFloat(val);
+        }
+
+        function showToast(message, type = 'success', hasUndo = false) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const bgClass = type === 'success' ? 'bg-slate-900 text-white' : 'bg-red-500 text-white';
+            toast.className = `${bgClass} shadow-xl rounded-xl px-4 py-3 flex items-center gap-3 min-w-[300px] animate-slide-in-right pointer-events-auto transition-all`;
+            let html = `<div class="flex items-center gap-2 flex-1"><i data-lucide="${type === 'success' ? 'check-circle' : 'alert-circle'}" class="w-5 h-5"></i><span class="text-sm font-medium">${message}</span></div>`;
+            if(hasUndo && lastUndoAction) html += `<button onclick="triggerUndo()" class="ml-4 text-xs font-bold underline hover:opacity-80">UNDO</button>`;
+            toast.innerHTML = html;
+            container.appendChild(toast); lucide.createIcons();
+            setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateY(10px)'; setTimeout(() => toast.remove(), 300); }, 4000);
+        }
+
+        function triggerUndo() { if(lastUndoAction) { lastUndoAction(); lastUndoAction = null; } }
+
+        function toggleGraph(cardId) {
+            const card = document.getElementById(cardId);
+            const wrapper = card.querySelector('.chart-wrapper');
+            const header = card.querySelector('.chart-header');
+            const btn = card.querySelector('.toggle-btn');
+            
+            const isHidden = wrapper.classList.contains('hidden');
+            
+            if (isHidden) {
+                // Show
+                wrapper.classList.remove('hidden');
+                header.classList.replace('mb-0', 'mb-4');
+                btn.innerHTML = '<i data-lucide="eye" class="w-4 h-4"></i>';
+            } else {
+                // Hide (Collapse)
+                wrapper.classList.add('hidden');
+                header.classList.replace('mb-4', 'mb-0');
+                btn.innerHTML = '<i data-lucide="eye-off" class="w-4 h-4"></i>';
+            }
+            lucide.createIcons();
+        }
+
+        // --- NOTIFICATIONS ---
+        function requestNotificationPermission() {
+            if (!("Notification" in window)) {
+                alert("This browser does not support desktop notification");
+            } else if (Notification.permission === "granted") {
+                showToast("Notifications already active");
+            } else if (Notification.permission !== "denied") {
+                Notification.requestPermission().then(function (permission) {
+                    if (permission === "granted") {
+                        showToast("Notifications enabled!");
+                        new Notification("Nexus Pro", { body: "You will be reminded to study!" });
+                    }
+                });
+            }
+        }
+
+        function checkScheduledNotifications() {
+             if (Notification.permission !== "granted") return;
+             const now = new Date();
+             const currentHour = now.getHours();
+             const currentMin = now.getMinutes();
+             
+             // Simple check: Is it 9:00 AM? (state.time)
+             if(state.time) {
+                 const [h, m] = state.time.split(':').map(Number);
+                 if(currentHour === h && currentMin === m) {
+                     // Check if notification already sent today to avoid spam
+                     const lastSent = localStorage.getItem('nexus_last_notif');
+                     const todayStr = now.toDateString();
+                     if(lastSent !== todayStr) {
+                         const pendingCount = state.topics.filter(t => !t.archived && new Date() >= new Date(t.nextReview).setHours(0,0,0,0)).length;
+                         if(pendingCount > 0) {
+                             new Notification("Study Time!", { body: `You have ${pendingCount} topics to review today.`, icon: "https://cdn.jsdelivr.net/npm/lucide-static@0.447.0/icons/layers.svg" });
+                             localStorage.setItem('nexus_last_notif', todayStr);
+                         }
+                     }
+                 }
+             }
+        }
+        
+        // Check every minute
+        setInterval(checkScheduledNotifications, 60000);
+
+        // --- ICS GENERATOR (Offline Calendar) ---
+        function downloadSchedule() {
+            let ics = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Nexus//Study//EN\n";
+            let count = 0;
+            state.topics.forEach(t => {
+                if(!t.archived && t.level < 6) {
+                    const d = new Date(t.nextReview);
+                    // Format date as YYYYMMDD
+                    const dateStr = d.toISOString().replace(/-|:|\.\d\d\d/g, "").substring(0,8);
+                    
+                    // Create all day event
+                    ics += `BEGIN:VEVENT\nSUMMARY:Review: ${t.name}\nDTSTART;VALUE=DATE:${dateStr}\nDESCRIPTION:${(t.desc||'').replace(/\n/g, '\\n')}\nEND:VEVENT\n`;
+                    count++;
+                }
+            });
+            ics += "END:VCALENDAR";
+            
+            const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.setAttribute('download', 'nexus_study_schedule.ics');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showToast(`Exported ${count} reviews to Calendar`);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons(); checkSession();
+            
+            const dateEl = document.getElementById('current-date');
+            if (dateEl) dateEl.innerText = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+            
+            const quoteEl = document.getElementById('daily-quote');
+            if (quoteEl) quoteEl.innerText = `"${quotes[Math.floor(Math.random() * quotes.length)]}"`;
+            
+            document.addEventListener('keydown', (e) => {
+                const viewApp = document.getElementById('view-app');
+                // Check visibility using offsetParent (null if hidden)
+                if (!viewApp || viewApp.offsetParent === null) return;
+
+                const isInputActive = e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA';
+                
+                // IMPORTANT: Check for any open modal (except the wrapper itself)
+                // We check if any element with 'fixed' (modal) is visible and NOT hidden
+                const modals = document.querySelectorAll('.fixed.z-\\[100\\], .fixed.z-\\[200\\]');
+                let isAnyModalOpen = false;
+                modals.forEach(m => {
+                    if(!m.classList.contains('hidden')) isAnyModalOpen = true;
+                });
+
+                // ESC: Always close all modals
+                if (e.key === 'Escape') { 
+                    ['add-modal', 'profile-modal', 'focus-modal-wrapper', 'help-modal', 'read-modal', 'subject-modal'].forEach(id => closeModal(id));
+                }
+                
+                // ENTER: Context sensitive actions
+                if (e.key === 'Enter') { 
+                    const addModal = document.getElementById('add-modal');
+                    const settingsModal = document.getElementById('profile-modal');
+                    const subjectModal = document.getElementById('subject-modal');
+                    
+                    if (addModal && !addModal.classList.contains('hidden') && e.target.tagName !== 'TEXTAREA') { e.preventDefault(); saveTopic(); }
+                    if (settingsModal && !settingsModal.classList.contains('hidden') && e.target.id === 'new-subject-input') { e.preventDefault(); addNewSubject(); }
+                    if (subjectModal && !subjectModal.classList.contains('hidden')) { e.preventDefault(); saveQuickSubject(); }
+                }
+                
+                // SHORTCUTS (Only when App is visible & no inputs focused & NO modals open)
+                if (!isInputActive && !isAnyModalOpen) {
+                    if (e.key.toLowerCase() === 'n') { e.preventDefault(); openModal('add-modal'); showToast('Shortcut: New Topic'); }
+                    if (e.key === '/') { e.preventDefault(); const search = document.getElementById('search-input'); if(search) search.focus(); }
+                    if (e.key === '?') openModal('help-modal');
+                    if (e.key === 'R' && e.shiftKey) { e.preventDefault(); surpriseReview(); }
+                }
+            });
+        });
+
+        // --- CORE FUNCTIONS ---
+        // NEW: Ensure openCalendar is globally accessible and safe
+        function openCalendar(id) {
+            const t = state.topics.find(x => x.id === id);
+            if (!t) return;
+            
+            const d = new Date(t.nextReview), time = state.time || "09:00", parts = time.split(':'); 
+            d.setHours(parseInt(parts[0]), parseInt(parts[1]), 0, 0);
+            const start = d.toISOString().replace(/-|:|\.\d\d\d/g, ""); 
+            d.setMinutes(d.getMinutes() + 30);
+            
+            // Construct Google Calendar URL safely
+            const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('Review: '+t.name)}&dates=${start}/${d.toISOString().replace(/-|:|\.\d\d\d/g, "")}&details=${encodeURIComponent(t.desc||'')}&sf=true&output=xml`;
+            
+            window.open(url, '_blank');
+        }
+
+        function updateGridDensity(val) { state.gridCols = parseInt(val); localStorage.setItem('nexus_grid_cols', val); renderGrid(); }
+        function toggleMute() { state.mute = !state.mute; localStorage.setItem('nexus_mute', state.mute); document.getElementById('mute-btn').innerHTML = state.mute ? '<i data-lucide="volume-x" class="w-4 h-4"></i>' : '<i data-lucide="volume-2" class="w-4 h-4"></i>'; lucide.createIcons(); }
+        function updateGoal(val) { state.dailyGoal = parseInt(val); localStorage.setItem('nexus_daily_goal', val); updateDailyProgress(); }
+        function toggleLoader(show) { 
+            const loader = document.getElementById('auth-loader');
+            if (loader) loader.classList.toggle('hidden', !show); 
+        }
+        
+        function toggleViewMode() {
+            state.viewMode = state.viewMode === 'grid' ? 'list' : 'grid';
+            const btn = document.getElementById('view-toggle-btn');
+            btn.innerHTML = state.viewMode === 'grid' ? '<i data-lucide="list" class="w-5 h-5"></i>' : '<i data-lucide="layout-grid" class="w-5 h-5"></i>';
+            renderGrid();
+            lucide.createIcons();
+            sfx.click();
+        }
+        
+        function toggleShowArchive() {
+            state.showArchived = !state.showArchived;
+            document.getElementById('archive-toggle-btn').innerHTML = state.showArchived ? '<i data-lucide="eye" class="w-4 h-4"></i>' : '<i data-lucide="eye-off" class="w-4 h-4"></i>';
+            renderGrid(); lucide.createIcons();
+        }
+
+        function toggleArchive(id) {
+            const t = state.topics.find(x => x.id === id);
+            if(t) { t.archived = !t.archived; syncUp(); renderGrid(); showToast(t.archived ? "Archived" : "Unarchived"); }
+        }
+
+        function toggleCram() {
+            state.cramMode = !state.cramMode;
+            const btn = document.getElementById('btn-cram');
+            if(state.cramMode) { btn.classList.add('cram-active'); showToast('Cram Mode Active: Reviewing next 24h'); } else { btn.classList.remove('cram-active'); }
+            renderGrid();
+        }
+
+        function togglePin(id) {
+            const t = state.topics.find(x => x.id === id);
+            if(t) { t.pinned = !t.pinned; syncUp(); renderGrid(); sfx.click(); }
+        }
+        
+        function surpriseReview() {
+            // Find all DUE topics
+            const now = new Date();
+            const next24h = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+            
+            const dueTopics = state.topics.filter(t => {
+                if (t.archived) return false;
+                let isDue = now >= new Date(t.nextReview);
+                if (state.cramMode && !isDue && new Date(t.nextReview) <= next24h) isDue = true;
+                return isDue;
+            });
+            
+            if(dueTopics.length > 0) {
+                const randomTopic = dueTopics[Math.floor(Math.random() * dueTopics.length)];
+                openReadMode(randomTopic.id);
+                sfx.click();
+            } else {
+                showToast("No topics due right now!", "success");
+            }
+        }
+
+        // --- LEVEL & XP ---
+        function updateLevelDisplay() {
+            document.getElementById('user-level').innerText = state.level;
+            const xpForNext = state.level * 100;
+            const progress = (state.xp / xpForNext) * 100;
+            document.getElementById('xp-bar').style.width = `${progress}%`;
+            document.getElementById('user-xp-text').innerText = `${state.xp}/${xpForNext} XP`;
+        }
+
+        function addXP(amount) {
+            state.xp += amount;
+            const xpForNext = state.level * 100;
+            if(state.xp >= xpForNext) {
+                state.xp -= xpForNext;
+                state.level++;
+                sfx.levelup();
+                showToast(`Leveled Up! Welcome to Lvl ${state.level}`);
+                fireConfetti();
+            }
+            localStorage.setItem('nexus_xp', state.xp);
+            localStorage.setItem('nexus_level', state.level);
+            updateLevelDisplay();
+        }
+
+        // --- SUBJECT MANAGEMENT ---
+        function loadSubjects() {
+            const stored = localStorage.getItem('nexus_subjects');
+            state.subjects = stored ? JSON.parse(stored) : [...defaultSubjects];
+            renderSubjectList(); populateSubjectSelects();
+        }
+
+        function renderSubjectList() {
+            const container = document.getElementById('subject-list'); container.innerHTML = '';
+            state.subjects.forEach(sub => {
+                const tag = document.createElement('div');
+                tag.className = 'px-2 py-1 bg-skin-surface border border-skin-border rounded-md text-xs font-medium text-skin-text flex items-center gap-2';
+                tag.innerHTML = `<span>${sub}</span> <button onclick="removeSubject('${sub}')" class="hover:text-red-500"><i data-lucide="x" class="w-3 h-3"></i></button>`;
+                container.appendChild(tag);
+            });
+            lucide.createIcons();
+        }
+
+        function populateSubjectSelects() {
+            const selects = ['new-topic-subject', 'filter-subject', 'filter-subject-mobile'];
+            selects.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                const isFilter = id.includes('filter');
+                const firstOpt = isFilter ? '<option value="all">All Subjects</option>' : '';
+                let opts = state.subjects.map(s => `<option value="${s}">${s}</option>`).join('');
+                el.innerHTML = firstOpt + opts;
+            });
+        }
+
+        function addNewSubject() {
+            const input = document.getElementById('new-subject-input');
+            const val = input.value.trim();
+            if (val && !state.subjects.includes(val)) {
+                state.subjects.push(val); 
+                localStorage.setItem('nexus_subjects', JSON.stringify(state.subjects));
+                input.value = ''; 
+                renderSubjectList(); 
+                populateSubjectSelects(); 
+                saveSubjectsToCloud(); // NEW: Sync subjects
+                showToast('Subject added');
+            }
+        }
+
+        function removeSubject(name) {
+            if (confirm(`Delete subject "${name}"?`)) {
+                state.subjects = state.subjects.filter(s => s !== name);
+                localStorage.setItem('nexus_subjects', JSON.stringify(state.subjects));
+                renderSubjectList(); 
+                populateSubjectSelects();
+                saveSubjectsToCloud(); // NEW: Sync subjects
+            }
+        }
+
+        // NEW: Function to sync subjects via a hidden topic
+        function saveSubjectsToCloud() {
+             if (GOOGLE_SCRIPT_URL) {
+                 // Check if config topic exists
+                 let conf = state.topics.find(t => t.id === 'config_subjects');
+                 if(!conf) {
+                     conf = { id: 'config_subjects', name: 'CONFIG', category: 'System', desc: JSON.stringify(state.subjects), level: 0, nextReview: 0, pinned: false, archived: true };
+                     state.topics.push(conf);
+                 } else {
+                     conf.desc = JSON.stringify(state.subjects);
+                 }
+                 syncUp();
+             }
+        }
+
+        function openSubjectModal() {
+            document.getElementById('quick-subject-input').value = '';
+            openModal('subject-modal'); setTimeout(() => document.getElementById('quick-subject-input').focus(), 50);
+        }
+
+        function saveQuickSubject() {
+            const val = document.getElementById('quick-subject-input').value.trim();
+            if(val && !state.subjects.includes(val)) {
+                state.subjects.push(val); 
+                localStorage.setItem('nexus_subjects', JSON.stringify(state.subjects));
+                renderSubjectList(); 
+                populateSubjectSelects();
+                saveSubjectsToCloud(); // NEW: Sync subjects
+                document.getElementById('new-topic-subject').value = val;
+                showToast('Subject added'); closeModal('subject-modal');
+            } else if (state.subjects.includes(val)) { showToast('Subject already exists', 'error'); }
+        }
+
+        // --- THEME ---
+        function setTheme(themeName, silent=false) { 
+            document.documentElement.setAttribute('data-theme', themeName); 
+            state.theme = themeName; 
+            localStorage.setItem('nexus_theme_style', themeName);
+            document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+            renderCharts(); 
+            if(!silent) sfx.click(); 
+        }
+        function toggleThemeMode() { document.documentElement.classList.toggle('dark'); localStorage.setItem('nexus_dark_mode', document.documentElement.classList.contains('dark')); renderCharts(); sfx.click(); }
+        function restoreTheme() {
+            const theme = localStorage.getItem('nexus_theme_style') || 'modern';
+            setTheme(theme, true);
+            if(localStorage.getItem('nexus_dark_mode') === 'true') document.documentElement.classList.add('dark');
+            if(localStorage.getItem('nexus_mute') === 'true') toggleMute(); 
+            const savedGrid = localStorage.getItem('nexus_grid_cols');
+            if(savedGrid) { state.gridCols = parseInt(savedGrid); if(document.getElementById('grid-density-slider')) document.getElementById('grid-density-slider').value = savedGrid; }
+            state.dailyGoal = parseInt(localStorage.getItem('nexus_daily_goal')) || 10;
+            if(document.getElementById('goal-input')) document.getElementById('goal-input').value = state.dailyGoal;
+        }
+
+        // --- TIMER ---
+        function setTimerMode(min) {
+            currentTimerMode = min;
+            timeLeft = min * 60;
+            isTimerRunning = false;
+            clearInterval(timerInterval);
+            document.getElementById('btn-timer-toggle').innerText = "Start";
+            
+            let text = "Deep work session";
+            if (min === 5) text = "Short Break";
+            if (min === 15) text = "Long Break";
+            document.getElementById('focus-status-text').innerText = text;
+            
+            // Remove active focus effect if it was stuck
+            document.body.classList.remove('deep-focus-active');
+
+            updateTimerDisplay();
+        }
+
+        function updateTimerDisplay() {
+            const m = Math.floor(timeLeft / 60).toString().padStart(2, '0'); const s = (timeLeft % 60).toString().padStart(2, '0');
+            document.getElementById('timer-display').innerText = `${m}:${s}`;
+            document.getElementById('timer-progress').style.strokeDashoffset = 283 - (timeLeft / (currentTimerMode * 60)) * 283;
+        }
+        function toggleTimer() {
+            const btn = document.getElementById('btn-timer-toggle');
+            if(isTimerRunning) { 
+                clearInterval(timerInterval); 
+                isTimerRunning = false; 
+                btn.innerText = "Resume"; 
+                // Pause effect
+                document.body.classList.remove('deep-focus-active');
+                if(isNoisePlaying) focusAudio.pause();
+            } else {
+                isTimerRunning = true; 
+                btn.innerText = "Pause";
+                // Start Effect - USE BODY CLASS
+                document.body.classList.add('deep-focus-active');
+                
+                // AUDIO SYNC
+                if(isNoisePlaying) {
+                    focusAudio.volume = parseFloat(document.querySelector('input[type="range"][step="0.1"]').value);
+                    focusAudio.play().catch(e => console.log(e));
+                }
+                
+                timerInterval = setInterval(() => { 
+                    timeLeft--; 
+                    updateTimerDisplay(); 
+                    if(timeLeft <= 0) { 
+                        clearInterval(timerInterval); 
+                        sfx.bell(); 
+                        fireConfetti(); 
+                        showToast("Session Complete!"); 
+                        isTimerRunning = false; 
+                        btn.innerText = "Start"; 
+                        timeLeft = currentTimerMode * 60; 
+                        state.focusSessionCount++; 
+                        document.getElementById('session-counter').innerText = state.focusSessionCount;
+                        
+                        // Stop Effect
+                        document.body.classList.remove('deep-focus-active');
+                        if(isNoisePlaying) focusAudio.pause();
+                    } 
+                }, 1000);
+            }
+        }
+        function resetTimer() { 
+            clearInterval(timerInterval); 
+            isTimerRunning = false; 
+            timeLeft = currentTimerMode * 60; 
+            updateTimerDisplay(); 
+            document.getElementById('btn-timer-toggle').innerText = "Start";
+            document.body.classList.remove('deep-focus-active');
+            if(isNoisePlaying) focusAudio.pause();
+        }
+
+        // --- AUTH/DATA ---
+        function checkStreak() {
+            const today = new Date().setHours(0,0,0,0); const last = state.lastLogin ? new Date(state.lastLogin).setHours(0,0,0,0) : null;
+            if (last) { const diff = (today - last) / (1000 * 60 * 60 * 24); if (diff === 1) state.streak++; else if (diff > 1) state.streak = 1; } else state.streak = 1;
+            state.lastLogin = Date.now(); localStorage.setItem('nexus_streak', state.streak); localStorage.setItem('nexus_lastLogin', state.lastLogin);
+            
+            document.getElementById('streak-count').innerText = window.innerWidth < 768 ? ` ${state.streak}` : `${state.streak} Day Streak`;
+            
+            const savedDate = localStorage.getItem('nexus_daily_date');
+            if (savedDate !== new Date().toDateString()) { state.dailyProgress = 0; localStorage.setItem('nexus_daily_progress', 0); localStorage.setItem('nexus_daily_date', new Date().toDateString()); } 
+            else { state.dailyProgress = parseInt(localStorage.getItem('nexus_daily_progress')) || 0; }
+            updateDailyProgress();
+            
+            // UPDATE TITLE WITH DUE COUNT
+            const pendingCount = state.topics.filter(t => !t.archived && new Date() >= new Date(t.nextReview).setHours(0,0,0,0)).length;
+            if(pendingCount > 0) document.title = `(${pendingCount}) Due - NEXUS PRO`;
+            else document.title = `NEXUS PRO`;
+        }
+        
+        function updateDailyProgress() {
+            const pct = Math.min((state.dailyProgress / state.dailyGoal) * 100, 100);
+            if(document.getElementById('daily-progress-bar')) {
+                document.getElementById('daily-progress-bar').style.width = pct + '%';
+                document.getElementById('daily-progress-text').innerText = `${state.dailyProgress}/${state.dailyGoal}`;
+            }
+        }
+
+        function switchAuthTab(tab) {
+            sfx.click(); document.getElementById('form-login').classList.add('hidden'); document.getElementById('form-signup').classList.add('hidden');
+            document.getElementById('tab-login').className = tab === 'login' ? "flex-1 py-2.5 text-sm font-semibold rounded-theme shadow-sm card-surface transition-all" : "flex-1 py-2.5 text-sm font-medium text-skin-muted hover:text-skin-text transition-all";
+            document.getElementById('tab-signup').className = tab === 'signup' ? "flex-1 py-2.5 text-sm font-semibold rounded-theme shadow-sm card-surface transition-all" : "flex-1 py-2.5 text-sm font-medium text-skin-muted hover:text-skin-text transition-all";
+            document.getElementById('form-' + tab).classList.remove('hidden');
+            if(tab === 'signup') generateCodename();
+        }
+        function generateCodename() { document.getElementById('signup-user').value = `${wordsA[Math.floor(Math.random()*wordsA.length)]}${wordsB[Math.floor(Math.random()*wordsB.length)]}${Math.floor(Math.random()*999)}`; }
+        function checkSession() {
+            restoreTheme(); loadSubjects();
+            // Load XP
+            state.xp = parseInt(localStorage.getItem('nexus_xp')) || 0;
+            state.level = parseInt(localStorage.getItem('nexus_level')) || 1;
+            updateLevelDisplay();
+
+            if(localStorage.getItem('nexus_hex')) {
+                state.hex = localStorage.getItem('nexus_hex'); state.user = localStorage.getItem('nexus_name'); state.time = localStorage.getItem('nexus_time') || "09:00";
+                state.streak = parseInt(localStorage.getItem('nexus_streak')) || 0; state.lastLogin = parseInt(localStorage.getItem('nexus_lastLogin')) || null;
+                checkStreak(); loadApp(); syncDown();
+            }
+        }
+        async function performLogin() {
+            const u = document.getElementById('login-user').value.trim(); const p = document.getElementById('login-pass').value;
+            if(!u || !p) return sfx.error();
+            
+            toggleLoader(true);
+            try {
+                if (GOOGLE_SCRIPT_URL) {
+                    const res = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'LOGIN', email: u, password: p }) });
+                    const data = await res.json();
+                    if (data.status === 'SUCCESS') { saveSession(data.hex, u, data.time || '09:00'); sfx.success(); checkStreak(); loadApp(); syncDown(); } 
+                    else { showToast(data.message || 'Login failed', 'error'); sfx.error(); }
+                } else { await new Promise(r => setTimeout(r, 800)); saveSession('DEMO_HEX', u, '09:00'); sfx.success(); checkStreak(); loadApp(); syncDown(); }
+            } catch(e) { console.error(e); showToast('Connection Error', 'error'); }
+            toggleLoader(false);
+        }
+        async function performSignup() {
+            const u = document.getElementById('signup-user').value.trim(); const p = document.getElementById('signup-pass').value;
+            if(!p) return sfx.error();
+            toggleLoader(true);
+            try {
+                if(GOOGLE_SCRIPT_URL) {
+                    const res = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'SIGNUP', email: u, password: p }) });
+                    const data = await res.json();
+                    if(data.status === 'SUCCESS') { saveSession(data.hex, u, "09:00"); sfx.success(); checkStreak(); loadApp(); } else { showToast(data.message || 'Signup failed', 'error'); }
+                } else { await new Promise(r => setTimeout(r, 800)); saveSession('DEMO_HEX_'+Date.now(), u, "09:00"); sfx.success(); checkStreak(); loadApp(); }
+            } catch(e) { console.error(e); showToast('Connection Error', 'error'); }
+            toggleLoader(false);
+        }
+        function saveSession(hex, name, time) { localStorage.setItem('nexus_hex', hex); localStorage.setItem('nexus_name', name); localStorage.setItem('nexus_time', time); state.hex=hex; state.user=name; state.time=time; }
+        function logout() { localStorage.clear(); location.reload(); }
+        function loadApp() {
+            document.body.classList.add('app-active');
+            document.getElementById('view-auth').classList.add('hidden'); document.getElementById('view-app').classList.remove('hidden'); document.getElementById('view-app').classList.add('animate-fade-in');
+            if(document.getElementById('sidebar-name')) document.getElementById('sidebar-name').innerText = state.user; 
+            if(document.getElementById('sidebar-avatar')) document.getElementById('sidebar-avatar').innerText = state.user.charAt(0).toUpperCase();
+            if(document.getElementById('profile-name-lg')) document.getElementById('profile-name-lg').innerText = state.user; 
+            if(document.getElementById('profile-avatar-lg')) document.getElementById('profile-avatar-lg').innerText = state.user.charAt(0).toUpperCase();
+            if(document.getElementById('setting-time')) document.getElementById('setting-time').value = state.time;
+        }
+        
+        function openModal(id, topicId=null) { 
+            sfx.click(); 
+            const m = document.getElementById(id); if(m) { 
+                m.classList.remove('hidden'); 
+                
+                // FORCE ANIMATION REPLAY
+                m.classList.remove('animate-pop-in');
+                void m.offsetWidth; // trigger reflow
+                m.classList.add('animate-pop-in');
+
+                m.classList.add('flex'); 
+                
+                // If opening focus modal, remove blur
+                if(id === 'focus-modal-wrapper' && !isTimerRunning) {
+                   document.body.classList.remove('deep-focus-active');
+                   // Also ensure elements are visible
+                   document.querySelectorAll('.zen-fade').forEach(el => el.classList.remove('zen-hidden'));
+                   const overlay = document.getElementById('zen-pause-overlay');
+                   if(overlay) overlay.style.opacity = '0';
+                }
+            }
+            
+            // Force Icon Refresh for dynamic content like buttons
+            lucide.createIcons();
+
+            if(id === 'add-modal') {
+                document.getElementById('form-single').classList.remove('hidden');
+                document.getElementById('form-bulk').classList.add('hidden');
+                document.getElementById('tab-single').classList.add('text-brand-600', 'border-b-2', 'border-brand-500');
+                document.getElementById('tab-single').classList.remove('text-skin-muted');
+                document.getElementById('tab-bulk').classList.remove('text-brand-600', 'border-b-2', 'border-brand-500');
+                document.getElementById('tab-bulk').classList.add('text-skin-muted');
+                addMode = 'single';
+                const resetBtn = document.getElementById('reset-btn-container');
+
+                if(topicId) {
+                    const t = state.topics.find(x => x.id === topicId);
+                    document.getElementById('modal-title').innerText = "Edit Topic"; document.getElementById('edit-topic-id').value = topicId;
+                    document.getElementById('new-topic-name').value = t.name; document.getElementById('new-topic-subject').value = t.category || 'General'; document.getElementById('new-topic-desc').value = t.desc;
+                    document.getElementById('new-topic-link').value = t.link || '';
+                    if(resetBtn) resetBtn.classList.remove('hidden');
+                } else {
+                    document.getElementById('modal-title').innerText = "New Topic"; document.getElementById('edit-topic-id').value = "";
+                    document.getElementById('new-topic-name').value = ""; document.getElementById('new-topic-desc').value = ""; document.getElementById('new-topic-link').value = "";
+                    if(resetBtn) resetBtn.classList.add('hidden');
+                    setTimeout(() => document.getElementById('new-topic-name').focus(), 50);
+                }
+            }
+        }
+        function closeModal(id) { 
+            sfx.click(); 
+            const m = document.getElementById(id); if(m) { m.classList.add('hidden'); m.classList.remove('flex'); } 
+            
+            // Special handling for focus modal
+            if(id==='focus-modal-wrapper') {
+                if(isTimerRunning) toggleTimer(); // Pause timer
+                document.body.classList.remove('deep-focus-active'); // Remove blur
+            }
+        }
+
+        function switchAddMode(mode) {
+            addMode = mode;
+            if (mode === 'single') {
+                document.getElementById('form-single').classList.remove('hidden');
+                document.getElementById('form-bulk').classList.add('hidden');
+                document.getElementById('tab-single').classList.add('text-brand-600', 'border-b-2', 'border-brand-500');
+                document.getElementById('tab-single').classList.remove('text-skin-muted');
+                document.getElementById('tab-bulk').classList.remove('text-brand-600', 'border-b-2', 'border-brand-500');
+                document.getElementById('tab-bulk').classList.add('text-skin-muted');
+            } else {
+                document.getElementById('form-single').classList.add('hidden');
+                document.getElementById('form-bulk').classList.remove('hidden');
+                document.getElementById('tab-bulk').classList.add('text-brand-600', 'border-b-2', 'border-brand-500');
+                document.getElementById('tab-bulk').classList.remove('text-skin-muted');
+                document.getElementById('tab-single').classList.remove('text-brand-600', 'border-b-2', 'border-brand-500');
+                document.getElementById('tab-single').classList.add('text-skin-muted');
+                document.getElementById('bulk-input').focus();
+            }
+        }
+
+        // --- READ MODE (ENHANCED) ---
+        function openReadMode(id) {
+            const t = state.topics.find(x => x.id === id);
+            if(t) {
+                // Basic Info
+                document.getElementById('read-title').innerText = t.name;
+                const style = getSubjectStyle(t.category || 'General');
+                document.getElementById('read-subject').innerText = t.category || 'General';
+                document.getElementById('read-subject').className = `text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md border inline-block mb-2 ${style}`;
+                
+                // Meta Info
+                const dateStr = new Date(t.nextReview).toLocaleDateString(undefined, {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'});
+                document.querySelector('#read-date span').innerText = `Due: ${dateStr}`;
+                
+                const levelNames = ['New', 'Learning', 'Developing', 'Competent', 'Proficient', 'Expert', 'Master'];
+                document.querySelector('#read-level span').innerText = `Lvl ${t.level} (${levelNames[t.level] || 'Unknown'})`;
+                
+                // Status Badges
+                const statusContainer = document.getElementById('read-status');
+                statusContainer.innerHTML = '';
+                if(t.pinned) statusContainer.innerHTML += `<span class="px-2 py-0.5 rounded-full bg-brand-100 dark:bg-brand-900/30 text-brand-600 dark:text-brand-400 text-xs font-bold border border-brand-200 dark:border-brand-800">Pinned</span>`;
+                if(t.archived) statusContainer.innerHTML += `<span class="px-2 py-0.5 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 text-xs font-bold border border-orange-200 dark:border-orange-800">Archived</span>`;
+
+                // Link
+                const linkSection = document.getElementById('read-link-section');
+                const linkBtn = document.getElementById('read-link-action');
+                if(t.link) {
+                    linkSection.classList.remove('hidden');
+                    linkBtn.href = t.link;
+                    try {
+                        const hostname = new URL(t.link).hostname.replace('www.', '');
+                        linkBtn.innerHTML = `<i data-lucide="external-link" class="w-4 h-4"></i> Open Resource: ${hostname}`;
+                    } catch(e) {
+                        linkBtn.innerHTML = `<i data-lucide="external-link" class="w-4 h-4"></i> Open Resource`;
+                    }
+                } else {
+                    linkSection.classList.add('hidden');
+                }
+
+                // Content
+                let raw = t.desc || 'No notes.';
+                
+                // MARKDOWN PARSER (SIMPLE)
+                let html = raw
+                    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+                    .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+                    .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+                    .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
+                    .replace(/\*(.*)\*/gim, '<em>$1</em>')
+                    .replace(/`([^`]+)`/gim, '<code>$1</code>')
+                    .replace(/\n/g, '<br>')
+                    .replace(/- (.*)/g, '<li>$1</li>');
+                    
+                if(html.includes('<li>')) html = `<ul>${html}</ul>`;
+                
+                document.getElementById('read-content').innerHTML = html;
+                
+                openModal('read-modal');
+                lucide.createIcons();
+            }
+        }
+
+        // --- SKELETON RENDERER ---
+        function renderSkeleton() {
+            const grid = document.getElementById('topic-grid'); grid.innerHTML = '';
+            for(let i=0; i<8; i++) {
+                const skel = document.createElement('div'); skel.className = 'card-surface p-6 shadow-soft h-48 animate-pulse flex flex-col justify-between';
+                skel.innerHTML = `<div class="w-full h-1.5 bg-gray-200 dark:bg-gray-700 rounded mb-4"></div><div class="flex justify-between mb-4"><div class="h-4 w-16 bg-gray-200 dark:bg-gray-700 rounded"></div><div class="h-6 w-12 bg-gray-200 dark:bg-gray-700 rounded"></div></div><div class="flex-1 space-y-3"><div class="h-6 w-3/4 bg-gray-200 dark:bg-gray-700 rounded"></div><div class="h-4 w-full bg-gray-200 dark:bg-gray-700 rounded"></div></div>`;
+                grid.appendChild(skel);
+            }
+        }
+
+        async function syncDown() {
+            renderSkeleton(); 
+            if (GOOGLE_SCRIPT_URL) {
+                try { 
+                    const res = await fetch(GOOGLE_SCRIPT_URL + '?hex=' + state.hex); 
+                    const data = await res.json(); 
+                    if(Array.isArray(data)) { 
+                        state.topics = data; 
+                        
+                        // EXTRACT SUBJECTS FROM CONFIG_TOPIC
+                        const configTopic = data.find(t => t.id === 'config_subjects');
+                        if (configTopic) {
+                            try {
+                                state.subjects = JSON.parse(configTopic.desc);
+                                renderSubjectList();
+                                populateSubjectSelects();
+                            } catch(e) { console.error('Failed to parse subjects'); }
+                        }
+
+                        renderGrid(); 
+                    } 
+                } catch(e) { console.error(e); }
+            } else {
+                const stored = localStorage.getItem('nexus_data'); await new Promise(r => setTimeout(r, 600));
+                if(stored) state.topics = JSON.parse(stored); else state.topics = [{ id: '1', name: 'UI Principles', category: 'Design', level: 3, nextReview: Date.now() - 100000, desc: 'Hierarchy, Balance, Contrast' }];
+                renderGrid();
+            }
+        }
+
+        async function syncUp() { 
+            if (GOOGLE_SCRIPT_URL) { try { await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'SYNC_UP', hex: state.hex, topics: state.topics }) }); } catch(e) { console.error("Save failed"); } } 
+            else { localStorage.setItem('nexus_data', JSON.stringify(state.topics)); }
+        }
+
+        function resetTopicLevel() {
+            const id = document.getElementById('edit-topic-id').value;
+            const t = state.topics.find(x => x.id === id);
+            if(t) { t.level = 0; t.nextReview = Date.now(); syncUp(); renderGrid(); closeModal('add-modal'); showToast('Level reset'); }
+        }
+
+        function saveTopic() {
+            if(addMode === 'bulk') {
+                const text = document.getElementById('bulk-input').value;
+                if(!text.trim()) return;
+                const lines = text.split('\n');
+                let count = 0;
+                lines.forEach(line => {
+                    const parts = line.split('|');
+                    if(parts.length > 0 && parts[0].trim()) {
+                        const name = parts[0].trim();
+                        let cat = parts[1] ? parts[1].trim() : 'General';
+                        if(!state.subjects.includes(cat)) cat = 'General';
+                        const desc = parts[2] ? parts[2].trim() : '';
+                        state.topics.push({ id: 'top_'+Date.now()+Math.random(), name: name, category: cat, desc: desc, level: 0, nextReview: Date.now(), pinned: false, archived: false, link: '' });
+                        count++;
+                    }
+                });
+                renderGrid(); syncUp(); closeModal('add-modal'); sfx.success(); showToast(`Added ${count} topics`);
+                document.getElementById('bulk-input').value = '';
+                return;
+            }
+
+            const id = document.getElementById('edit-topic-id').value, name = document.getElementById('new-topic-name').value.trim(), cat = document.getElementById('new-topic-subject').value, desc = document.getElementById('new-topic-desc').value.trim(), link = document.getElementById('new-topic-link').value.trim();
+            if(!name) return;
+            if(id) { const t = state.topics.find(x => x.id === id); if(t) { t.name = name; t.category = cat; t.desc = desc; t.link = link; } showToast('Topic updated'); }
+            else { state.topics.push({ id: 'top_'+Date.now(), name: name, category: cat, desc: desc, level: 0, nextReview: Date.now(), pinned: false, archived: false, link: link }); showToast('New topic created'); }
+            renderGrid(); syncUp(); closeModal('add-modal'); sfx.success();
+        }
+        function deleteTopic(id) { if(confirm("Permanently delete topic?")) { state.topics = state.topics.filter(t => t.id !== id); renderGrid(); syncUp(); sfx.click(); showToast('Deleted', 'error'); } }
+        
+        function processReview(id, success) {
+            const t = state.topics.find(x => x.id === id);
+            if(t) {
+                const prev = { ...t }; const prevDaily = state.dailyProgress; const prevXp = state.xp; const prevLvl = state.level;
+                
+                // Calculate new level
+                let newLevel = t.level;
+                if(success) newLevel = Math.min(t.level+1, 6); // Max Level 6
+                else newLevel = Math.max(t.level-1, 0); // Drop level on fail
+
+                // Calculate NEW date (SRS Logic)
+                const intervals = [0, 1, 3, 7, 14, 30, 90];
+                const daysToAdd = intervals[newLevel];
+                
+                // Normalize to midnight
+                const nextDate = new Date();
+                nextDate.setHours(0,0,0,0); 
+                nextDate.setDate(nextDate.getDate() + daysToAdd);
+                
+                const newNextReview = nextDate.getTime(); // Define it here
+
+                // Update topic state
+                t.level = newLevel;
+                t.nextReview = newNextReview; 
+
+                if(success) { 
+                    sfx.celebrate(); 
+                    fireConfetti(); 
+                    state.dailyProgress++; 
+                    localStorage.setItem('nexus_daily_progress', state.dailyProgress); 
+                    updateDailyProgress();
+                    addXP(10);
+                    
+                    showToast('Retention +', 'success', true);
+                } else { 
+                    sfx.click(); 
+                    showToast('Scheduled sooner.', 'success', true);
+                } 
+                
+                lastReviewedTopicId = id; // Set ID
+                
+                lastUndoAction = () => {
+                    const target = state.topics.find(x => x.id === id);
+                    if(target) { 
+                        target.level = prev.level; 
+                        target.nextReview = prev.nextReview; 
+                        state.dailyProgress = prevDaily; 
+                        localStorage.setItem('nexus_daily_progress', state.dailyProgress); 
+                        updateDailyProgress(); 
+                        state.xp = prevXp; 
+                        state.level = prevLvl; 
+                        updateLevelDisplay();
+                        
+                        lastReviewedTopicId = null; // Clear ID on undo
+                        
+                        syncUp(); 
+                        renderGrid(); 
+                        showToast('Undone'); 
+                    }
+                };
+                renderGrid(); 
+                syncUp(); 
+            }
+        }
+        
+        function undoLastReview() {
+            if (lastUndoAction) lastUndoAction();
+        }
+        
+        function fireConfetti() { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#6366f1', '#10b981', '#f43f5e'] }); }
+        function calculateNextReview(lvl) { return new Date().setDate(new Date().getDate() + [0,1,3,7,14,30,90][Math.min(lvl,6)]); }
+        
+        function saveSettings() { state.time = document.getElementById('setting-time').value; localStorage.setItem('nexus_time', state.time); if (GOOGLE_SCRIPT_URL) { fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'UPDATE_SETTINGS', hex: state.hex, time: state.time }) }).catch(console.error); } sfx.success(); closeModal('profile-modal'); showToast('Saved'); }
+        
+        function copyData() { navigator.clipboard.writeText(JSON.stringify(state.topics)).then(() => showToast('Copied to Clipboard')); }
+
+        function exportData(type) {
+            let dataStr, name;
+            if(type === 'csv') {
+                const header = ['ID','Name','Subject','Level','NextReview','Description','Link'].join(',');
+                const rows = state.topics.map(t => [t.id, `"${t.name}"`, t.category, t.level, new Date(t.nextReview).toISOString(), `"${(t.desc||'').replace(/"/g,'""')}"`, t.link||''].join(','));
+                dataStr = "data:text/csv;charset=utf-8," + encodeURIComponent([header, ...rows].join('\n')); name = "nexus_export.csv";
+            } else { dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state.topics)); name = "nexus_backup.json"; }
+            const dl = document.createElement('a'); dl.setAttribute("href", dataStr); dl.setAttribute("download", name); document.body.appendChild(dl); dl.click(); dl.remove(); showToast('Export downloaded');
+        }
+        function importData(input) {
+            const file = input.files[0]; if(!file) return;
+            const r = new FileReader(); r.onload = function(e) { try { state.topics = JSON.parse(e.target.result); syncUp(); renderGrid(); showToast('Restored'); } catch(err) { showToast('Error', 'error'); } }; r.readAsText(file);
+        }
+        function handleSearch(val) { const btn = document.getElementById('clear-search-btn'); if(val) btn.classList.remove('hidden'); else btn.classList.add('hidden'); renderGrid(); }
+        function clearSearch() { document.getElementById('search-input').value = ''; document.getElementById('search-input-mobile').value = ''; document.getElementById('clear-search-btn').classList.add('hidden'); renderGrid(); }
+        function scrollToTop() { document.getElementById('main-scroll').scrollTo({ top: 0, behavior: 'smooth' }); }
+
+        function renderCharts() {
+            // Check for elements before accessing
+            const c1 = document.getElementById('chart-levels');
+            const c2 = document.getElementById('chart-forecast');
+            if (!c1 || !c2) return;
+
+            const isDark = document.documentElement.classList.contains('dark'), style = getComputedStyle(document.body), brandColor = style.getPropertyValue('--color-brand-500').trim().replace(/ /g, ',') || '99, 102, 241';
+            const levels = [0,0,0,0,0,0,0], forecast = []; state.topics.forEach(t => { if(!t.archived && t.level <= 6) levels[t.level]++; });
+            const labels = []; const now = new Date();
+            for(let i=0; i<7; i++) {
+                const d = new Date(now); d.setDate(d.getDate() + i); labels.push(d.toLocaleDateString('en-US', {weekday: 'short'}));
+                const s = new Date(d).setHours(0,0,0,0), e = new Date(d).setHours(23,59,59,999);
+                if (i===0) forecast.push(state.topics.filter(t => !t.archived && t.nextReview <= e).length); else forecast.push(state.topics.filter(t => !t.archived && t.nextReview >= s && t.nextReview <= e).length);
+            }
+            if(retentionChart) retentionChart.destroy();
+            retentionChart = new Chart(c1.getContext('2d'), {
+                type: 'doughnut', data: { labels: ['New','L1','L2','L3','L4','L5','Master'], datasets: [{ data: levels, backgroundColor: [`rgba(${brandColor},0.2)`,`rgba(${brandColor},0.3)`,`rgba(${brandColor},0.4)`,`rgba(${brandColor},0.6)`,`rgba(${brandColor},0.7)`,`rgba(${brandColor},0.8)`,`rgba(${brandColor},1)`], borderWidth: 0, hoverOffset: 4 }] },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: {display: false} } }
+            });
+            if(forecastChart) forecastChart.destroy();
+            const grad = c2.getContext('2d').createLinearGradient(0,0,0,200); grad.addColorStop(0, `rgba(${brandColor},0.4)`); grad.addColorStop(1, `rgba(${brandColor},0.0)`);
+            forecastChart = new Chart(c2.getContext('2d'), {
+                type: 'line', data: { labels: labels, datasets: [{ data: forecast, borderColor: `rgb(${brandColor})`, backgroundColor: grad, borderWidth: 3, fill: true, tension: 0.4, pointRadius: 2 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: {display:false} }, scales: { y: { beginAtZero: true, grid: { color: isDark ? '#334155' : '#e2e8f0', borderDash: [5,5] } }, x: { grid: {display: false} } } }
+            });
+        }
+        
+        function renderHeatmap() {
+             const grid = document.getElementById('heatmap-grid');
+             if(!grid) return;
+             grid.innerHTML = '';
+             
+             // Create fake contribution data for visual appeal (since we don't have real historical data stored yet)
+             // In a real app, this would pull from state.history
+             for(let i=0; i<60; i++) {
+                 const cell = document.createElement('div');
+                 const intensity = Math.random();
+                 let styleClass = 'hm-cell'; // default gray
+                 if(intensity > 0.8) styleClass += ' hm-l3';
+                 else if (intensity > 0.5) styleClass += ' hm-l2';
+                 else if (intensity > 0.2) styleClass += ' hm-l1';
+                 
+                 cell.className = styleClass;
+                 grid.appendChild(cell);
+             }
+        }
+
+        function toggleGraph(cardId) {
+            const card = document.getElementById(cardId);
+            const wrapper = card.querySelector('.chart-wrapper');
+            const header = card.querySelector('.chart-header');
+            const btn = card.querySelector('.toggle-btn');
+            
+            const isHidden = wrapper.classList.contains('hidden');
+            
+            if (isHidden) {
+                // Show
+                wrapper.classList.remove('hidden');
+                header.classList.replace('mb-0', 'mb-4');
+                btn.innerHTML = '<i data-lucide="eye" class="w-4 h-4"></i>';
+            } else {
+                // Hide (Collapse)
+                wrapper.classList.add('hidden');
+                header.classList.replace('mb-4', 'mb-0');
+                btn.innerHTML = '<i data-lucide="eye-off" class="w-4 h-4"></i>';
+            }
+            lucide.createIcons();
+        }
+
+        function renderGrid() {
+            // renderHeatmap(); // Also refresh heatmap
+            const grid = document.getElementById('topic-grid'); grid.innerHTML = '';
+            const search = (document.getElementById('search-input').value || document.getElementById('search-input-mobile').value).toLowerCase();
+            const sortMode = document.getElementById('sort-select').value;
+            const subjectFilter = window.innerWidth < 768 ? document.getElementById('filter-subject-mobile').value : document.getElementById('filter-subject').value;
+            
+            let filtered = state.topics.filter(t => {
+                // Filter out the config file from grid
+                if(t.id === 'config_subjects') return false;
+
+                const matchesSearch = t.name.toLowerCase().includes(search) || (t.category && t.category.toLowerCase().includes(search));
+                const matchesSubject = subjectFilter === 'all' || t.category === subjectFilter;
+                const matchesArchive = state.showArchived ? true : !t.archived;
+                return matchesSearch && matchesSubject && matchesArchive;
+            });
+            
+            // SORT LOGIC (Applied before rendering)
+            const now = new Date();
+            const next24h = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+
+            filtered.sort((a, b) => {
+                if (a.pinned && !b.pinned) return -1;
+                if (!a.pinned && b.pinned) return 1;
+                if (sortMode === 'urgency') return a.nextReview - b.nextReview;
+                if (sortMode === 'level') return a.level - b.level;
+                if (sortMode === 'newest') return parseInt(b.id.split('_')[1]||0) - parseInt(a.id.split('_')[1]||0);
+                return 0;
+            });
+
+            if(filtered.length === 0 && search === "") { document.getElementById('empty-state').classList.remove('hidden'); document.getElementById('analytics-section').classList.add('hidden'); }
+            else if (state.topics.length > 0) { document.getElementById('empty-state').classList.add('hidden'); document.getElementById('analytics-section').classList.remove('hidden'); if(search==="") renderCharts(); }
+
+            // List View Logic
+            if(state.viewMode === 'list') {
+                grid.className = 'flex flex-col gap-2 pb-24 transition-all duration-300';
+                
+                filtered.forEach(t => {
+                    const card = document.createElement('div');
+                    card.className = 'list-row bg-skin-surface cursor-pointer group hover:shadow-md';
+                    card.onclick = (e) => { if(!e.target.closest('button')) openReadMode(t.id); };
+                    
+                    const style = getSubjectStyle(t.category || 'General');
+                    const colorClass = style.split(' ')[0].replace('bg-', 'bg-'); 
+
+                    const dateStr = new Date(t.nextReview).toLocaleDateString(undefined, {month:'short', day:'numeric'});
+                    const isDue = new Date() >= new Date(t.nextReview).setHours(0,0,0,0);
+                    const isJustReviewed = t.id === lastReviewedTopicId;
+                    
+                    card.innerHTML = `
+                        <div class="h-full w-1 rounded-full ${colorClass}"></div>
+                        <div class="font-bold text-sm truncate">${t.name}</div>
+                        <div class="text-xs text-skin-muted truncate">${t.category}</div>
+                        <div class="flex items-center gap-2">
+                             <div class="flex-1 h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                                 <div class="h-full bg-brand-500" style="width: ${(t.level/6)*100}%"></div>
+                             </div>
+                        </div>
+                        <div class="text-xs font-medium ${isDue ? 'text-red-500' : 'text-skin-muted'}">${isDue ? 'Due Now' : dateStr}</div>
+                        <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                             <!-- Calendar Button -->
+                             <button onclick="openCalendar('${t.id}'); event.stopPropagation();" class="p-1 hover:text-brand-600" title="Calendar"><i data-lucide="calendar" class="w-3.5 h-3.5"></i></button>
+                             <!-- Undo Button (New) -->
+                             ${isJustReviewed ? `<button onclick="undoLastReview(); event.stopPropagation();" class="p-1 hover:text-orange-500" title="Undo"><i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i></button>` : ''}
+                             <!-- Quick Review Button (Only if due) -->
+                             ${isDue ? `<button onclick="processReview('${t.id}', true); event.stopPropagation();" class="p-1 hover:text-green-600" title="Quick Review"><i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i></button>` : ''}
+                             
+                             <button onclick="togglePin('${t.id}'); event.stopPropagation();" class="p-1 hover:text-brand-600"><i data-lucide="${t.pinned ? 'pin-off' : 'pin'}" class="w-3.5 h-3.5 ${t.pinned?'fill-current' : ''}"></i></button>
+                             <button onclick="openModal('add-modal', '${t.id}'); event.stopPropagation();" class="p-1 hover:text-brand-600"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
+                             <button onclick="deleteTopic('${t.id}'); event.stopPropagation();" class="p-1 hover:text-red-500"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+                lucide.createIcons();
+                return;
+            }
+
+            // Grid View Logic
+            let gridClass = 'grid gap-4 md:gap-6 pb-24 transition-all duration-300 ';
+            if (state.gridCols === 3) gridClass += 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3';
+            else if (state.gridCols === 5) gridClass += 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5';
+            else gridClass += 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'; 
+            grid.className = gridClass;
+
+            let dueCount=0, totalLevel=0;
+            filtered.forEach((t, i) => {
+                let isDue = now >= new Date(t.nextReview).setHours(0,0,0,0); 
+                if(state.cramMode && !isDue) { if (new Date(t.nextReview) <= next24h) isDue = true; }
+                if(isDue && !t.archived) dueCount++; 
+                if (!t.archived) totalLevel += t.level;
+                
+                const style = getSubjectStyle(t.category || 'General');
+                const card = document.createElement('div');
+                const pinClass = t.pinned ? 'border-brand-500 ring-1 ring-brand-500 shadow-glow' : 'border-skin-border';
+                const archiveClass = t.archived ? 'opacity-60 grayscale' : '';
+                
+                card.className = `card-surface p-6 shadow-soft card-hover flex flex-col relative overflow-hidden group animate-slide-up stagger-${(i%5)+1} transition-theme cursor-pointer border ${pinClass} ${archiveClass}`;
+                card.onclick = (e) => { if(!e.target.closest('button')) openReadMode(t.id); };
+                
+                const nameHtml = search ? t.name.replace(new RegExp(search, 'gi'), match => `<span class="highlight-text">${match}</span>`) : t.name;
+                const isJustReviewed = t.id === lastReviewedTopicId;
+
+                card.innerHTML = `
+                    <div class="absolute top-0 left-0 w-full h-1.5 bg-gray-100 dark:bg-gray-800 transition-theme"><div class="h-full bg-brand-500 transition-all duration-1000" style="width: ${(t.level/6)*100}%"></div></div>
+                    <div class="flex justify-between items-start mb-3">
+                         <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md border ${style} transition-theme flex items-center gap-1">
+                            ${t.category||'General'}
+                        </span>
+                        <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                             <button onclick="togglePin('${t.id}'); event.stopPropagation();" class="text-skin-muted hover:text-brand-600 p-2 hover:bg-skin-base rounded-lg transition-colors" title="${t.pinned ? 'Unpin' : 'Pin to Top'}"><i data-lucide="${t.pinned ? 'pin-off' : 'pin'}" class="w-4 h-4 ${t.pinned ? 'fill-current' : ''}"></i></button>
+                             <button onclick="toggleArchive('${t.id}'); event.stopPropagation();" class="text-skin-muted hover:text-orange-500 p-2 hover:bg-skin-base rounded-lg transition-colors" title="${t.archived ? 'Unarchive' : 'Archive'}"><i data-lucide="${t.archived ? 'archive-restore' : 'archive'}" class="w-4 h-4"></i></button>
+                             <button onclick="openModal('add-modal', '${t.id}'); event.stopPropagation();" class="text-skin-muted hover:text-brand-600 p-2 hover:bg-skin-base rounded-lg transition-colors"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
+                             <button onclick="deleteTopic('${t.id}'); event.stopPropagation();" class="text-skin-muted hover:text-red-500 p-2 hover:bg-skin-base rounded-lg transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        </div>
+                    </div>
+                    <div class="flex-1 mb-5">
+                        <h3 class="font-bold text-lg mb-1.5 leading-tight transition-theme">${nameHtml}</h3>
+                        <p class="text-sm text-skin-muted line-clamp-2 leading-relaxed transition-theme">${t.desc||'No additional notes provided.'}</p>
+                    </div>
+                    <div class="flex gap-3 mt-auto">
+                        ${isDue?`<button onclick="processReview('${t.id}', true); event.stopPropagation();" class="flex-1 btn-primary py-2.5 text-sm shadow-glow w-full transition-theme">Review Now</button>`:`<div class="w-full py-2.5 bg-skin-base rounded-theme border border-skin-border flex items-center justify-center gap-2 text-xs text-skin-muted font-medium transition-theme"><i data-lucide="clock" class="w-3.5 h-3.5"></i>Next: ${new Date(t.nextReview).toLocaleDateString(undefined, {month:'short', day:'numeric'})}</div>`}
+                        ${isJustReviewed ? `<button onclick="undoLastReview(); event.stopPropagation();" class="p-2.5 rounded-theme bg-skin-base border border-skin-border hover:border-brand-500 text-orange-500 hover:text-orange-600 transition-colors" title="Undo Last Review"><i data-lucide="rotate-ccw" class="w-4 h-4"></i></button>` : ''}
+                        <button onclick="openCalendar('${t.id}'); event.stopPropagation();" class="p-2.5 rounded-theme bg-skin-base border border-skin-border hover:border-brand-500 text-skin-muted hover:text-brand-600 transition-colors" title="Schedule in Calendar"><i data-lucide="calendar" class="w-4 h-4"></i></button>
+                    </div>`;
+                grid.appendChild(card);
+            });
+            document.getElementById('stat-pending').innerText = dueCount;
+            const totalActive = state.topics.filter(t => !t.archived).length;
+            document.getElementById('stat-retention').innerText = (totalActive ? Math.round((totalLevel/(totalActive*6))*100) : 0) + "%";
+            lucide.createIcons();
+        }
+    </script>
+</body>
+</html>
