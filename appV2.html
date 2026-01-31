@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEXUS // PRO v13.6 (Mobile Actions)</title>
+    <title>NEXUS // PRO v13.7 (Undo Restored)</title>
     
     <!-- FONTS -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -304,7 +304,7 @@
                     <i data-lucide="layers" class="w-7 h-7"></i>
                 </div>
                 <h1 class="text-3xl font-bold tracking-tight">Nexus</h1>
-                <p class="text-skin-muted mt-2 text-sm">Active Space Repetition System v13.6</p>
+                <p class="text-skin-muted mt-2 text-sm">Active Space Repetition System v13.7</p>
             </div>
 
             <div class="flex p-1 bg-skin-base rounded-theme mb-6 transition-theme">
@@ -1973,6 +1973,20 @@
                 const marginB = window.innerWidth < 768 ? 'mb-2' : 'mb-3';
                 const marginBContent = window.innerWidth < 768 ? 'mb-2' : 'mb-5';
 
+                // DATE LOGIC (Minimalist on Mobile)
+                let dateDisplay = '';
+                if(isDue) {
+                    dateDisplay = `<button onclick="processReview('${t.id}', true); event.stopPropagation();" class="flex-1 btn-primary py-2.5 text-sm shadow-glow w-full transition-theme"><span class="md:hidden">Review</span><span class="hidden md:inline">Review Now</span></button>`;
+                } else {
+                    dateDisplay = `<div class="w-full py-2.5 bg-skin-base rounded-theme border border-skin-border flex items-center justify-center gap-2 text-xs text-skin-muted font-medium transition-theme flex-1">
+                                    <span class="md:hidden text-lg font-bold text-brand-600">${new Date(t.nextReview).getDate()}</span>
+                                    <span class="hidden md:flex items-center gap-1"><i data-lucide="clock" class="w-3.5 h-3.5"></i>Next: ${new Date(t.nextReview).toLocaleDateString(undefined, {month:'short', day:'numeric'})}</span>
+                                   </div>`;
+                }
+
+                // MOBILE HIDE ACTIONS LOGIC
+                const mobileHideClass = window.innerWidth < 768 ? 'hidden' : 'flex';
+
                 card.innerHTML = `
                     <div class="absolute top-0 left-0 w-full h-1.5 bg-gray-100 dark:bg-gray-800 transition-theme"><div class="h-full bg-brand-500 transition-all duration-1000" style="width: ${(t.level/6)*100}%"></div></div>
                     <div class="flex justify-between items-start ${marginB}">
@@ -1996,13 +2010,7 @@
                         <p class="${descSize} text-skin-muted line-clamp-2 leading-relaxed transition-theme">${t.desc||'No additional notes provided.'}</p>
                     </div>
                     <div class="flex gap-2 mt-auto items-center">
-                        ${isDue
-                            ? `<button onclick="processReview('${t.id}', true); event.stopPropagation();" class="flex-1 btn-primary py-2.5 text-sm shadow-glow w-full transition-theme"><span class="md:hidden">Review</span><span class="hidden md:inline">Review Now</span></button>`
-                            : `<div class="w-full py-2.5 bg-skin-base rounded-theme border border-skin-border flex items-center justify-center gap-2 text-xs text-skin-muted font-medium transition-theme flex-1">
-                                <span class="md:hidden text-lg font-bold text-brand-600">${new Date(t.nextReview).getDate()}</span>
-                                <span class="hidden md:flex items-center gap-1"><i data-lucide="clock" class="w-3.5 h-3.5"></i>Next: ${new Date(t.nextReview).toLocaleDateString(undefined, {month:'short', day:'numeric'})}</span>
-                               </div>`
-                        }
+                        ${dateDisplay}
                         
                         ${isJustReviewed ? `<button onclick="undoLastReview(); event.stopPropagation();" class="p-2.5 rounded-theme bg-skin-base border border-skin-border hover:border-brand-500 text-orange-500 hover:text-orange-600 transition-colors" title="Undo Last Review"><i data-lucide="rotate-ccw" class="w-4 h-4"></i></button>` : ''}
                         
