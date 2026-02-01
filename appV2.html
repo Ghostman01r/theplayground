@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEXUS // PRO v13.7 (Undo Restored)</title>
+    <title>NEXUS // PRO v14.5 (Cloud Date Fix)</title>
     
     <!-- FONTS -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -154,6 +154,21 @@
             --color-text-main: 240 253 244; --color-text-muted: 187 247 208;
         }
 
+        /* 7. VOID (NOTHING) */
+        [data-theme="void"] {
+            --color-brand-50: 50 20 20; --color-brand-100: 80 30 30; 
+            --color-brand-500: 255 85 0; 
+            --color-brand-600: 200 65 0; 
+            --color-brand-900: 255 255 255;
+            --color-bg-base: 0 0 0; 
+            --color-bg-surface: 20 20 20; 
+            --color-border: 50 50 50;
+            --color-text-main: 240 240 240; 
+            --color-text-muted: 150 150 150;
+            --radius-theme: 1rem; 
+            --font-main: 'Outfit';
+        }
+
         .modern-input {
             width: 100%; padding: 12px 16px;
             background: rgb(var(--color-bg-base));
@@ -275,12 +290,11 @@
             .list-row {
                 grid-template-columns: 4px 1fr auto;
                 gap: 8px;
-                padding: 16px 12px; /* Taller on mobile */
+                padding: 16px 12px;
             }
             .list-row > *:nth-child(3), .list-row > *:nth-child(4), .list-row > *:nth-child(5) {
                 display: none; 
             }
-            /* Always show actions on mobile, no hover needed */
             .list-row > *:last-child {
                 display: flex !important;
                 opacity: 1 !important;
@@ -304,7 +318,7 @@
                     <i data-lucide="layers" class="w-7 h-7"></i>
                 </div>
                 <h1 class="text-3xl font-bold tracking-tight">Nexus</h1>
-                <p class="text-skin-muted mt-2 text-sm">Active Space Repetition System v13.7</p>
+                <p class="text-skin-muted mt-2 text-sm">Active Space Repetition System v14.5</p>
             </div>
 
             <div class="flex p-1 bg-skin-base rounded-theme mb-6 transition-theme">
@@ -698,6 +712,7 @@
                         <div onclick="setTheme('ocean')" class="theme-btn group"><div class="theme-preview bg-cyan-500"></div><span class="text-xs font-bold text-skin-text">Ocean</span></div>
                         <div onclick="setTheme('sunset')" class="theme-btn group"><div class="theme-preview bg-orange-500"></div><span class="text-xs font-bold text-skin-text">Sunset</span></div>
                         <div onclick="setTheme('forest')" class="theme-btn group"><div class="theme-preview bg-green-600"></div><span class="text-xs font-bold text-skin-text">Forest</span></div>
+                        <div onclick="setTheme('void')" class="theme-btn group"><div class="theme-preview bg-black border border-gray-700"></div><span class="text-xs font-bold text-skin-text">Void</span></div>
                     </div>
                 </div>
 
@@ -840,7 +855,8 @@
             xp: 0,
             level: 1,
             focusSessionCount: 0,
-            viewMode: 'grid'
+            viewMode: 'grid',
+            history: {}
         };
         let retentionChart = null, forecastChart = null, timerInterval, timeLeft = 25 * 60, isTimerRunning = false, currentTimerMode = 25;
         let lastUndoAction = null; 
@@ -1075,13 +1091,27 @@
             const t = state.topics.find(x => x.id === id);
             if (!t) return;
             
-            const d = new Date(t.nextReview), time = state.time || "09:00", parts = time.split(':'); 
-            d.setHours(parseInt(parts[0]), parseInt(parts[1]), 0, 0);
-            const start = d.toISOString().replace(/-|:|\.\d\d\d/g, ""); 
-            d.setMinutes(d.getMinutes() + 30);
+            let targetDate = new Date(t.nextReview);
+            const now = new Date();
             
-            // Construct Google Calendar URL safely
-            const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('Review: '+t.name)}&dates=${start}/${d.toISOString().replace(/-|:|\.\d\d\d/g, "")}&details=${encodeURIComponent(t.desc||'')}&sf=true&output=xml`;
+            // If the scheduled date is in the past (overdue), default to TODAY for the calendar event
+            // so the user can schedule a "Catch up" session.
+            if (targetDate < now.setHours(0,0,0,0)) {
+                targetDate = new Date(); // Use today
+            }
+            
+            const time = state.time || "09:00";
+            const parts = time.split(':'); 
+            
+            targetDate.setHours(parseInt(parts[0]), parseInt(parts[1]), 0, 0);
+            
+            const start = targetDate.toISOString().replace(/-|:|\.\d\d\d/g, ""); 
+            targetDate.setMinutes(targetDate.getMinutes() + 30);
+            const end = targetDate.toISOString().replace(/-|:|\.\d\d\d/g, "");
+            
+            const action = t.nextReview < now.getTime() ? "Catch Up" : "Review";
+            
+            const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(action + ': '+t.name)}&dates=${start}/${end}&details=${encodeURIComponent(t.desc||'')}&sf=true&output=xml`;
             
             window.open(url, '_blank');
         }
@@ -1631,10 +1661,19 @@
                     const res = await fetch(GOOGLE_SCRIPT_URL + '?hex=' + state.hex); 
                     const data = await res.json(); 
                     if(Array.isArray(data)) { 
-                        state.topics = data; 
+                        // SANITIZATION FIX: Ensure timestamps are numbers, not strings
+                        state.topics = data.map(t => {
+                            // If nextReview is a string of digits, convert to number
+                            if (typeof t.nextReview === 'string' && /^\d+$/.test(t.nextReview)) {
+                                t.nextReview = parseInt(t.nextReview, 10);
+                            }
+                            // Ensure level is a number
+                            t.level = parseInt(t.level) || 0;
+                            return t;
+                        });
                         
                         // EXTRACT SUBJECTS FROM CONFIG_TOPIC
-                        const configTopic = data.find(t => t.id === 'config_subjects');
+                        const configTopic = state.topics.find(t => t.id === 'config_subjects');
                         if (configTopic) {
                             try {
                                 state.subjects = JSON.parse(configTopic.desc);
@@ -1699,7 +1738,7 @@
             if(t) {
                 const prev = { ...t }; const prevDaily = state.dailyProgress; const prevXp = state.xp; const prevLvl = state.level;
                 
-                // Calculate new level first
+                // Calculate new level
                 let newLevel = t.level;
                 if(success) newLevel = Math.min(t.level+1, 6); // Max Level 6
                 else newLevel = Math.max(t.level-1, 0); // Drop level on fail
@@ -1713,7 +1752,7 @@
                 nextDate.setHours(0,0,0,0); 
                 nextDate.setDate(nextDate.getDate() + daysToAdd);
                 
-                const newNextReview = nextDate.getTime(); // Define it here
+                const newNextReview = nextDate.getTime(); 
 
                 // Update topic state
                 t.level = newLevel;
@@ -1726,41 +1765,47 @@
                     localStorage.setItem('nexus_daily_progress', state.dailyProgress); 
                     updateDailyProgress();
                     addXP(10);
-                    
                     showToast('Retention +', 'success', true);
                 } else { 
                     sfx.click(); 
                     showToast('Scheduled sooner.', 'success', true);
                 } 
                 
-                lastReviewedTopicId = id; // Set ID
+                // NEW: Use state.history for multi-undo
+                if(!state.history) state.history = {};
+                state.history[id] = { prevLevel: prevLvl, prevNextReview: prev.nextReview, prevDaily: prevDaily, prevXp: prevXp };
                 
-                lastUndoAction = () => {
-                    const target = state.topics.find(x => x.id === id);
-                    if(target) { 
-                        target.level = prev.level; 
-                        target.nextReview = prev.nextReview; 
-                        state.dailyProgress = prevDaily; 
-                        localStorage.setItem('nexus_daily_progress', state.dailyProgress); 
-                        updateDailyProgress(); 
-                        state.xp = prevXp; 
-                        state.level = prevLvl; 
-                        updateLevelDisplay();
-                        
-                        lastReviewedTopicId = null; // Clear ID on undo
-                        
-                        syncUp(); 
-                        renderGrid(); 
-                        showToast('Undone'); 
-                    }
-                };
-                renderGrid(); 
+                // FORCE RE-RENDER TO SHOW UNDO
+                lastReviewedTopicId = id; 
+
                 syncUp(); 
+                renderGrid(); 
             }
         }
         
-        function undoLastReview() {
-            if (lastUndoAction) lastUndoAction();
+        // NEW: Specific Undo Function
+        function undoReview(id) {
+             const t = state.topics.find(x => x.id === id);
+             const hist = state.history ? state.history[id] : null;
+             
+             if(t && hist) {
+                 t.level = hist.prevLevel;
+                 t.nextReview = hist.prevNextReview;
+                 state.dailyProgress = hist.prevDaily;
+                 localStorage.setItem('nexus_daily_progress', state.dailyProgress); 
+                 updateDailyProgress();
+                 
+                 // Revert XP if it increased
+                 if(state.xp > hist.prevXp) {
+                      state.xp = hist.prevXp;
+                      updateLevelDisplay();
+                 }
+                 
+                 delete state.history[id];
+                 syncUp();
+                 renderGrid();
+                 showToast('Review Undone');
+             }
         }
         
         function fireConfetti() { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#6366f1', '#10b981', '#f43f5e'] }); }
@@ -1904,6 +1949,7 @@
                     const dateStr = new Date(t.nextReview).toLocaleDateString(undefined, {month:'short', day:'numeric'});
                     const isDue = new Date() >= new Date(t.nextReview).setHours(0,0,0,0);
                     const isJustReviewed = t.id === lastReviewedTopicId;
+                    const canUndo = state.history && state.history[t.id];
                     
                     card.innerHTML = `
                         <div class="h-full w-1 rounded-full ${colorClass}"></div>
@@ -1919,7 +1965,7 @@
                              <!-- Calendar Button -->
                              <button onclick="openCalendar('${t.id}'); event.stopPropagation();" class="p-1 hover:text-brand-600" title="Calendar"><i data-lucide="calendar" class="w-3.5 h-3.5"></i></button>
                              <!-- Undo Button (New) -->
-                             ${isJustReviewed ? `<button onclick="undoLastReview(); event.stopPropagation();" class="p-1 hover:text-orange-500" title="Undo"><i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i></button>` : ''}
+                             ${canUndo ? `<button onclick="undoReview('${t.id}'); event.stopPropagation();" class="p-1 hover:text-orange-500" title="Undo"><i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i></button>` : ''}
                              <!-- Quick Review Button (Only if due) -->
                              ${isDue ? `<button onclick="processReview('${t.id}', true); event.stopPropagation();" class="p-1 hover:text-green-600" title="Quick Review"><i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i></button>` : ''}
                              
@@ -1965,7 +2011,8 @@
                 card.onclick = (e) => { if(!e.target.closest('button')) openReadMode(t.id); };
                 
                 const nameHtml = search ? t.name.replace(new RegExp(search, 'gi'), match => `<span class="highlight-text">${match}</span>`) : t.name;
-                const isJustReviewed = t.id === lastReviewedTopicId;
+                const isJustReviewed = t.id === lastReviewedTopicId; // For immediate UI feedback
+                const canUndo = state.history && state.history[t.id]; // For Undo Persistence
 
                 // MOBILE TEXT SIZE ADJUSTMENT
                 const titleSize = window.innerWidth < 768 ? 'text-base' : 'text-lg';
@@ -1975,7 +2022,11 @@
 
                 // DATE LOGIC (Minimalist on Mobile)
                 let dateDisplay = '';
-                if(isDue) {
+                
+                // Hide review button if just reviewed (to show date/undo instead)
+                const showReviewButton = isDue && !isJustReviewed;
+
+                if(showReviewButton) {
                     dateDisplay = `<button onclick="processReview('${t.id}', true); event.stopPropagation();" class="flex-1 btn-primary py-2.5 text-sm shadow-glow w-full transition-theme"><span class="md:hidden">Review</span><span class="hidden md:inline">Review Now</span></button>`;
                 } else {
                     dateDisplay = `<div class="w-full py-2.5 bg-skin-base rounded-theme border border-skin-border flex items-center justify-center gap-2 text-xs text-skin-muted font-medium transition-theme flex-1">
@@ -2012,7 +2063,7 @@
                     <div class="flex gap-2 mt-auto items-center">
                         ${dateDisplay}
                         
-                        ${isJustReviewed ? `<button onclick="undoLastReview(); event.stopPropagation();" class="p-2.5 rounded-theme bg-skin-base border border-skin-border hover:border-brand-500 text-orange-500 hover:text-orange-600 transition-colors" title="Undo Last Review"><i data-lucide="rotate-ccw" class="w-4 h-4"></i></button>` : ''}
+                        ${canUndo ? `<button onclick="undoReview('${t.id}'); event.stopPropagation();" class="p-2.5 rounded-theme bg-skin-base border border-skin-border hover:border-brand-500 text-orange-500 hover:text-orange-600 transition-colors" title="Undo Last Review"><i data-lucide="rotate-ccw" class="w-4 h-4"></i></button>` : ''}
                         
                         <button onclick="openCalendar('${t.id}'); event.stopPropagation();" class="p-2.5 rounded-theme bg-skin-base border border-skin-border hover:border-brand-500 text-skin-muted hover:text-brand-600 transition-colors" title="Schedule in Calendar"><i data-lucide="calendar" class="w-4 h-4"></i></button>
                     </div>`;
