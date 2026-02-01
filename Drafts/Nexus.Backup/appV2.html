@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS // MODERNITY</title>
+    
+    <!-- FONTS -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- TAILWIND CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- ICONS -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- CONFIG -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Outfit"', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1', // Indigo
+                            600: '#4f46e5',
+                            900: '#312e81',
+                        },
+                        surface: '#ffffff',
+                        bg: '#f8fafc',
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'hover': '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.4s ease-out forwards',
+                        'slide-up': 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                    },
+                    keyframes: {
+                        fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
+                        slideUp: { '0%': { transform: 'translateY(20px)', opacity: '0' }, '100%': { transform: 'translateY(0)', opacity: '1' } }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { background-color: #f8fafc; color: #0f172a; -webkit-font-smoothing: antialiased; }
+        
+        /* Custom Inputs */
+        .modern-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: #f1f5f9;
+            border: 1px solid transparent;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.2s;
+            outline: none;
+        }
+        .modern-input:focus {
+            background: #ffffff;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+
+        /* Custom Buttons */
+        .btn-primary {
+            background: #4f46e5;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-primary:hover {
+            background: #4338ca;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+        .btn-primary:active { transform: translateY(0); }
+
+        .btn-secondary {
+            background: white;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .btn-secondary:hover { background: #f8fafc; color: #0f172a; border-color: #cbd5e1; }
+
+        .card-hover { transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); }
+        .card-hover:hover { transform: translateY(-4px); box-shadow: 0 12px 30px -10px rgba(0,0,0,0.1); }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden selection:bg-brand-100 selection:text-brand-900">
+
+    <!-- AUDIO ENGINE -->
+    <div id="audio-engine"></div>
+
+    <!-- ================= AUTH VIEW ================= -->
+    <div id="view-auth" class="fixed inset-0 z-50 flex items-center justify-center p-6 bg-white">
+        <!-- Abstract Decoration -->
+        <div class="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-brand-50 to-transparent"></div>
+        <div class="absolute -top-20 -right-20 w-96 h-96 bg-brand-100 rounded-full blur-3xl opacity-50"></div>
+        <div class="absolute top-40 -left-20 w-72 h-72 bg-blue-100 rounded-full blur-3xl opacity-50"></div>
+
+        <div class="w-full max-w-md bg-white rounded-3xl shadow-soft border border-slate-100 p-8 relative z-10 animate-slide-up">
+            
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-brand-600 text-white mb-4 shadow-lg shadow-brand-500/30">
+                    <i data-lucide="layers" class="w-7 h-7"></i>
+                </div>
+                <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Nexus</h1>
+                <p class="text-slate-500 mt-2 text-sm">Active Space Repetition System</p>
+            </div>
+
+            <!-- TABS -->
+            <div class="flex p-1 bg-slate-100 rounded-xl mb-6">
+                <button onclick="switchAuthTab('login')" id="tab-login" class="flex-1 py-2.5 text-sm font-semibold rounded-lg shadow-sm bg-white text-slate-900 transition-all">
+                    Sign In
+                </button>
+                <button onclick="switchAuthTab('signup')" id="tab-signup" class="flex-1 py-2.5 text-sm font-medium text-slate-500 hover:text-slate-900 transition-all">
+                    Create Account
+                </button>
+            </div>
+
+            <!-- LOGIN FORM -->
+            <div id="form-login" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1.5 ml-1">CODENAME</label>
+                    <input type="text" id="login-user" class="modern-input" placeholder="Enter your ID">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1.5 ml-1">ACCESS KEY</label>
+                    <input type="password" id="login-pass" class="modern-input" placeholder="••••••••">
+                </div>
+                <button onclick="performLogin()" class="btn-primary w-full mt-2">
+                    Start Session <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <!-- SIGNUP FORM -->
+            <div id="form-signup" class="space-y-4 hidden">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1.5 ml-1">GENERATED ID</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="signup-user" class="modern-input font-mono font-medium text-brand-600 bg-brand-50 border-brand-100" readonly>
+                        <button onclick="generateCodename()" class="p-3 rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors">
+                            <i data-lucide="refresh-cw" class="w-5 h-5 text-slate-500"></i>
+                        </button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1.5 ml-1">CREATE KEY</label>
+                    <input type="password" id="signup-pass" class="modern-input" placeholder="New Password">
+                </div>
+                <button onclick="performSignup()" class="btn-primary w-full mt-2">
+                    Initialize System
+                </button>
+            </div>
+
+            <div id="auth-loader" class="hidden mt-6 flex justify-center">
+                <div class="flex space-x-2">
+                    <div class="w-2 h-2 bg-brand-600 rounded-full animate-bounce"></div>
+                    <div class="w-2 h-2 bg-brand-600 rounded-full animate-bounce delay-75"></div>
+                    <div class="w-2 h-2 bg-brand-600 rounded-full animate-bounce delay-150"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= APP VIEW ================= -->
+    <div id="view-app" class="hidden flex h-full relative z-10">
+        
+        <!-- SIDEBAR (Desktop) -->
+        <aside class="hidden md:flex flex-col w-64 bg-white border-r border-slate-200 h-full p-6">
+            <div class="flex items-center gap-3 mb-10 px-2">
+                <div class="w-8 h-8 rounded-lg bg-brand-600 text-white flex items-center justify-center">
+                    <i data-lucide="layers" class="w-5 h-5"></i>
+                </div>
+                <span class="font-bold text-xl text-slate-900 tracking-tight">Nexus</span>
+            </div>
+
+            <nav class="space-y-1 flex-1">
+                <button class="w-full flex items-center gap-3 px-4 py-3 bg-brand-50 text-brand-700 rounded-xl font-medium transition-colors">
+                    <i data-lucide="layout-grid" class="w-5 h-5"></i> Dashboard
+                </button>
+                <button onclick="openModal('profile-modal')" class="w-full flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-50 hover:text-slate-900 rounded-xl font-medium transition-colors">
+                    <i data-lucide="settings" class="w-5 h-5"></i> Settings
+                </button>
+            </nav>
+
+            <div class="mt-auto pt-6 border-t border-slate-100">
+                <div class="flex items-center gap-3 mb-4 px-2">
+                    <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-bold" id="sidebar-avatar">
+                        U
+                    </div>
+                    <div class="overflow-hidden">
+                        <div class="text-sm font-bold text-slate-900 truncate" id="sidebar-name">User</div>
+                        <div class="text-xs text-slate-500">Pro Plan</div>
+                    </div>
+                </div>
+                <button onclick="logout()" class="w-full flex items-center gap-2 text-sm text-red-500 hover:text-red-600 px-2 py-1">
+                    <i data-lucide="log-out" class="w-4 h-4"></i> Sign Out
+                </button>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="flex-1 flex flex-col h-full overflow-hidden bg-slate-50/50">
+            
+            <!-- HEADER -->
+            <header class="h-20 flex items-center justify-between px-6 md:px-10 border-b border-slate-200 bg-white/80 backdrop-blur-md sticky top-0 z-20">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-900">Dashboard</h2>
+                    <p class="text-sm text-slate-500 hidden sm:block" id="current-date">Fetching date...</p>
+                </div>
+                
+                <div class="flex items-center gap-4">
+                    <div class="hidden sm:flex items-center gap-6 mr-4">
+                        <div class="text-right">
+                            <div class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Pending</div>
+                            <div class="text-lg font-bold text-brand-600" id="stat-pending">0</div>
+                        </div>
+                        <div class="w-px h-8 bg-slate-200"></div>
+                        <div class="text-right">
+                            <div class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Retention</div>
+                            <div class="text-lg font-bold text-slate-900" id="stat-retention">0%</div>
+                        </div>
+                    </div>
+                    <button onclick="openModal('add-modal')" class="btn-primary shadow-lg shadow-brand-500/20">
+                        <i data-lucide="plus" class="w-5 h-5"></i> <span class="hidden sm:inline">New Topic</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- SCROLLABLE GRID -->
+            <div class="flex-1 overflow-y-auto p-6 md:p-10">
+                <div id="topic-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-20">
+                    <!-- Cards will be injected here -->
+                </div>
+
+                <!-- Empty State -->
+                <div id="empty-state" class="hidden h-96 flex flex-col items-center justify-center text-center">
+                    <div class="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mb-6">
+                        <i data-lucide="inbox" class="w-10 h-10 text-slate-400"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900">All clear for now</h3>
+                    <p class="text-slate-500 mt-2 max-w-xs mx-auto">You have no active topics. Add a new topic to start tracking your retention.</p>
+                    <button onclick="openModal('add-modal')" class="mt-6 text-brand-600 font-semibold hover:text-brand-700">
+                        Create first topic &rarr;
+                    </button>
+                </div>
+            </div>
+
+            <!-- MOBILE BOTTOM NAV -->
+            <div class="md:hidden bg-white border-t border-slate-200 px-6 py-3 flex justify-around items-center sticky bottom-0 z-30">
+                <button class="flex flex-col items-center gap-1 text-brand-600">
+                    <i data-lucide="layout-grid" class="w-6 h-6"></i>
+                    <span class="text-[10px] font-medium">Home</span>
+                </button>
+                <button onclick="openModal('add-modal')" class="bg-brand-600 text-white p-3 rounded-full -mt-8 shadow-lg shadow-brand-500/40 border-4 border-slate-50">
+                    <i data-lucide="plus" class="w-6 h-6"></i>
+                </button>
+                <button onclick="openModal('profile-modal')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-900">
+                    <i data-lucide="user" class="w-6 h-6"></i>
+                    <span class="text-[10px] font-medium">Profile</span>
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <!-- ================= MODALS ================= -->
+    
+    <!-- ADD TOPIC MODAL -->
+    <div id="add-modal" class="fixed inset-0 z-[60] hidden">
+        <div class="absolute inset-0 bg-slate-900/20 backdrop-blur-sm transition-opacity" onclick="closeModal('add-modal')"></div>
+        <div class="absolute bottom-0 md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 w-full md:w-[480px] bg-white md:rounded-2xl rounded-t-2xl shadow-2xl p-6 md:p-8 animate-slide-up">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-slate-900">New Topic</h3>
+                <button onclick="closeModal('add-modal')" class="p-2 bg-slate-100 rounded-full hover:bg-slate-200 transition-colors">
+                    <i data-lucide="x" class="w-4 h-4 text-slate-600"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Topic Name</label>
+                    <input type="text" id="new-topic-name" class="modern-input bg-slate-50" placeholder="e.g. React Hooks">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Description / Notes</label>
+                    <textarea id="new-topic-desc" class="modern-input bg-slate-50 h-32 resize-none" placeholder="Brief details about this topic..."></textarea>
+                </div>
+            </div>
+
+            <div class="mt-8 flex gap-3">
+                <button onclick="closeModal('add-modal')" class="flex-1 btn-secondary justify-center">Cancel</button>
+                <button onclick="createTopic()" class="flex-1 btn-primary shadow-lg shadow-brand-500/20">Create Topic</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SETTINGS MODAL -->
+    <div id="profile-modal" class="fixed inset-0 z-[60] hidden">
+        <div class="absolute inset-0 bg-slate-900/20 backdrop-blur-sm transition-opacity" onclick="closeModal('profile-modal')"></div>
+        <div class="absolute bottom-0 md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 w-full md:w-[400px] bg-white md:rounded-2xl rounded-t-2xl shadow-2xl p-6 md:p-8 animate-slide-up">
+            <div class="text-center mb-6">
+                <div class="w-20 h-20 bg-brand-100 text-brand-600 rounded-full flex items-center justify-center text-3xl font-bold mx-auto mb-3" id="profile-avatar-lg">
+                    U
+                </div>
+                <h2 class="text-xl font-bold text-slate-900" id="profile-name-lg">User</h2>
+                <p class="text-sm text-slate-500">Free Tier</p>
+            </div>
+            
+            <div class="bg-slate-50 rounded-xl p-4 mb-6 border border-slate-100">
+                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Daily Review Time</label>
+                <input type="time" id="setting-time" class="modern-input bg-white text-center font-semibold text-lg">
+            </div>
+
+            <button onclick="saveSettings()" class="btn-primary w-full mb-3">Save Preferences</button>
+            <button onclick="logout()" class="w-full py-3 text-red-500 text-sm font-medium hover:bg-red-50 rounded-xl transition-colors">Sign Out</button>
+        </div>
+    </div>
+
+    <script>
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxqhlq19-8l-RmOVVGlzaOLhxm3g_cEiPzReXOF1__qGs0h8_qmAmUfnW14Q1k5kI1-Iw/exec'; // Add your script URL here if needed
+        
+        // --- DATA ---
+        const wordsA = ["Alpha", "Beta", "Gamma", "Delta", "Neo", "Prime", "Flux", "Core", "Zen", "Nova"];
+        const wordsB = ["Pilot", "Scout", "Mind", "Flow", "Spark", "Wave", "Link", "Sync", "Pulse", "Drift"];
+        let state = { user: null, hex: null, time: "09:00", topics: [] };
+
+        // --- AUDIO ENGINE (Subtler for modern UI) ---
+        const sfx = {
+            ctx: null,
+            init: function() { window.AudioContext = window.AudioContext || window.webkitAudioContext; this.ctx = new AudioContext(); },
+            play: function(freq, type, duration, vol=0.05) {
+                if (!this.ctx) this.init();
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + duration);
+            },
+            click: () => sfx.play(600, 'sine', 0.1, 0.02), // Soft pop
+            success: () => { sfx.play(440, 'sine', 0.1, 0.05); setTimeout(() => sfx.play(554, 'sine', 0.2, 0.05), 100); }, // Major chord
+            error: () => sfx.play(150, 'sawtooth', 0.2, 0.05) // Soft buzz
+        };
+
+        // --- INIT ---
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            checkSession();
+            
+            const d = new Date();
+            document.getElementById('current-date').innerText = d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+        });
+
+        // --- AUTH ---
+        function switchAuthTab(tab) {
+            sfx.click();
+            document.getElementById('form-login').classList.add('hidden');
+            document.getElementById('form-signup').classList.add('hidden');
+            
+            // Reset Tab Styles
+            const btnLogin = document.getElementById('tab-login');
+            const btnSignup = document.getElementById('tab-signup');
+            
+            btnLogin.className = "flex-1 py-2.5 text-sm font-medium text-slate-500 hover:text-slate-900 transition-all";
+            btnSignup.className = "flex-1 py-2.5 text-sm font-medium text-slate-500 hover:text-slate-900 transition-all";
+
+            // Active Tab Style
+            const activeClass = "flex-1 py-2.5 text-sm font-semibold rounded-lg shadow-sm bg-white text-slate-900 transition-all";
+            
+            if(tab === 'login') {
+                document.getElementById('form-login').classList.remove('hidden');
+                btnLogin.className = activeClass;
+            } else {
+                document.getElementById('form-signup').classList.remove('hidden');
+                btnSignup.className = activeClass;
+                generateCodename();
+            }
+        }
+
+        function generateCodename() {
+            const rA = wordsA[Math.floor(Math.random() * wordsA.length)];
+            const rB = wordsB[Math.floor(Math.random() * wordsB.length)];
+            const num = Math.floor(Math.random() * 999);
+            document.getElementById('signup-user').value = `${rA}${rB}${num}`;
+        }
+
+        function checkSession() {
+            const savedHex = localStorage.getItem('nexus_hex');
+            if(savedHex) {
+                state.hex = savedHex;
+                state.user = localStorage.getItem('nexus_name');
+                state.time = localStorage.getItem('nexus_time') || "09:00";
+                loadApp();
+                syncDown();
+            }
+        }
+
+        async function performLogin() {
+            const user = document.getElementById('login-user').value.trim();
+            const pass = document.getElementById('login-pass').value;
+            if(!user || !pass) return sfx.error();
+            
+            toggleLoader(true);
+            try {
+                let data;
+                if(GOOGLE_SCRIPT_URL === '') {
+                    await new Promise(r => setTimeout(r, 1000));
+                    data = { status: 'SUCCESS', hex: 'DEMO_HEX', time: '09:00' };
+                } else {
+                    const res = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'LOGIN', email: user, password: pass }) });
+                    data = await res.json();
+                }
+
+                if(data.status === 'SUCCESS' || GOOGLE_SCRIPT_URL === '') {
+                    saveSession(data.hex, user, data.time);
+                    sfx.success();
+                    loadApp();
+                    syncDown();
+                } else {
+                    alert('Invalid Credentials'); sfx.error();
+                }
+            } catch(e) { console.error(e); }
+            toggleLoader(false);
+        }
+
+        async function performSignup() {
+            const user = document.getElementById('signup-user').value.trim();
+            const pass = document.getElementById('signup-pass').value;
+            if(!pass) return sfx.error();
+            toggleLoader(true);
+            try {
+                let data;
+                if(GOOGLE_SCRIPT_URL === '') {
+                    await new Promise(r => setTimeout(r, 1000));
+                    data = { status: 'SUCCESS', hex: 'DEMO_HEX_' + Date.now() };
+                } else {
+                    const res = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'SIGNUP', email: user, password: pass }) });
+                    data = await res.json();
+                }
+                if(data.status === 'SUCCESS' || GOOGLE_SCRIPT_URL === '') {
+                    saveSession(data.hex, user, "09:00");
+                    sfx.success();
+                    loadApp();
+                } else { alert('Error: ' + data.message); }
+            } catch(e) { console.error(e); }
+            toggleLoader(false);
+        }
+
+        function saveSession(hex, name, time) {
+            localStorage.setItem('nexus_hex', hex); localStorage.setItem('nexus_name', name); localStorage.setItem('nexus_time', time);
+            state.hex = hex; state.user = name; state.time = time;
+        }
+
+        function toggleLoader(show) {
+            const l = document.getElementById('auth-loader');
+            if(show) l.classList.remove('hidden'); else l.classList.add('hidden');
+        }
+
+        function logout() { localStorage.clear(); location.reload(); }
+
+        function loadApp() {
+            document.getElementById('view-auth').classList.add('hidden');
+            document.getElementById('view-app').classList.remove('hidden');
+            document.getElementById('view-app').classList.add('animate-fade-in');
+            
+            document.getElementById('sidebar-name').innerText = state.user;
+            document.getElementById('sidebar-avatar').innerText = state.user.charAt(0).toUpperCase();
+            
+            document.getElementById('profile-name-lg').innerText = state.user;
+            document.getElementById('profile-avatar-lg').innerText = state.user.charAt(0).toUpperCase();
+            document.getElementById('setting-time').value = state.time;
+        }
+
+        function openModal(id) { 
+            sfx.click(); 
+            document.getElementById(id).classList.remove('hidden'); 
+            if(id === 'add-modal') setTimeout(() => document.getElementById('new-topic-name').focus(), 50); 
+        }
+        function closeModal(id) { 
+            sfx.click(); 
+            document.getElementById(id).classList.add('hidden'); 
+        }
+
+        async function syncDown() {
+            if(!state.hex || GOOGLE_SCRIPT_URL === '') {
+                 if(state.topics.length === 0) {
+                     state.topics = [
+                         { id: '1', name: 'UI Principles', level: 3, nextReview: Date.now() - 100000, desc: 'Hierarchy, Balance, Contrast' },
+                         { id: '2', name: 'Tailwind CSS', level: 1, nextReview: Date.now() + 86400000, desc: 'Utility classes and configuration' }
+                     ];
+                 }
+                 renderGrid();
+                 return;
+            }
+            try {
+                const res = await fetch(GOOGLE_SCRIPT_URL + '?hex=' + state.hex);
+                const data = await res.json();
+                if(Array.isArray(data)) { state.topics = data; renderGrid(); }
+            } catch(e) { console.error(e); }
+        }
+
+        async function syncUp() {
+            if(GOOGLE_SCRIPT_URL === '') return;
+            try { await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'SYNC_UP', hex: state.hex, topics: state.topics }) }); } catch(e) { console.error("Save failed"); }
+        }
+
+        function createTopic() {
+            const name = document.getElementById('new-topic-name').value.trim();
+            const desc = document.getElementById('new-topic-desc').value.trim();
+            if(name) {
+                state.topics.push({ id: 'top_' + Date.now(), name: name, desc: desc, level: 0, nextReview: Date.now() });
+                renderGrid(); syncUp(); closeModal('add-modal');
+                document.getElementById('new-topic-name').value = ''; document.getElementById('new-topic-desc').value = ''; sfx.success();
+            }
+        }
+
+        function deleteTopic(id) {
+            if(confirm("Remove this topic?")) {
+                state.topics = state.topics.filter(t => t.id !== id);
+                renderGrid(); syncUp(); sfx.click();
+            }
+        }
+
+        function processReview(id, success) {
+            const topic = state.topics.find(t => t.id === id);
+            if(topic) {
+                if(success) { topic.level = Math.min(topic.level + 1, 6); sfx.success(); openCalendar(topic); }
+                else { topic.level = Math.max(topic.level - 1, 0); sfx.click(); }
+                topic.nextReview = calculateNextReview(topic.level); renderGrid(); syncUp();
+            }
+        }
+
+        function calculateNextReview(level) {
+            const now = new Date(); const intervals = [0, 1, 3, 7, 14, 30, 90]; 
+            const daysToAdd = intervals[Math.min(level, intervals.length - 1)];
+            now.setDate(now.getDate() + daysToAdd); return now.getTime();
+        }
+
+        function openCalendar(topic) {
+            const dateObj = new Date(topic.nextReview);
+            let timeString = state.time || "09:00"; const parts = timeString.split(':');
+            dateObj.setHours(parseInt(parts[0]), parseInt(parts[1]), 0, 0);
+            const startISO = dateObj.toISOString().replace(/-|:|\.\d\d\d/g, "");
+            dateObj.setMinutes(dateObj.getMinutes() + 30);
+            const endISO = dateObj.toISOString().replace(/-|:|\.\d\d\d/g, "");
+            const title = encodeURIComponent(`NEXUS: ${topic.name}`);
+            const details = encodeURIComponent(`Notes: ${topic.desc || 'None'}`);
+            const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startISO}/${endISO}&details=${details}&sf=true&output=xml`;
+            window.open(url, '_blank');
+        }
+
+        async function saveSettings() {
+            state.time = document.getElementById('setting-time').value;
+            localStorage.setItem('nexus_time', state.time);
+            if(GOOGLE_SCRIPT_URL !== '') fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'UPDATE_SETTINGS', hex: state.hex, time: state.time }) });
+            sfx.success(); closeModal('profile-modal');
+        }
+
+        function renderGrid() {
+            const grid = document.getElementById('topic-grid'); grid.innerHTML = '';
+            const today = new Date().setHours(0,0,0,0);
+            let dueCount = 0; let totalLevel = 0;
+
+            if(state.topics.length === 0) document.getElementById('empty-state').classList.remove('hidden');
+            else document.getElementById('empty-state').classList.add('hidden');
+
+            state.topics.forEach(t => {
+                const reviewDate = new Date(t.nextReview).setHours(0,0,0,0);
+                const isDue = today >= reviewDate;
+                if(isDue) dueCount++; totalLevel += t.level;
+
+                const card = document.createElement('div');
+                card.className = `bg-white rounded-2xl p-6 shadow-soft card-hover border border-slate-100 flex flex-col relative overflow-hidden group`;
+                
+                // Progress Bar Background
+                const progress = (t.level / 6) * 100;
+                
+                card.innerHTML = `
+                    <div class="absolute top-0 left-0 w-full h-1 bg-slate-100">
+                        <div class="h-full bg-brand-500 transition-all duration-700" style="width: ${progress}%"></div>
+                    </div>
+
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${isDue ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}">
+                            ${isDue ? 'Due Now' : 'On Track'}
+                        </span>
+                        <div class="opacity-0 group-hover:opacity-100 transition-opacity">
+                             <button onclick="deleteTopic('${t.id}')" class="text-slate-400 hover:text-red-500 transition-colors p-1">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex-1 mb-4">
+                        <h3 class="font-bold text-lg text-slate-900 mb-1 leading-tight">${t.name}</h3>
+                        <p class="text-sm text-slate-500 line-clamp-2">${t.desc || 'No additional notes provided.'}</p>
+                    </div>
+
+                    <div class="flex gap-2 mt-auto">
+                        ${isDue 
+                            ? `<button onclick="processReview('${t.id}', true)" class="flex-1 btn-primary py-2 text-sm shadow-md shadow-brand-500/20">
+                                 Review
+                               </button>`
+                            : `<div class="flex-1 text-xs text-slate-400 font-medium flex items-center">
+                                 Next: ${new Date(t.nextReview).toLocaleDateString(undefined, {month:'short', day:'numeric'})}
+                               </div>`
+                        }
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+
+            document.getElementById('stat-pending').innerText = dueCount;
+            const retention = state.topics.length ? Math.round((totalLevel / (state.topics.length * 6)) * 100) : 0;
+            document.getElementById('stat-retention').innerText = retention + "%";
+            
+            // Re-init icons for new elements
+            lucide.createIcons();
+        }
+    </script>
+</body>
+</html>
