@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Cloud Library</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;500;600;700&family=Playfair+Display:ital,wght@0,400..800;1,400..800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+
+    <!-- Core Dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/epub.js/0.3.90/epub.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+    <style>
+        /* Theme Variables */
+        :root {
+            --bg-base: #F6F5F0;
+            --bg-surface: #FFFFFF;
+            --bg-sidebar: #F6F5F0;
+            --text-main: #2C2D2A;
+            --text-muted: #8A8A8A;
+            --accent: #E66B6B;
+            --accent-hover: #d15656;
+            --border-color: rgba(0,0,0,0.1);
+            --border-width: 1px;
+            --font-head: 'Playfair Display', serif;
+            --font-body: 'DM Sans', sans-serif;
+            --shadow-book: 10px 15px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            --radius-ui: 16px;
+        }
+
+        [data-theme="serenity-dark"] {
+            --bg-base: #121212; --bg-surface: #1E1E1E; --bg-sidebar: #121212;
+            --text-main: #E0E0E0; --text-muted: #A0A0A0; --accent: #E66B6B;
+            --border-color: rgba(255,255,255,0.1); --shadow-book: 10px 15px 25px -5px rgba(0, 0, 0, 0.8);
+        }
+
+        [data-theme="retro-light"] {
+            --bg-base: #F3E8D6; --bg-surface: #FFFDF8; --bg-sidebar: #F3E8D6;
+            --text-main: #111111; --text-muted: #555555; --accent: #FF6B35;
+            --border-color: #111111; --border-width: 2px;
+            --font-head: 'Space Mono', monospace; --font-body: 'DM Sans', sans-serif;
+            --shadow-book: 4px 4px 0px 0px rgba(17, 17, 17, 1); --radius-ui: 0px;
+        }
+
+        [data-theme="retro-dark"] {
+            --bg-base: #2A2421; --bg-surface: #362F2B; --bg-sidebar: #2A2421;
+            --text-main: #F3E8D6; --text-muted: #A89F95; --accent: #FF6B35;
+            --border-color: #F3E8D6; --shadow-book: 4px 4px 0px 0px rgba(243, 232, 214, 1);
+            --radius-ui: 0px;
+        }
+
+        body {
+            background-color: var(--bg-base); color: var(--text-main); font-family: var(--font-body);
+            transition: background-color 0.3s, color 0.3s; overflow: hidden;
+        }
+
+        h1, h2, h3, h4, .font-head { font-family: var(--font-head); }
+
+        .themed-border { border: var(--border-width) solid var(--border-color); }
+        .themed-border-b { border-bottom: var(--border-width) solid var(--border-color); }
+        .themed-border-r { border-right: var(--border-width) solid var(--border-color); }
+        .themed-border-t { border-top: var(--border-width) solid var(--border-color); }
+        
+        .themed-card { background-color: var(--bg-surface); border: var(--border-width) solid var(--border-color); border-radius: var(--radius-ui); }
+
+        .icon-btn {
+            width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;
+            border-radius: var(--radius-ui); color: var(--text-muted); cursor: pointer; transition: all 0.2s;
+        }
+        .icon-btn:hover { background-color: var(--border-color); color: var(--text-main); }
+        .icon-btn.active { background-color: var(--accent); color: white; border: var(--border-width) solid var(--border-color); }
+
+        .btn-primary {
+            background-color: var(--accent); color: white; padding: 12px 24px; border-radius: var(--radius-ui);
+            font-weight: 600; border: var(--border-width) solid var(--border-color); transition: all 0.2s;
+            display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
+        }
+        .btn-primary:hover { background-color: var(--accent-hover); transform: translateY(-2px); }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: 10px; opacity: 0.5; }
+
+        /* 3D Book CSS */
+        .book-3d-container { perspective: 1500px; display: flex; justify-content: center; align-items: center; margin: 2rem 0; transform-style: preserve-3d; }
+        .book-page-left, .book-page-right { width: 200px; height: 300px; background: #fff; box-shadow: inset 0 0 20px rgba(0,0,0,0.05); overflow: hidden; position: relative; }
+        .book-page-left { transform-origin: right; transform: rotateY(-12deg); border-radius: 8px 0 0 8px; border-right: 2px solid #ddd; background: linear-gradient(to right, #f4f4f4 0%, #fff 100%); }
+        .book-page-right { transform-origin: left; transform: rotateY(12deg); border-radius: 0 8px 8px 0; background: linear-gradient(to left, #f4f4f4 0%, #fff 100%); }
+        
+        @media (max-width: 768px) {
+            .book-3d-container { transform: scale(0.7); margin: 0; }
+            .hide-on-mobile { display: none !important; }
+        }
+
+        .view-section { display: none; height: 100%; overflow-y: auto; padding: 2rem; }
+        @media (min-width: 768px) { .view-section { padding: 2rem 3rem; } }
+        .view-section.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        #reader-modal { display: none; }
+        #reader-modal.active { display: flex; animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+        .pdf-page-canvas { max-width: 100%; box-shadow: var(--shadow-book); margin-bottom: 2rem; }
+        
+        /* Loading Overlay */
+        #loader-overlay { display: none; }
+        #loader-overlay.active { display: flex; }
+    </style>
+</head>
+<body class="h-screen flex flex-col md:flex-row">
+
+    <!-- Navigation Sidebar (Left on Desktop, Bottom on Mobile) -->
+    <nav class="md:w-24 w-full md:border-r border-t md:border-t-0 themed-border flex md:flex-col flex-row items-center md:py-8 justify-around md:justify-start shrink-0 z-40 fixed md:relative bottom-0 md:bottom-auto h-16 md:h-full" style="background-color: var(--bg-sidebar); border-color: var(--border-color);">
+        <div class="mb-12 cursor-pointer font-head text-2xl font-bold tracking-tighter hidden md:block" style="color: var(--accent);">Nx.</div>
+
+        <div class="flex md:flex-col flex-row gap-4 md:w-full w-auto px-4 md:px-0 justify-around w-full">
+            <div class="icon-btn nav-btn active" data-target="view-home"><span class="material-symbols-outlined">dashboard</span></div>
+            <div class="icon-btn nav-btn" data-target="view-library"><span class="material-symbols-outlined">library_books</span></div>
+            <div class="icon-btn nav-btn" data-target="view-settings"><span class="material-symbols-outlined">settings</span></div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 h-full relative flex flex-col pb-16 md:pb-0">
+        
+        <!-- Header -->
+        <header class="h-16 md:h-20 px-6 md:px-12 flex items-center shrink-0 themed-border-b justify-between">
+            <div class="flex items-center gap-3 text-text-muted w-full max-w-md bg-opacity-10 bg-black px-4 py-2 rounded-full" style="border-radius: var(--radius-ui);">
+                <span class="material-symbols-outlined text-sm md:text-base">search</span>
+                <input type="text" id="search-input" placeholder="Search cloud library..." class="bg-transparent border-none outline-none w-full text-xs md:text-sm font-body">
+            </div>
+            <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-300 overflow-hidden themed-border ml-4"><img src="https://i.pravatar.cc/100?img=33" alt="User"></div>
+        </header>
+
+        <!-- Container for Views -->
+        <div class="flex-1 relative overflow-hidden">
+            
+            <!-- VIEW: HOME DASHBOARD -->
+            <div id="view-home" class="view-section active">
+                <div class="max-w-4xl mx-auto">
+                    <h1 class="font-head text-3xl md:text-5xl leading-tight mb-2 md:mb-4">Welcome back,<br><span style="color: var(--accent);">Reader.</span></h1>
+                    <p class="text-xs md:text-sm mb-8 opacity-70 max-w-lg">Your cloud-hosted nexus. Your progress is synced locally to this device.</p>
+
+                    <div id="home-content">
+                        <h2 class="font-head text-xl md:text-2xl mb-4 md:mb-6">Continue Reading</h2>
+                        <div id="continue-reading-container" class="mb-10 md:mb-12"></div>
+
+                        <div class="flex justify-between items-center mb-4 md:mb-6">
+                            <h2 class="font-head text-xl md:text-2xl">Cloud Library</h2>
+                            <button class="text-xs md:text-sm hover:underline font-bold" onclick="switchView('view-library')" style="color: var(--accent);">View All</button>
+                        </div>
+                        <div id="recent-books-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: LIBRARY -->
+            <div id="view-library" class="view-section">
+                <div class="max-w-6xl mx-auto">
+                    <div class="flex justify-between items-center mb-6 md:mb-8">
+                        <h1 class="font-head text-3xl md:text-4xl">All Books</h1>
+                        <div class="text-xs md:text-sm opacity-70"><span id="total-books-count">0</span> books</div>
+                    </div>
+                    
+                    <div id="library-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-4 md:gap-x-6 gap-y-8 md:gap-y-10">
+                        <!-- Books injected here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: BOOK DETAILS -->
+            <div id="view-details" class="view-section">
+                <div class="max-w-5xl mx-auto">
+                    <button class="mb-4 md:mb-6 flex items-center gap-2 text-xs md:text-sm opacity-70 hover:opacity-100 transition-all" onclick="switchView('view-library')">
+                        <span class="material-symbols-outlined text-sm">arrow_back</span> Back to Library
+                    </button>
+
+                    <div class="flex flex-col lg:flex-row gap-4 md:gap-12">
+                        <!-- Left: 3D Preview -->
+                        <div class="flex-1 flex flex-col items-center justify-center">
+                            <div class="book-3d-container relative cursor-pointer group" onclick="startReadingActiveBook()">
+                                <div class="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 rounded-xl transition-all z-10 flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-white text-4xl drop-shadow-lg">play_circle</span>
+                                </div>
+                                <div class="book-page-left" style="box-shadow: -10px 10px 20px rgba(0,0,0,0.1);">
+                                    <img id="detail-cover" src="" class="w-full h-full object-cover" alt="Cover">
+                                </div>
+                                <div class="book-page-right hide-on-mobile" style="box-shadow: 10px 10px 20px rgba(0,0,0,0.1);">
+                                    <div class="p-4 text-[6px] text-gray-400 space-y-2 leading-relaxed font-body">
+                                        <h4 id="detail-mock-title" class="text-[8px] font-head text-black mb-4 border-b pb-1">Chapter</h4>
+                                        <div class="h-1 bg-gray-200 rounded w-full"></div><div class="h-1 bg-gray-200 rounded w-full"></div>
+                                        <div class="h-1 bg-gray-200 rounded w-5/6"></div><div class="h-1 bg-gray-200 rounded w-full mt-2"></div>
+                                        <div class="h-1 bg-gray-200 rounded w-4/6"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right: Details -->
+                        <div class="flex-1 pt-4 md:pt-8 text-center lg:text-left">
+                            <div class="inline-block px-3 py-1 text-[10px] md:text-xs uppercase tracking-wider mb-2 md:mb-4 themed-card font-bold" id="detail-type" style="color: var(--accent);">EPUB</div>
+                            <h1 id="detail-title" class="font-head text-2xl md:text-4xl mb-2 leading-tight">Book Title</h1>
+                            <p id="detail-author" class="text-base md:text-xl opacity-70 mb-6 md:mb-8 font-head italic">By Author Name</p>
+
+                            <div class="flex justify-center lg:justify-start gap-4 mb-6 md:mb-8">
+                                <button class="btn-primary" onclick="startReadingActiveBook()">
+                                    <span class="material-symbols-outlined">menu_book</span> Resume Reading
+                                </button>
+                            </div>
+
+                            <div class="themed-card p-4 md:p-6 text-left">
+                                <h3 class="font-head text-base md:text-lg mb-2 md:mb-4">About this file</h3>
+                                <p class="text-xs md:text-sm opacity-80 leading-relaxed mb-4">This book is streaming dynamically from the configured cloud repository. Your progress is saved locally to your current browser.</p>
+                                
+                                <div class="grid grid-cols-2 gap-4 text-xs md:text-sm mt-4 md:mt-6 border-t pt-4" style="border-color: var(--border-color);">
+                                    <div><span class="opacity-50 block text-[10px] md:text-xs">Progress</span><strong id="detail-progress">0%</strong></div>
+                                    <div><span class="opacity-50 block text-[10px] md:text-xs">Format</span><strong id="detail-format-text">Standard EPUB</strong></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: SETTINGS -->
+            <div id="view-settings" class="view-section">
+                <div class="max-w-4xl mx-auto">
+                    <h1 class="font-head text-3xl md:text-4xl mb-6 md:mb-8">Settings</h1>
+                    
+                    <div class="grid md:grid-cols-2 gap-6 md:gap-8">
+                        <!-- Theme Selector -->
+                        <div class="themed-card p-4 md:p-6">
+                            <h3 class="font-head text-lg md:text-xl mb-2 md:mb-4 flex items-center gap-2"><span class="material-symbols-outlined">palette</span> Appearance</h3>
+                            <p class="text-xs md:text-sm opacity-70 mb-4 md:mb-6">Choose your interface aesthetic.</p>
+                            
+                            <div class="grid grid-cols-2 gap-3 md:gap-4">
+                                <button class="themed-border p-3 md:p-4 text-center transition-all hover:opacity-80 flex flex-col items-center gap-1" style="background:#F6F5F0; color:#2C2D2A; border-radius:var(--radius-ui);" onclick="setTheme('serenity-light')">
+                                    <span class="font-head font-bold text-xs md:text-sm">Serenity Light</span>
+                                </button>
+                                <button class="themed-border p-3 md:p-4 text-center transition-all hover:opacity-80 flex flex-col items-center gap-1" style="background:#121212; color:#E0E0E0; border-radius:var(--radius-ui);" onclick="setTheme('serenity-dark')">
+                                    <span class="font-head font-bold text-xs md:text-sm">Serenity Dark</span>
+                                </button>
+                                <button class="p-3 md:p-4 text-center transition-all hover:opacity-80 flex flex-col items-center gap-1" style="background:#F3E8D6; color:#111111; border: 2px solid #111;" onclick="setTheme('retro-light')">
+                                    <span class="font-head font-bold text-xs md:text-sm" style="font-family:'Space Mono'">Retro Light</span>
+                                </button>
+                                <button class="p-3 md:p-4 text-center transition-all hover:opacity-80 flex flex-col items-center gap-1" style="background:#2A2421; color:#F3E8D6; border: 2px solid #F3E8D6;" onclick="setTheme('retro-dark')">
+                                    <span class="font-head font-bold text-xs md:text-sm" style="font-family:'Space Mono'">Retro Dark</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Database Info -->
+                        <div class="themed-card p-4 md:p-6">
+                            <h3 class="font-head text-lg md:text-xl mb-2 md:mb-4 flex items-center gap-2"><span class="material-symbols-outlined">cloud_sync</span> Cloud Configuration</h3>
+                            <p class="text-xs md:text-sm opacity-70 mb-4">The library is currently fetching from the <code class="bg-black bg-opacity-10 px-1 rounded">REMOTE_LIBRARY</code> array defined in the source code.</p>
+                            
+                            <div class="bg-yellow-500 bg-opacity-20 border border-yellow-500 rounded p-3 text-xs mb-6">
+                                <strong>Host Your Own:</strong> Edit the HTML file array to point to your GitHub <code>raw.githubusercontent.com</code> file links.
+                            </div>
+
+                            <div class="border-t pt-4" style="border-color: var(--border-color);">
+                                <p class="text-xs opacity-50 mb-2">Device Storage</p>
+                                <button class="text-xs text-red-500 hover:underline font-bold" onclick="clearData()">Clear Progress & Cache</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- FULLSCREEN IMMERSIVE READER -->
+    <div id="reader-modal" class="fixed inset-0 z-50 flex-col" style="background-color: var(--bg-base);">
+        
+        <!-- Reader Toolbar -->
+        <div class="h-14 md:h-16 px-4 md:px-6 flex justify-between items-center themed-border-b shrink-0" style="background-color: var(--bg-surface);">
+            <div class="flex items-center gap-2 md:gap-4">
+                <button class="icon-btn !w-10 !h-10 md:!w-12 md:!h-12" onclick="closeReader()"><span class="material-symbols-outlined">close</span></button>
+                <h2 id="reader-title" class="font-head text-sm md:text-lg truncate max-w-[150px] md:max-w-md">Reading...</h2>
+            </div>
+            
+            <div class="flex items-center gap-1 md:gap-2">
+                <!-- Mode Toggles -->
+                <div class="flex themed-border rounded-lg overflow-hidden mr-2 md:mr-4" style="border-radius: var(--radius-ui);">
+                    <button class="px-2 md:px-3 py-1.5 hover:bg-black hover:bg-opacity-10 transition-all mode-btn active" data-mode="spread" title="Spread View"><span class="material-symbols-outlined text-sm">menu_book</span></button>
+                    <button class="px-2 md:px-3 py-1.5 hover:bg-black hover:bg-opacity-10 transition-all border-l mode-btn" data-mode="scroll" title="Scroll View" style="border-color: var(--border-color);"><span class="material-symbols-outlined text-sm">swap_vert</span></button>
+                    <button class="px-2 md:px-3 py-1.5 hover:bg-black hover:bg-opacity-10 transition-all border-l mode-btn" data-mode="zen" title="Zen Focus" style="border-color: var(--border-color);"><span class="material-symbols-outlined text-sm">crop_portrait</span></button>
+                </div>
+
+                <button class="icon-btn !w-10 !h-10 hidden md:flex" id="btn-font-minus" title="Decrease Font (EPUB)"><span class="material-symbols-outlined">text_decrease</span></button>
+                <button class="icon-btn !w-10 !h-10 hidden md:flex" id="btn-font-plus" title="Increase Font (EPUB)"><span class="material-symbols-outlined">text_increase</span></button>
+            </div>
+        </div>
+
+        <!-- Reader Canvas Area -->
+        <div class="flex-1 w-full relative flex justify-center overflow-hidden" id="reader-container" style="background-color: var(--bg-base);">
+            
+            <div id="epub-viewer" class="w-full h-full hidden py-2 px-2 md:py-4 md:px-12"></div>
+            
+            <div id="pdf-viewer-scroll" class="w-full h-full hidden overflow-y-auto flex flex-col items-center py-4 md:py-8 px-2 md:px-4"></div>
+            
+            <button id="btn-reader-prev" class="absolute left-2 top-1/2 -translate-y-1/2 icon-btn !w-10 !h-10 bg-white bg-opacity-70 shadow-lg hidden z-10"><span class="material-symbols-outlined">west</span></button>
+            <button id="btn-reader-next" class="absolute right-2 top-1/2 -translate-y-1/2 icon-btn !w-10 !h-10 bg-white bg-opacity-70 shadow-lg hidden z-10"><span class="material-symbols-outlined">east</span></button>
+        </div>
+    </div>
+
+    <!-- Loading Overlay for Remote Fetches -->
+    <div id="loader-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-[100] flex-col items-center justify-center text-white backdrop-blur-sm">
+        <span class="material-symbols-outlined animate-spin text-5xl mb-4">sync</span>
+        <h2 class="font-head text-2xl tracking-wide">Fetching from Cloud...</h2>
+        <p class="text-sm opacity-80 mt-2">Downloading and rendering the book.</p>
+    </div>
+
+    <!-- MAIN APPLICATION LOGIC -->
+    <script>
+        // PDF.js Worker
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        // --- THE DATABASE (GitHub/Cloud Links Go Here) ---
+        // To add your own books, upload them to a GitHub repo, view the file, click "Raw", and paste the URL here.
+        const REMOTE_LIBRARY = [
+            {
+                id: "alice_wonderland",
+                title: "Alice's Adventures in Wonderland",
+                author: "Lewis Carroll",
+                type: "epub",
+                url: "https://s3.amazonaws.com/epubjs/books/alice.epub",
+                cover: "https://s3.amazonaws.com/epubjs/books/alice/OPS/images/cover_th.jpg"
+            },
+            {
+                id: "moby_dick",
+                title: "Moby Dick",
+                author: "Herman Melville",
+                type: "epub",
+                url: "https://s3.amazonaws.com/epubjs/books/moby-dick.epub",
+                cover: "https://s3.amazonaws.com/epubjs/books/moby-dick/OPS/images/9780316000000.jpg"
+            },
+            {
+                id: "tracemonkey_pdf",
+                title: "TraceMonkey PDF Rendering Test",
+                author: "Mozilla Foundation",
+                type: "pdf",
+                url: "https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf",
+                cover: "" // Left blank to show auto-fallback
+            }
+        ];
+
+        // App State
+        const App = {
+            theme: 'serenity-light',
+            activeBookId: null,
+            metadata: {}, 
+            reader: {
+                active: false, mode: 'spread', epubBook: null, epubRendition: null, pdfDoc: null, pdfCurrentPage: 1, fontSize: 100
+            }
+        };
+
+        const D = {
+            views: document.querySelectorAll('.view-section'),
+            navBtns: document.querySelectorAll('.nav-btn'),
+            recentGrid: document.getElementById('recent-books-grid'),
+            libraryGrid: document.getElementById('library-grid'),
+            continueContainer: document.getElementById('continue-reading-container'),
+            dtCover: document.getElementById('detail-cover'),
+            dtTitle: document.getElementById('detail-title'),
+            dtAuthor: document.getElementById('detail-author'),
+            dtType: document.getElementById('detail-type'),
+            dtProg: document.getElementById('detail-progress'),
+            modal: document.getElementById('reader-modal'),
+            epubV: document.getElementById('epub-viewer'),
+            pdfV: document.getElementById('pdf-viewer-scroll'),
+            btnPrev: document.getElementById('btn-reader-prev'),
+            btnNext: document.getElementById('btn-reader-next'),
+            modeBtns: document.querySelectorAll('.mode-btn'),
+            loader: document.getElementById('loader-overlay')
+        };
+
+        async function init() {
+            const savedTheme = localStorage.getItem('nexusTheme');
+            if(savedTheme) setTheme(savedTheme); else setTheme('serenity-light');
+
+            try { const meta = await localforage.getItem('nexusMeta'); if(meta) App.metadata = meta; } catch(e) {}
+
+            D.navBtns.forEach(btn => btn.addEventListener('click', (e) => switchView(e.currentTarget.dataset.target)));
+            
+            D.btnPrev.addEventListener('click', readerPrev);
+            D.btnNext.addEventListener('click', readerNext);
+            D.modeBtns.forEach(btn => btn.addEventListener('click', (e) => setReaderMode(e.currentTarget.dataset.mode)));
+            document.getElementById('btn-font-plus').addEventListener('click', () => adjustFont(10));
+            document.getElementById('btn-font-minus').addEventListener('click', () => adjustFont(-10));
+            
+            document.addEventListener('keydown', (e) => {
+                if(!App.reader.active) return;
+                if(e.key === 'ArrowRight') readerNext();
+                if(e.key === 'ArrowLeft') readerPrev();
+                if(e.key === 'Escape') closeReader();
+            });
+
+            // Automatically render the remote library
+            renderLibrary();
+        }
+
+        function switchView(viewId) {
+            D.views.forEach(v => v.classList.remove('active'));
+            D.navBtns.forEach(b => b.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+            const navBtn = document.querySelector(`[data-target="${viewId}"]`);
+            if(navBtn) navBtn.classList.add('active');
+        }
+
+        function setTheme(theme) {
+            App.theme = theme;
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('nexusTheme', theme);
+            if(App.reader.epubRendition) applyEpubTheme();
+        }
+
+        function renderLibrary() {
+            document.getElementById('total-books-count').innerText = REMOTE_LIBRARY.length;
+            const sortedBooks = [...REMOTE_LIBRARY].sort((a, b) => (App.metadata[b.id]?.lastRead || 0) - (App.metadata[a.id]?.lastRead || 0));
+
+            D.recentGrid.innerHTML = ''; D.libraryGrid.innerHTML = '';
+            
+            sortedBooks.forEach((book, index) => {
+                const card = createBookCard(book);
+                D.libraryGrid.appendChild(card);
+                if(index < 5) D.recentGrid.appendChild(card.cloneNode(true)); 
+            });
+
+            renderContinueCard(sortedBooks[0]);
+        }
+
+        function createBookCard(book) {
+            const el = document.createElement('div');
+            el.className = "group cursor-pointer flex flex-col items-center transition-all hover:-translate-y-1 relative";
+            el.onclick = () => openDetails(book.id);
+
+            const coverDiv = document.createElement('div');
+            coverDiv.className = "w-full aspect-[2/3] rounded-lg mb-2 md:mb-3 overflow-hidden relative themed-border";
+            coverDiv.style.boxShadow = "var(--shadow-book)";
+            
+            if(book.cover) coverDiv.innerHTML = `<img src="${book.cover}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">`;
+            else coverDiv.innerHTML = `<div class="w-full h-full flex items-center justify-center p-2 md:p-4 text-center text-[10px] md:text-xs font-head opacity-50" style="background:var(--border-color)">${book.title}</div>`;
+            
+            coverDiv.innerHTML += `
+                <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hide-on-mobile">
+                    <button class="bg-white text-black px-4 py-2 rounded-full text-xs font-bold shadow-lg flex items-center gap-1 hover:scale-105 transition-transform" onclick="event.stopPropagation(); startReadingDirectly('${book.id}')">
+                        <span class="material-symbols-outlined text-sm">menu_book</span>
+                    </button>
+                </div>
+            `;
+
+            el.innerHTML = `
+                ${coverDiv.outerHTML}
+                <h3 class="font-head text-xs md:text-sm font-bold leading-tight w-full truncate px-1">${book.title}</h3>
+                <p class="text-[10px] md:text-[11px] opacity-70 w-full truncate px-1 mt-0.5">${book.author}</p>
+            `;
+            return el;
+        }
+
+        function renderContinueCard(book) {
+            D.continueContainer.innerHTML = `
+                <div class="themed-card flex flex-col md:flex-row gap-4 md:gap-6 p-4 md:p-6 items-center md:items-start cursor-pointer hover:shadow-lg transition-all text-center md:text-left" onclick="openDetails('${book.id}')">
+                    <div class="w-20 md:w-24 aspect-[2/3] rounded shadow-md overflow-hidden shrink-0 themed-border">
+                        ${book.cover ? `<img src="${book.cover}" class="w-full h-full object-cover">` : `<div class="w-full h-full bg-gray-200 flex items-center justify-center text-[8px] p-2 text-center">${book.title}</div>`}
+                    </div>
+                    <div class="flex-1 flex flex-col justify-center">
+                        <span class="text-[10px] md:text-xs uppercase tracking-widest opacity-60 font-bold mb-1" style="color:var(--accent)">Pick up where you left off</span>
+                        <h3 class="font-head text-xl md:text-3xl mt-1 md:mt-2 mb-1">${book.title}</h3>
+                        <p class="text-xs md:text-sm opacity-70 mb-4">${book.author}</p>
+                        <div class="flex justify-center md:justify-start">
+                            <button class="btn-primary py-2 px-4 text-xs md:text-sm" onclick="event.stopPropagation(); startReadingDirectly('${book.id}')">Start Reading ↗</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function openDetails(bookId) {
+            const book = REMOTE_LIBRARY.find(b => b.id === bookId);
+            if(!book) return;
+            App.activeBookId = book.id;
+
+            D.dtTitle.innerText = book.title; D.dtAuthor.innerText = book.author; D.dtType.innerText = book.type;
+            document.getElementById('detail-mock-title').innerText = book.title;
+            
+            if(book.cover) D.dtCover.src = book.cover;
+            else D.dtCover.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='300'><rect width='200' height='300' fill='%23eee'/></svg>";
+
+            const meta = App.metadata[book.id];
+            D.dtProg.innerText = (meta && meta.progress) ? (book.type === 'epub' ? 'Saved' : `Page ${meta.progress}`) : 'Not started';
+
+            switchView('view-details');
+        }
+
+        function startReadingDirectly(bookId) { App.activeBookId = bookId; startReadingActiveBook(); }
+
+        async function startReadingActiveBook() {
+            const book = REMOTE_LIBRARY.find(b => b.id === App.activeBookId);
+            if(!book) return;
+
+            document.getElementById('reader-title').innerText = book.title;
+            D.loader.classList.add('active'); // Show loading screen while fetching
+            
+            if(!App.metadata[book.id]) App.metadata[book.id] = {};
+            App.metadata[book.id].lastRead = Date.now();
+            saveMeta();
+
+            try {
+                if (book.type === 'epub') await initEpub(book);
+                else await initPdf(book);
+                
+                D.modal.classList.add('active');
+                App.reader.active = true;
+                updateReaderUIForMode();
+            } catch (err) {
+                console.error("Failed to load cloud book", err);
+                alert("Failed to load book from the server. Check internet connection or CORS settings.");
+            } finally {
+                D.loader.classList.remove('active');
+            }
+        }
+
+        function setReaderMode(mode) {
+            App.reader.mode = mode;
+            D.modeBtns.forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+            
+            const book = REMOTE_LIBRARY.find(b => b.id === App.activeBookId);
+            if(book.type === 'epub' && App.reader.epubRendition) {
+                const location = App.reader.epubRendition.currentLocation()?.start?.cfi;
+                App.reader.epubRendition.destroy();
+                renderEpubRendition(location);
+            } else if (book.type === 'pdf') { renderPdfMode(); }
+            updateReaderUIForMode();
+        }
+
+        function updateReaderUIForMode() {
+            const isScroll = App.reader.mode === 'scroll';
+            D.btnPrev.style.display = isScroll ? 'none' : 'flex'; D.btnNext.style.display = isScroll ? 'none' : 'flex';
+        }
+
+        function readerNext() {
+            if(App.reader.epubRendition) App.reader.epubRendition.next();
+            else if(App.reader.pdfDoc) {
+                const max = App.reader.mode === 'spread' && window.innerWidth > 768 ? 2 : 1;
+                if(App.reader.pdfCurrentPage + max <= App.reader.pdfDoc.numPages) { App.reader.pdfCurrentPage += max; renderPdfMode(); }
+            }
+        }
+
+        function readerPrev() {
+            if(App.reader.epubRendition) App.reader.epubRendition.prev();
+            else if(App.reader.pdfDoc) {
+                const max = App.reader.mode === 'spread' && window.innerWidth > 768 ? 2 : 1;
+                if(App.reader.pdfCurrentPage - max >= 1) { App.reader.pdfCurrentPage -= max; renderPdfMode(); }
+            }
+        }
+
+        function closeReader() {
+            D.modal.classList.remove('active'); App.reader.active = false;
+            if(App.reader.epubBook) { App.reader.epubBook.destroy(); App.reader.epubBook = null; App.reader.epubRendition = null; }
+            if(App.reader.pdfDoc) { App.reader.pdfDoc.destroy(); App.reader.pdfDoc = null; }
+            D.epubV.innerHTML = ''; D.pdfV.innerHTML = ''; renderLibrary();
+        }
+
+        // EPUB Logic via URL
+        async function initEpub(book) {
+            D.pdfV.classList.add('hidden'); D.epubV.classList.remove('hidden');
+            App.reader.epubBook = ePub(book.url); // Directly pass URL
+            const savedLocation = App.metadata[book.id]?.progress;
+            renderEpubRendition(savedLocation);
+        }
+
+        function renderEpubRendition(startLocation) {
+            D.epubV.innerHTML = ''; 
+            let manager = 'default'; let flow = 'paginated'; let spread = 'none';
+
+            if(App.reader.mode === 'spread' && window.innerWidth > 768) { spread = 'auto'; }
+            if(App.reader.mode === 'scroll') { manager = 'continuous'; flow = 'scrolled'; }
+            if(App.reader.mode === 'zen') { spread = 'none'; }
+
+            App.reader.epubRendition = App.reader.epubBook.renderTo("epub-viewer", { width: "100%", height: "100%", manager, flow, spread });
+            applyEpubTheme();
+
+            App.reader.epubBook.ready.then(() => { App.reader.epubRendition.display(startLocation); });
+            App.reader.epubRendition.on('relocated', (location) => { if(App.activeBookId) { App.metadata[App.activeBookId].progress = location.start.cfi; saveMeta(); } });
+        }
+
+        function applyEpubTheme() {
+            if(!App.reader.epubRendition) return;
+            const style = getComputedStyle(document.body);
+            App.reader.epubRendition.themes.default({
+                body: { "background": "transparent", "color": style.color, "font-family": App.theme.includes('retro') ? '"Space Mono", monospace' : '"DM Sans", sans-serif', "font-size": `${App.reader.fontSize}%` },
+                p: { "line-height": "1.8", "margin-bottom": "1em" }
+            });
+        }
+
+        function adjustFont(delta) { App.reader.fontSize += delta; applyEpubTheme(); }
+
+        // PDF Logic via URL
+        async function initPdf(book) {
+            D.epubV.classList.add('hidden'); D.pdfV.classList.remove('hidden');
+            App.reader.pdfDoc = await pdfjsLib.getDocument(book.url).promise;
+            App.reader.pdfCurrentPage = App.metadata[book.id]?.progress || 1;
+            renderPdfMode();
+        }
+
+        async function renderPdfMode() {
+            const container = D.pdfV; container.innerHTML = ''; 
+            if(!App.reader.pdfDoc) return;
+
+            if(App.activeBookId) { App.metadata[App.activeBookId].progress = App.reader.pdfCurrentPage; saveMeta(); }
+
+            if(App.reader.mode === 'scroll') {
+                container.classList.remove('justify-center', 'items-center'); container.style.overflowY = 'auto';
+                for(let i=0; i<3; i++) { const p = App.reader.pdfCurrentPage + i; if(p <= App.reader.pdfDoc.numPages) await appendPdfPage(p, container, 1.5); }
+            } else if (App.reader.mode === 'spread' && window.innerWidth > 768) {
+                container.classList.add('justify-center', 'items-center'); container.style.overflowY = 'hidden';
+                const wrapper = document.createElement('div'); wrapper.className = "flex gap-2 max-w-full h-full justify-center";
+                await appendPdfPage(App.reader.pdfCurrentPage, wrapper, 1.2);
+                if(App.reader.pdfCurrentPage + 1 <= App.reader.pdfDoc.numPages) await appendPdfPage(App.reader.pdfCurrentPage + 1, wrapper, 1.2);
+                container.appendChild(wrapper);
+            } else {
+                container.classList.add('justify-center', 'items-center'); container.style.overflowY = 'hidden';
+                await appendPdfPage(App.reader.pdfCurrentPage, container, 1.8);
+            }
+        }
+
+        async function appendPdfPage(pageNum, container, scaleModifier) {
+            const page = await App.reader.pdfDoc.getPage(pageNum);
+            let viewport = page.getViewport({scale: 1});
+            const containerHeight = D.pdfV.clientHeight - 40; 
+            let scale = (containerHeight / viewport.height) * scaleModifier;
+            if(scale > 2) scale = 2; 
+            
+            viewport = page.getViewport({scale});
+            const canvas = document.createElement('canvas'); canvas.className = 'pdf-page-canvas bg-white';
+            canvas.width = viewport.width; canvas.height = viewport.height;
+            container.appendChild(canvas);
+            await page.render({canvasContext: canvas.getContext('2d'), viewport}).promise;
+        }
+
+        function saveMeta() { localforage.setItem('nexusMeta', App.metadata); }
+        function clearData() { localforage.clear().then(() => { alert("Cache cleared. Reloading."); location.reload(); }); }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
