@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexus Cloud Library</title>
+    <title>Pustakālaya Library</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -124,9 +124,9 @@
 
     <!-- Navigation Sidebar (Left on Desktop, Bottom on Mobile) -->
     <nav class="md:w-24 w-full md:border-r border-t md:border-t-0 themed-border flex md:flex-col flex-row items-center md:py-8 justify-around md:justify-start shrink-0 z-40 fixed md:relative bottom-0 md:bottom-auto h-16 md:h-full" style="background-color: var(--bg-sidebar); border-color: var(--border-color);">
-        <div class="mb-12 cursor-pointer font-head text-2xl font-bold tracking-tighter hidden md:block" style="color: var(--accent);">Nx.</div>
+        <div class="mb-12 cursor-pointer font-head text-xl md:text-2xl font-bold tracking-tighter hidden md:block writing-vertical-lr md:-rotate-90 md:mt-10" style="color: var(--accent);">Pustakālaya</div>
 
-        <div class="flex md:flex-col flex-row gap-4 md:w-full w-auto px-4 md:px-0 justify-around w-full">
+        <div class="flex md:flex-col flex-row gap-4 md:w-full w-auto px-4 md:px-0 justify-around w-full mt-auto mb-auto">
             <div class="icon-btn nav-btn active" data-target="view-home"><span class="material-symbols-outlined">dashboard</span></div>
             <div class="icon-btn nav-btn" data-target="view-library"><span class="material-symbols-outlined">library_books</span></div>
             <div class="icon-btn nav-btn" data-target="view-settings"><span class="material-symbols-outlined">settings</span></div>
@@ -152,7 +152,7 @@
             <div id="view-home" class="view-section active">
                 <div class="max-w-4xl mx-auto">
                     <h1 class="font-head text-3xl md:text-5xl leading-tight mb-2 md:mb-4">Welcome back,<br><span style="color: var(--accent);">Reader.</span></h1>
-                    <p class="text-xs md:text-sm mb-8 opacity-70 max-w-lg">Your cloud-hosted nexus. Your progress is synced locally to this device.</p>
+                    <p class="text-xs md:text-sm mb-8 opacity-70 max-w-lg">Your cloud-hosted Pustakālaya. Your progress is synced locally to this device.</p>
 
                     <div id="home-content">
                         <h2 class="font-head text-xl md:text-2xl mb-4 md:mb-6">Continue Reading</h2>
@@ -264,11 +264,14 @@
 
                         <!-- Database Info -->
                         <div class="themed-card p-4 md:p-6">
-                            <h3 class="font-head text-lg md:text-xl mb-2 md:mb-4 flex items-center gap-2"><span class="material-symbols-outlined">cloud_sync</span> Cloud Configuration</h3>
-                            <p class="text-xs md:text-sm opacity-70 mb-4">The library is currently fetching from the <code class="bg-black bg-opacity-10 px-1 rounded">REMOTE_LIBRARY</code> array defined in the source code.</p>
+                            <h3 class="font-head text-lg md:text-xl mb-2 md:mb-4 flex items-center gap-2"><span class="material-symbols-outlined">cloud_sync</span> Cloud Auto-Sync</h3>
+                            <p class="text-xs md:text-sm opacity-70 mb-4">Connect your public GitHub repository to automatically sync your library. Just upload PDFs/EPUBs to your repo and they will appear here!</p>
                             
-                            <div class="bg-yellow-500 bg-opacity-20 border border-yellow-500 rounded p-3 text-xs mb-6">
-                                <strong>Host Your Own:</strong> Edit the HTML file array to point to your GitHub <code>raw.githubusercontent.com</code> file links.
+                            <div class="flex flex-col gap-3 mb-6">
+                                <input type="text" id="gh-owner" placeholder="GitHub Username (e.g. torvalds)" class="w-full text-sm p-2 rounded themed-border bg-transparent outline-none">
+                                <input type="text" id="gh-repo" placeholder="Repository Name (e.g. pustakalaya)" class="w-full text-sm p-2 rounded themed-border bg-transparent outline-none">
+                                <input type="text" id="gh-path" placeholder="Folder Path (e.g. books or leave empty)" class="w-full text-sm p-2 rounded themed-border bg-transparent outline-none">
+                                <button class="btn-primary w-full justify-center mt-2 text-sm" onclick="saveGitHubConfig()">Sync Library Automatically</button>
                             </div>
 
                             <div class="border-t pt-4" style="border-color: var(--border-color);">
@@ -330,34 +333,9 @@
         // PDF.js Worker
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-        // --- THE DATABASE (GitHub/Cloud Links Go Here) ---
-        // To add your own books, upload them to a GitHub repo, view the file, click "Raw", and paste the URL here.
-        const REMOTE_LIBRARY = [
-            {
-                id: "alice_wonderland",
-                title: "Alice's Adventures in Wonderland",
-                author: "Lewis Carroll",
-                type: "epub",
-                url: "https://s3.amazonaws.com/epubjs/books/alice.epub",
-                cover: "https://s3.amazonaws.com/epubjs/books/alice/OPS/images/cover_th.jpg"
-            },
-            {
-                id: "moby_dick",
-                title: "Moby Dick",
-                author: "Herman Melville",
-                type: "epub",
-                url: "https://s3.amazonaws.com/epubjs/books/moby-dick.epub",
-                cover: "https://s3.amazonaws.com/epubjs/books/moby-dick/OPS/images/9780316000000.jpg"
-            },
-            {
-                id: "tracemonkey_pdf",
-                title: "TraceMonkey PDF Rendering Test",
-                author: "Mozilla Foundation",
-                type: "pdf",
-                url: "https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf",
-                cover: "" // Left blank to show auto-fallback
-            }
-        ];
+        // --- THE DATABASE (Dynamic Auto-Sync) ---
+        let REMOTE_LIBRARY = [];
+        let ghConfig = { owner: '', repo: '', path: '' };
 
         // App State
         const App = {
@@ -410,8 +388,69 @@
                 if(e.key === 'Escape') closeReader();
             });
 
-            // Automatically render the remote library
-            renderLibrary();
+            // Load GitHub Config and Auto-Sync
+            const savedGh = localStorage.getItem('pustakalayaGh');
+            if (savedGh) {
+                ghConfig = JSON.parse(savedGh);
+                document.getElementById('gh-owner').value = ghConfig.owner || '';
+                document.getElementById('gh-repo').value = ghConfig.repo || '';
+                document.getElementById('gh-path').value = ghConfig.path || '';
+                if (ghConfig.owner && ghConfig.repo) {
+                    fetchGitHubLibrary();
+                } else {
+                    renderLibrary();
+                }
+            } else {
+                renderLibrary();
+            }
+        }
+
+        async function fetchGitHubLibrary() {
+            D.loader.classList.add('active');
+            D.loader.querySelector('h2').innerText = "Scanning GitHub Folder...";
+            try {
+                const pathParam = ghConfig.path ? `/${ghConfig.path}` : '';
+                const url = `https://api.github.com/repos/${ghConfig.owner}/${ghConfig.repo}/contents${pathParam}`;
+                const response = await fetch(url);
+                
+                if (!response.ok) throw new Error("GitHub API Error: Check repository details.");
+                const files = await response.json();
+
+                REMOTE_LIBRARY = files
+                    .filter(f => f.name.toLowerCase().endsWith('.epub') || f.name.toLowerCase().endsWith('.pdf'))
+                    .map(f => {
+                        const isEpub = f.name.toLowerCase().endsWith('.epub');
+                        return {
+                            id: btoa(f.path).substring(0, 20),
+                            title: f.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, ' '),
+                            author: ghConfig.owner,
+                            type: isEpub ? 'epub' : 'pdf',
+                            url: f.download_url,
+                            cover: null
+                        };
+                    });
+                renderLibrary();
+            } catch(e) {
+                console.error(e);
+                alert("Failed to sync GitHub folder. Make sure the repository is public and details are correct.");
+            } finally {
+                D.loader.classList.remove('active');
+                D.loader.querySelector('h2').innerText = "Fetching from Cloud..."; // Reset
+            }
+        }
+
+        function saveGitHubConfig() {
+            ghConfig.owner = document.getElementById('gh-owner').value.trim();
+            ghConfig.repo = document.getElementById('gh-repo').value.trim();
+            ghConfig.path = document.getElementById('gh-path').value.trim();
+            localStorage.setItem('pustakalayaGh', JSON.stringify(ghConfig));
+            
+            if (ghConfig.owner && ghConfig.repo) {
+                fetchGitHubLibrary();
+                switchView('view-home');
+            } else {
+                alert("Username and Repository are required.");
+            }
         }
 
         function switchView(viewId) {
@@ -435,6 +474,16 @@
 
             D.recentGrid.innerHTML = ''; D.libraryGrid.innerHTML = '';
             
+            if (sortedBooks.length === 0) {
+                D.continueContainer.innerHTML = `
+                    <div class="themed-card p-6 text-center opacity-70">
+                        <span class="material-symbols-outlined text-4xl mb-2">cloud_off</span>
+                        <p>No books synced yet. Go to <strong>Settings</strong> to configure your GitHub auto-sync!</p>
+                        <button class="btn-primary mt-4 py-2 px-4 text-sm" onclick="switchView('view-settings')">Setup Auto-Sync</button>
+                    </div>`;
+                return;
+            }
+
             sortedBooks.forEach((book, index) => {
                 const card = createBookCard(book);
                 D.libraryGrid.appendChild(card);
