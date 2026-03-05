@@ -202,7 +202,7 @@
         <div class="spinner"></div>
         <div class="loading-text">Loading preview…</div>
       </div>
-      <iframe class="reader-frame" id="readerFrame" src="" onload="frameLoaded()" allow="autoplay"></iframe>
+      <iframe class="reader-frame" id="readerFrame" src="" allow="autoplay"></iframe>
     </div>
   </div>
 </div>
@@ -211,7 +211,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 //  👇 PASTE YOUR APPS SCRIPT WEB APP URL HERE
 // ─────────────────────────────────────────────────────────────────────────────
-var APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby1znUbVSbJd1x8Q_0Cmm_Sc4ZtI7rfp8xdUxjNI_qxnbXZiAgmQraIADyTwPXTimE/exec";
+var APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzP_613UucWrROK_2beQyw1BYoHGWJpETXb4yme8gDo1fnv1x6ofRlEFq7RVWqCZm-f/exec";
 // ─────────────────────────────────────────────────────────────────────────────
 
 var allBooks = [];
@@ -232,29 +232,51 @@ function getCover(index) {
   return covers[index % covers.length];
 }
 
+// ── FRAME ONLOAD (avoid inline handler issues) ────────────────────────────
+document.getElementById('readerFrame').addEventListener('load', frameLoaded);
+
 // ── FETCH ──────────────────────────────────────────────────────────────────
 function loadLibrary() {
-  if (APPS_SCRIPT_URL === "https://script.google.com/macros/s/AKfycby1znUbVSbJd1x8Q_0Cmm_Sc4ZtI7rfp8xdUxjNI_qxnbXZiAgmQraIADyTwPXTimE/exec") {
-    // Demo mode — show placeholder books
+  if (APPS_SCRIPT_URL === "https://script.google.com/macros/s/AKfycbzP_613UucWrROK_2beQyw1BYoHGWJpETXb4yme8gDo1fnv1x6ofRlEFq7RVWqCZm-f/exec") {
     loadDemo();
     return;
   }
 
-  fetch(APPS_SCRIPT_URL)
-    .then(r => r.json())
+  // Apps Script requires fetch with redirect following
+  fetch(APPS_SCRIPT_URL, { redirect: 'follow' })
+    .then(r => {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
     .then(data => {
       allBooks = data.books || [];
+      if (allBooks.length === 0) {
+        document.getElementById('errorBanner').textContent = '⚠ Connected to Drive but no books found. Check your Folder ID in Apps Script and make sure the folder has book files.';
+        document.getElementById('errorBanner').style.display = 'block';
+      }
       buildFilters();
       renderBooks(allBooks);
       updateStats(data);
-      document.getElementById('syncLabel').textContent = 'Synced';
+      document.getElementById('syncLabel').textContent = 'Synced ✓';
       document.getElementById('footerSync').textContent =
         allBooks.length + ' books · Last synced ' + formatTime(data.lastSynced);
     })
-    .catch(() => {
+    .catch(err => {
+      console.error('Folio fetch error:', err);
+      document.getElementById('errorBanner').textContent =
+        '⚠ Could not load books from Drive. See the checklist below.';
       document.getElementById('errorBanner').style.display = 'block';
+      document.getElementById('gridArea').innerHTML = `
+        <div class="empty-state">
+          <h3>Connection checklist</h3>
+          <p style="text-align:left;max-width:420px;margin:0 auto;">
+            1. In Apps Script → Deploy → Manage deployments → confirm <strong>Who has access = Anyone</strong><br><br>
+            2. After any code change, you must create a <strong>New Deployment</strong> (not re-use the old URL)<br><br>
+            3. Make sure the <strong>Folder ID</strong> in the script is correct<br><br>
+            4. Open the Apps Script URL directly in your browser — you should see JSON text
+          </p>
+        </div>`;
       document.getElementById('syncLabel').textContent = 'Sync failed';
-      document.getElementById('gridArea').innerHTML = '';
     });
 }
 
