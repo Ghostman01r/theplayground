@@ -3,468 +3,368 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXUS // ASRS </title>
-    <link rel="icon" type="image/png" href="favicon.png">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <title>NEXUS // MEMORY ARCHITECTURE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CORE VARIABLES --- */
+        /* --- LIVE BACKGROUND --- */
+        #canvas-bg {
+             position: fixed;
+             top: 0; left: 0;
+             width: 100%; height: 100%;
+            z-index: -1; /* Puts it behind everything */
+             background: radial-gradient(circle at center, #111 0%, #000 100%); /* Subtle depth */
+        }
         :root {
             --bg-color: #050505;
-            --surface-color: #121212;
-            --surface-hover: #1E1E1E;
-            --accent-color: #FF5500;
-            --text-primary: #FFFFFF;
-            --text-secondary: #888888;
-            --danger: #FF2A2A;
-            --success: #00E055;
-            --radius-lg: 28px;
-            --radius-md: 16px;
-            --radius-sm: 8px;
-            --font-main: 'Inter', sans-serif;
+            --surface: #111;
+            --accent: #FF5500;
+            --text-main: #FFF;
+            --text-muted: #888;
+            --font-display: 'Inter', sans-serif;
             --font-tech: 'Space Mono', monospace;
         }
 
-        /* --- BASE --- */
-        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         body {
             background-color: var(--bg-color);
-            color: var(--text-primary);
-            font-family: var(--font-main);
+            color: var(--text-main);
+            font-family: var(--font-display);
             overflow-x: hidden;
-            min-height: 100vh;
-            padding-bottom: 100px;
-            background-image: radial-gradient(#222 1px, transparent 1px);
-            background-size: 20px 20px;
+            line-height: 1.6;
         }
 
-        .app-container { 
-            max-width: 1400px; margin: 0 auto; padding: 20px; 
-            display: none; opacity: 0; transition: opacity 0.5s ease;
+        /* --- NAVIGATION --- */
+        nav {
+            position: fixed; top: 0; width: 100%; padding: 20px 40px;
+            display: flex; justify-content: space-between; align-items: center;
+            z-index: 1000; mix-blend-mode: difference;
         }
-        .app-visible { display: block; opacity: 1; }
-
-        /* --- HEADER --- */
-        header { margin-bottom: 40px; }
-        .status-bar {
-            font-family: var(--font-tech); font-size: 0.8rem; color: var(--text-secondary);
-            margin-bottom: 8px; display: flex; justify-content: space-between; letter-spacing: 1px;
-        }
-        #user-identity { color: var(--accent-color); font-weight: bold; text-shadow: 0 0 10px rgba(255, 85, 0, 0.3); }
-
-        .hero-card {
-            background-color: var(--accent-color); color: #000; padding: 30px;
-            border-radius: var(--radius-lg); width: 100%;
-            display: flex; flex-direction: column; gap: 10px;
-            box-shadow: 0 10px 30px rgba(255, 85, 0, 0.2);
-        }
-        .hero-title { font-size: 2rem; font-weight: 800; line-height: 1.1; }
-        .progress-container { margin-top: 20px; display: flex; gap: 40px; }
-        .stat-item h3 { font-size: 3rem; font-family: var(--font-tech); letter-spacing: -2px; }
-
-        /* --- CONTROLS --- */
-        .controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .btn {
-            background: var(--surface-color); border: 1px solid #333; color: white;
-            padding: 10px 20px; border-radius: var(--radius-md); cursor: pointer;
-            font-family: var(--font-tech); transition: all 0.2s ease;
-        }
-        .btn-glow {
-            background: var(--surface-color); color: white; border: 1px solid var(--accent-color);
-            box-shadow: 0 0 5px rgba(255, 85, 0, 0.2); font-weight: bold;
-        }
-        .btn-glow:hover {
-            background: var(--accent-color); color: black; box-shadow: 0 0 20px rgba(255, 85, 0, 0.6); transform: translateY(-2px);
-        }
-
-        /* --- GRID (DESKTOP DEFAULT) --- */
-        .grid-view { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
-            gap: 20px; 
-        }
-
-        .card {
-            background: var(--surface-color); border-radius: var(--radius-lg);
-            padding: 24px; min-height: 220px; border: 1px solid #222;
-            display: flex; flex-direction: column; justify-content: space-between;
-        }
-        .card-header { display: flex; justify-content: space-between; }
-        .status-dot { width: 12px; height: 12px; border-radius: 50%; background: #333; }
-        .status-due { background: var(--accent-color); box-shadow: 0 0 10px var(--accent-color); animation: pulse 2s infinite; }
-        .status-ok { background: var(--success); }
-        .topic-name { font-size: 1.4rem; font-weight: 600; margin-top: 15px; word-break: break-word; }
-        .card-meta { font-family: var(--font-tech); font-size: 0.75rem; color: var(--text-secondary); margin-top: 5px; }
+        .logo { font-family: var(--font-tech); font-weight: bold; letter-spacing: 2px; font-size: 1.2rem; }
         
-        .card-actions { margin-top: auto; display: flex; gap: 10px; padding-top: 20px; }
-        .action-btn { flex: 1; padding: 12px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; }
-        .btn-review { background: var(--accent-color); color: black; }
-        .btn-delete { background: transparent; color: var(--text-secondary); width: 30px; flex: none; border: 1px solid #333; }
+        /* --- HERO SECTION --- */
+        .hero {
+            height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            text-align: center; position: relative;
+        }
 
-        /* --- MOBILE GRID OVERRIDE (FIX 1) --- */
+        .glitch-wrapper { position: relative; display: inline-block; margin-bottom: 20px; }
+        h1 {
+            font-size: 5rem; font-weight: 900; letter-spacing: -3px; line-height: 1;
+            text-transform: uppercase; position: relative; z-index: 1;
+        }
+
+        /* Glitch Effect */
+        h1::before, h1::after {
+            content: attr(data-text); position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.8;
+        }
+        h1::before { color: #0ff; z-index: -1; animation: glitch-anim-1 2.5s infinite linear alternate-reverse; }
+        h1::after { color: #f0f; z-index: -2; animation: glitch-anim-2 3s infinite linear alternate-reverse; }
+
+        .hero-sub {
+            font-family: var(--font-tech); color: var(--text-muted); max-width: 600px;
+            margin-bottom: 40px; font-size: 1.1rem;
+        }
+
+        /* CTA Button */
+        .cta-btn {
+            padding: 20px 50px; background: var(--text-main); color: #000;
+            font-family: var(--font-tech); font-weight: bold; font-size: 1.2rem;
+            border: none; cursor: pointer; text-decoration: none;
+            clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%);
+            transition: 0.3s; position: relative; overflow: hidden;
+        }
+        .cta-btn::before {
+            content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+            background: var(--accent); transition: 0.3s; z-index: -1;
+        }
+        .cta-btn:hover::before { left: 0; }
+        .cta-btn:hover { color: #FFF; box-shadow: 0 0 30px var(--accent); }
+
+        /* --- SCROLL DOWN --- */
+        .scroll-indicator {
+            position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
+            font-family: var(--font-tech); font-size: 0.8rem; color: var(--text-muted);
+            animation: bounce 2s infinite;
+        }
+
+        /* --- SECTIONS --- */
+        section { padding: 100px 20px; max-width: 1200px; margin: 0 auto; }
+        
+        .grid-split { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+        
+        h2 { font-size: 3rem; margin-bottom: 20px; line-height: 1.1; }
+        .accent-text { color: var(--accent); }
+        
+        .card {
+            background: var(--surface); border: 1px solid #222; padding: 40px;
+            transition: 0.3s; position: relative;
+        }
+        .card:hover { border-color: var(--accent); transform: translateY(-10px); }
+
+        /* --- GRAPH ANIMATION (SVG) --- */
+        .graph-wrapper {
+            background: #000; border: 1px solid #333; padding: 20px;
+            border-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+        .line-decay { stroke: #333; stroke-width: 2; stroke-dasharray: 5,5; }
+        .line-nexus { stroke: var(--accent); stroke-width: 3; stroke-dasharray: 1000; stroke-dashoffset: 1000; }
+        
+        .graph-wrapper.visible .line-nexus { animation: drawLine 3s ease-out forwards; }
+
+        /* --- FOOTER --- */
+        footer {
+            padding: 80px 20px; text-align: center; border-top: 1px solid #222;
+            font-family: var(--font-tech); color: #666;
+        }
+
+        /* --- ANIMATIONS --- */
+        @keyframes glitch-anim-1 {
+            0% { clip-path: inset(20% 0 80% 0); transform: translate(-2px, 1px); }
+            20% { clip-path: inset(60% 0 10% 0); transform: translate(2px, -1px); }
+            100% { clip-path: inset(10% 0 50% 0); transform: translate(-2px, 2px); }
+        }
+        @keyframes glitch-anim-2 {
+            0% { clip-path: inset(10% 0 60% 0); transform: translate(2px, 1px); }
+            20% { clip-path: inset(80% 0 5% 0); transform: translate(-2px, -1px); }
+            100% { clip-path: inset(30% 0 20% 0); transform: translate(2px, 2px); }
+        }
+        @keyframes bounce { 0%, 100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, 10px); } }
+        @keyframes drawLine { to { stroke-dashoffset: 0; } }
+
+        .reveal { opacity: 0; transform: translateY(50px); transition: 1s all ease; }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+
+        /* --- RESPONSIVE --- */
         @media (max-width: 768px) {
-            .app-container { padding: 15px; }
-            .hero-card { margin-top: -10px; padding: 25px; }
-            .hero-title { font-size: 1.5rem; }
-            .stat-item h3 { font-size: 2.2rem; }
-
-            .grid-view {
-                /* FORCE 2 COLUMNS */
-                grid-template-columns: 1fr 1fr; 
-                gap: 10px;
-            }
-
-            .card {
-                /* SMALLER CARDS */
-                min-height: 180px;
-                padding: 15px;
-                border-radius: 16px;
-            }
-
-            .topic-name {
-                font-size: 1rem; /* Smaller text to fit */
-                margin-top: 10px;
-                line-height: 1.2;
-            }
-
-            .card-actions {
-                /* Smaller buttons */
-                padding-top: 10px;
-                gap: 5px;
-            }
-
-            .action-btn {
-                padding: 8px 0;
-                font-size: 0.7rem;
-            }
+            h1 { font-size: 3rem; }
+            .grid-split { grid-template-columns: 1fr; gap: 40px; }
+            .hero { padding: 20px; }
         }
-
-        /* --- BOTTOM NAV BAR --- */
-        .bottom-nav {
-            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
-            background: rgba(18, 18, 18, 0.9); backdrop-filter: blur(10px);
-            border: 1px solid #333; border-radius: 24px; padding: 10px 30px;
-            display: flex; gap: 40px; z-index: 900; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-secondary); cursor: pointer; transition: 0.3s; }
-        .nav-item:hover, .nav-item.active { color: var(--accent-color); }
-        .nav-icon { width: 24px; height: 24px; margin-bottom: 4px; fill: currentColor; }
-        .nav-label { font-family: var(--font-tech); font-size: 0.65rem; }
-
-        /* --- PROFILE POPUP --- */
-        .profile-header { text-align: center; margin-bottom: 30px; }
-        .profile-avatar {
-            width: 80px; height: 80px; background: #222; border-radius: 50%;
-            margin: 0 auto 15px auto; display: flex; align-items: center; justify-content: center;
-            border: 2px solid var(--accent-color); font-size: 2rem; color: #fff;
-        }
-        .profile-stats {
-            display: flex; justify-content: space-around; background: #000; padding: 15px; border-radius: 12px;
-            margin-bottom: 30px; font-family: var(--font-tech);
-        }
-        .stat-box { text-align: center; }
-        .stat-num { display: block; font-size: 1.2rem; color: #fff; font-weight: bold; }
-        .stat-lbl { font-size: 0.7rem; color: #666; }
-        .btn-logout-pop {
-            width: 100%; padding: 15px; background: rgba(255, 42, 42, 0.1); border: 1px solid var(--danger);
-            color: var(--danger); font-family: var(--font-tech); font-weight: bold; cursor: pointer; border-radius: 12px; transition: 0.2s;
-        }
-        .btn-logout-pop:hover { background: var(--danger); color: white; }
-
-        /* --- GATEKEEPER --- */
-        .gatekeeper-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 5, 5, 1); z-index: 2000; display: flex; justify-content: center; align-items: center; }
-        .gatekeeper-card { width: 90%; max-width: 420px; background: var(--surface-color); border: 1px solid #333; padding: 40px; border-radius: 28px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.8); position: relative; overflow: hidden; }
-        .gatekeeper-card::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: var(--accent-color); box-shadow: 0 0 15px var(--accent-color); }
-        .gate-title { font-family: var(--font-tech); color: #fff; font-size: 1.2rem; margin-bottom: 30px; letter-spacing: 2px; text-transform: uppercase; }
-        .gate-input { width: 100%; background: #000; border: 1px solid #333; padding: 15px; color: white; font-family: var(--font-tech); border-radius: 12px; font-size: 1rem; text-align: center; margin-bottom: 15px; }
-        .gate-input:focus { outline: none; border-color: var(--accent-color); }
-        .gate-btn { width: 100%; padding: 15px; font-weight: bold; font-family: var(--font-tech); background: white; color: black; border-radius: 12px; cursor: pointer; border: none;}
-        .switch-link { color: #555; margin-top: 25px; font-size: 0.75rem; cursor: pointer; font-family: var(--font-tech); display: inline-block; text-decoration: underline;}
-        .loader-bar { height: 4px; width: 100%; background: #222; margin-top: 20px; display: none; }
-        .loader-fill { height: 100%; width: 50%; background: var(--accent-color); animation: load 1.5s infinite ease-in-out; }
-
-        /* --- MODALS --- */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 100; }
-        .modal-active { display: flex !important; }
-        .modal { background: var(--surface-color); padding: 30px; border-radius: 28px; width: 90%; max-width: 400px; border: 1px solid #333; }
-
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 85, 0, 0.4); } 70% { box-shadow: 0 0 0 10px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
-        @keyframes load { 0% { width: 0%; margin-left: 0; } 50% { width: 100%; margin-left: 0; } 100% { width: 0%; margin-left: 100%; } }
-
     </style>
 </head>
 <body>
 
-    <div class="gatekeeper-overlay" id="gatekeeper">
-        <div class="gatekeeper-card" id="form-login">
-            <div class="gate-title">System // Access</div>
-            <input type="text" id="login-user" class="gate-input" placeholder="CODENAME" autocomplete="off">
-            <input type="password" id="login-pass" class="gate-input" placeholder="PASSWORD">
-            <button class="gate-btn" onclick="performLogin()">DECRYPT & ENTER</button>
-            <div class="loader-bar" id="loader-login"><div class="loader-fill"></div></div>
-            <div class="switch-link" onclick="toggleAuthMode('signup')">Initialize New Identity</div>
+    <canvas id="canvas-bg"></canvas>
+
+    <nav>
+        <div class="logo">NEXUS // OS</div>
+        <div style="font-family: var(--font-tech); font-size: 0.8rem;">v6.3 STABLE</div>
+    </nav>
+
+    <div class="hero">
+        <div class="glitch-wrapper">
+            <h1 data-text="DONT JUST LEARN.">DONT JUST LEARN.</h1>
         </div>
-        <div class="gatekeeper-card" id="form-signup" style="display:none;">
-            <div class="gate-title">System // Enlist</div>
-            <div style="display:flex; gap:10px; margin-bottom: 15px;">
-                <input type="text" id="signup-user" class="gate-input" placeholder="ENTER CODENAME" style="margin:0; font-weight:bold; color: var(--accent-color);">
-                <button class="btn" onclick="generateCodename()" style="width: 50px; height: 100%; display:flex; align-items:center; justify-content:center;">↻</button>
-            </div>
-            <input type="password" id="signup-pass" class="gate-input" placeholder="CREATE PASSWORD">
-            <button class="gate-btn" onclick="performSignup()">CONFIRM IDENTITY</button>
-            <div class="loader-bar" id="loader-signup"><div class="loader-fill"></div></div>
-            <div class="switch-link" onclick="toggleAuthMode('login')">Back to Login</div>
+        <div class="glitch-wrapper">
+            <h1 data-text="RETAIN." style="color: var(--accent);">RETAIN.</h1>
         </div>
+        
+        <p class="hero-sub">
+            The automated Spaced Repetition protocol designed to hack your biological memory retention.
+        </p>
+        
+        <a href="app.html" class="cta-btn">INITIALIZE PROTOCOL</a>
+
+        <div class="scroll-indicator">SCROLL TO ANALYZE</div>
     </div>
 
-    <div class="app-container" id="app-core">
-        <header>
-            <div class="status-bar">
-                <span id="user-identity">--</span>
-                <span>SYSTEM ONLINE</span>
+    <section>
+        <div class="grid-split reveal">
+            <div>
+                <h2>The <span class="accent-text">Bug</span> in Your Brain.</h2>
+                <p style="color: #ccc; margin-bottom: 20px;">
+                    It's called the <strong>Forgetting Curve</strong>. Discovered by <a href="https://en.wikipedia.org/wiki/Hermann_Ebbinghaus" target="_blank" style="color:var(--text-muted)">Hermann Ebbinghaus</a>, it proves that humans lose <span style="color:#fff">50% of new information</span> within 24 hours.
+                </p>
+                <p style="color: #ccc;">
+                    Without intervention, your study hours are wasted. Your brain treats new data as "temp files" and deletes them.
+                </p>
             </div>
-            <div class="hero-card">
-                <div class="hero-title">Cloud Knowledge Matrix.</div>
-                <div class="progress-container">
-                    <div class="stat-item"><h3 id="score-display">--</h3><p>Retention</p></div>
-                    <div class="stat-item"><h3 id="due-display">--</h3><p>Due Now</p></div>
+            <div class="graph-wrapper" id="graph">
+                <svg viewBox="0 0 500 300">
+                    <line x1="50" y1="250" x2="450" y2="250" stroke="#333" stroke-width="2"/>
+                    <line x1="50" y1="50" x2="50" y2="250" stroke="#333" stroke-width="2"/>
+                    
+                    <text x="20" y="55" fill="#666" font-family="monospace" font-size="12">100%</text>
+                    <text x="30" y="265" fill="#666" font-family="monospace" font-size="12">0%</text>
+                    
+                    <path class="line-decay" d="M50,50 Q150,220 450,240" fill="none"/>
+                    
+                    <path class="line-nexus" d="M50,50 Q100,60 120,180 L120,50 Q200,60 240,150 L240,50 Q400,60 450,80" fill="none"/>
+                </svg>
+                <div style="text-align: center; margin-top: 10px; font-family: var(--font-tech); font-size: 0.8rem; color: var(--accent);">
+                    FIG 1.0: MEMORY REINFORCEMENT
                 </div>
             </div>
-        </header>
-
-        <div class="controls">
-            <span class="section-label">Modules</span>
-            <button class="btn btn-glow" id="btn-add-modal">+ Add Topic</button>
         </div>
+    </section>
 
-        <div class="grid-view" id="topic-grid"></div>
-    </div>
-
-    <div class="bottom-nav" id="bottom-nav" style="display:none;">
-        <div class="nav-item active" onclick="showDashboard()">
-            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M4 13h6a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1zm-1 7a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v4zm10 0a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-7a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v7zm1-10h6a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1z"/></svg>
-            <span class="nav-label">GRID</span>
-        </div>
-        <div class="nav-item" onclick="openProfile()">
-            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-            <span class="nav-label">PROFILE</span>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="add-modal">
-        <div class="modal">
-            <h2>New Topic</h2>
-            <br>
-            <input type="text" id="new-topic-name" placeholder="Enter topic name..." style="width:100%; background:transparent; border:none; border-bottom:2px solid #333; color:white; font-size:1.2rem; padding:10px 0; margin-bottom:20px; outline:none;" autocomplete="off">
-            <div style="display: flex; gap: 10px;">
-                <button class="btn" id="btn-cancel" style="flex: 1">Cancel</button>
-                <button class="btn btn-primary" id="btn-create-topic" style="flex: 1">Create</button>
+    <section>
+        <div class="grid-split reveal">
+            <div class="card">
+                <h3 style="font-family: var(--font-tech); margin-bottom: 10px; color: var(--accent);">// ALGORITHM</h3>
+                <p style="color: #888;">
+                    Nexus doesn't let you guess when to study. It calculates the exact moment you are about to forget and triggers a <strong style="color:white">REVIEW ALERT</strong>.
+                </p>
+            </div>
+            <div>
+                <h2>Automated <span class="accent-text">Active Recall</span>.</h2>
+                <p style="color: #ccc;">
+                    We utilize the industry-standard <a href="https://en.wikipedia.org/wiki/Spaced_repetition" target="_blank" style="color:var(--text-muted)">Spaced Repetition System (SRS)</a>.
+                </p>
+                <ul style="list-style: none; margin-top: 20px; font-family: var(--font-tech); color: #888;">
+                    <li style="margin-bottom: 10px;">> INPUT TOPIC</li>
+                    <li style="margin-bottom: 10px;">> SYSTEM WAITS</li>
+                    <li style="margin-bottom: 10px;">> NOTIFICATION TRIGGERED</li>
+                    <li style="margin-bottom: 10px; color: var(--accent);">> LONG TERM STORAGE SECURED</li>
+                </ul>
             </div>
         </div>
-    </div>
+    </section>
 
-    <div class="modal-overlay" id="profile-modal">
-        <div class="modal">
-            <div class="profile-header">
-                <div class="profile-avatar">
-                    <svg style="width:40px; height:40px; fill:white;" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-                </div>
-                <h2 id="profile-name">--</h2>
-                <div style="color:#666; font-family:var(--font-tech); font-size:0.8rem; margin-top:5px;">OPERATOR LEVEL: 1</div>
-            </div>
-            <div class="profile-stats">
-                <div class="stat-box"><span class="stat-num" id="stat-total">0</span><span class="stat-lbl">TOPICS</span></div>
-                <div class="stat-box"><span class="stat-num" id="stat-due">0</span><span class="stat-lbl">DUE</span></div>
-            </div>
-            <button class="btn-logout-pop" onclick="logout()">// TERMINATE SESSION (LOGOUT)</button>
-            <br><br>
-            <button class="btn" style="width:100%; border:none; color:#666;" onclick="closeProfile()">Close</button>
-        </div>
-    </div>
+    <section style="text-align: center; margin-top: 100px;" class="reveal">
+        <h2 style="font-size: 4rem;">READY TO UPGRADE?</h2>
+        <br>
+        <a href=" app.html" class="cta-btn" style="padding: 30px 80px; font-size: 1.5rem;">LAUNCH NEXUS</a>
+    </section>
+
+    <footer>
+        <p>NEXUS ASRS // SYSTEM ARCHITECTURE 2026</p>
+        <p style="font-size: 0.8rem; margin-top: 10px;">Open Source Educational Protocol</p>
+    </footer>
 
     <script>
-        // ---------------------------------------------------------
-        // PASTE YOUR GOOGLE SCRIPT URL HERE
-        // ---------------------------------------------------------
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzBhJH57sl9jhjpE06Glt_wV3ceQ-KW5iKt25HqqVOyTT7iavsBhCbbnC2XBAheGQCqcA/exec'; 
-        // ---------------------------------------------------------
+        /**
+     * NEXUS LIVE BACKGROUND // NEURAL MESH
+     */
+    const canvas = document.getElementById('canvas-bg');
+    const ctx = canvas.getContext('2d');
+    let particlesArray;
 
-        const wordsA = ["Iron", "Neon", "Solar", "Cyber", "Void", "Crimson", "Shadow", "Rogue", "Silent", "Rapid", "Dark", "Aero", "Hyper", "Sonic", "Prime", "Alpha", "Omega", "Steel"];
-        const wordsB = ["Wolf", "Falcon", "Eagle", "Echo", "Ghost", "Hawk", "Blade", "Runner", "Viper", "Storm", "Spark", "Flux", "Core", "Nexus", "Link", "Pulse", "Signal", "Fox"];
+    // Set Canvas Size
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
-        let currentUser = { name: null, hex: null };
-        let topics = [];
+    // Handle Resize
+    window.addEventListener('resize', () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        init();
+    });
 
-        window.onload = checkSession;
+    // Mouse Interaction
+    const mouse = { x: null, y: null, radius: 150 };
+    window.addEventListener('mousemove', (event) => {
+        mouse.x = event.x;
+        mouse.y = event.y;
+    });
 
-        function checkSession() {
-            const savedHex = localStorage.getItem('nexus_hex');
-            const savedName = localStorage.getItem('nexus_name');
-            if(savedHex && savedName) {
-                currentUser.hex = savedHex;
-                currentUser.name = savedName;
-                unlockApp();
-                syncDown(); 
-            } else {
-                generateCodename();
+    // Particle Class
+    class Particle {
+        constructor(x, y, directionX, directionY, size, color) {
+            this.x = x;
+            this.y = y;
+            this.directionX = directionX;
+            this.directionY = directionY;
+            this.size = size;
+            this.color = color;
+        }
+        
+        draw() {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
+            ctx.fillStyle = '#333'; // Particle Dot Color
+            ctx.fill();
+        }
+
+        update() {
+            // Check borders
+            if (this.x > canvas.width || this.x < 0) this.directionX = -this.directionX;
+            if (this.y > canvas.height || this.y < 0) this.directionY = -this.directionY;
+
+            // Move
+            this.x += this.directionX;
+            this.y += this.directionY;
+
+            // Mouse Repel/Attract (Optional: currently just standard move)
+            // But we will calculate connections in the animate loop
+            
+            this.draw();
+        }
+    }
+
+    // Initialize Particles
+    function init() {
+        particlesArray = [];
+        // Number of particles based on screen size
+        let numberOfParticles = (canvas.height * canvas.width) / 9000;
+        
+        for (let i = 0; i < numberOfParticles; i++) {
+            let size = (Math.random() * 2) + 1;
+            let x = (Math.random() * ((canvas.width - size * 2) - (size * 2)) + size * 2);
+            let y = (Math.random() * ((canvas.height - size * 2) - (size * 2)) + size * 2);
+            let directionX = (Math.random() * 0.4) - 0.2; // Slow speed
+            let directionY = (Math.random() * 0.4) - 0.2;
+            let color = '#fff';
+
+            particlesArray.push(new Particle(x, y, directionX, directionY, size, color));
+        }
+    }
+
+    // Animation Loop
+    function animate() {
+        requestAnimationFrame(animate);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        for (let i = 0; i < particlesArray.length; i++) {
+            particlesArray[i].update();
+        }
+        connect();
+    }
+
+    // Draw Lines Between Particles
+    function connect() {
+        let opacityValue = 1;
+        for (let a = 0; a < particlesArray.length; a++) {
+            for (let b = a; b < particlesArray.length; b++) {
+                let distance = ((particlesArray[a].x - particlesArray[b].x) * (particlesArray[a].x - particlesArray[b].x)) + 
+                               ((particlesArray[a].y - particlesArray[b].y) * (particlesArray[a].y - particlesArray[b].y));
+                
+                // Connect if close enough
+                if (distance < (canvas.width / 7) * (canvas.height / 7)) {
+                    opacityValue = 1 - (distance / 20000);
+                    // THIS IS THE GLOW COLOR (Nexus Orange)
+                    ctx.strokeStyle = 'rgba(255, 85, 0,' + (opacityValue * 0.15) + ')'; 
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+                    ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
+                    ctx.stroke();
+                }
             }
         }
-
-        function generateCodename() {
-            const rA = wordsA[Math.floor(Math.random() * wordsA.length)];
-            const rB = wordsB[Math.floor(Math.random() * wordsB.length)];
-            document.getElementById('signup-user').value = rA + rB;
-        }
-
-        function toggleAuthMode(mode) {
-            document.getElementById('form-login').style.display = mode === 'login' ? 'block' : 'none';
-            document.getElementById('form-signup').style.display = mode === 'signup' ? 'block' : 'none';
-        }
-
-        function unlockApp() {
-            document.getElementById('gatekeeper').style.display = 'none';
-            document.getElementById('app-core').classList.add('app-visible');
-            document.getElementById('bottom-nav').style.display = 'flex';
-            document.getElementById('user-identity').innerText = currentUser.name.toUpperCase();
-        }
-
-        function logout() {
-            localStorage.removeItem('nexus_hex');
-            localStorage.removeItem('nexus_name');
-            location.reload();
-        }
-
-        function showDashboard() { closeProfile(); }
-        function openProfile() {
-            document.getElementById('profile-name').innerText = currentUser.name;
-            document.getElementById('stat-total').innerText = topics.length;
-            const dueCount = topics.filter(t => {
-                const today = new Date(); today.setHours(0,0,0,0);
-                const reviewDate = new Date(t.nextReview); reviewDate.setHours(0,0,0,0);
-                return today.getTime() >= reviewDate.getTime();
-            }).length;
-            document.getElementById('stat-due').innerText = dueCount;
-            document.getElementById('profile-modal').classList.add('modal-active');
-        }
-        function closeProfile() { document.getElementById('profile-modal').classList.remove('modal-active'); }
-
-        async function performLogin() {
-            const user = document.getElementById('login-user').value.trim();
-            const pass = document.getElementById('login-pass').value;
-            if(!user || !pass) return alert("Credentials missing.");
-            document.getElementById('loader-login').style.display = 'block';
-            try {
-                const res = await fetch(GOOGLE_SCRIPT_URL, {
-                    method: 'POST', body: JSON.stringify({ action: 'LOGIN', email: user, password: pass })
-                });
-                const data = await res.json();
-                if(data.status === 'SUCCESS') {
-                    localStorage.setItem('nexus_hex', data.hex);
-                    localStorage.setItem('nexus_name', user);
-                    currentUser = { hex: data.hex, name: user };
-                    unlockApp();
-                    syncDown();
-                } else { alert("ACCESS DENIED: " + data.message); }
-            } catch(e) { alert("Network Error. Check URL."); }
-            document.getElementById('loader-login').style.display = 'none';
-        }
-
-        async function performSignup() {
-            const user = document.getElementById('signup-user').value.trim();
-            const pass = document.getElementById('signup-pass').value;
-            if(!user || !pass) return alert("Credentials missing.");
-            document.getElementById('loader-signup').style.display = 'block';
-            try {
-                const res = await fetch(GOOGLE_SCRIPT_URL, {
-                    method: 'POST', body: JSON.stringify({ action: 'SIGNUP', email: user, password: pass })
-                });
-                const data = await res.json();
-                if(data.status === 'SUCCESS') {
-                    localStorage.setItem('nexus_hex', data.hex);
-                    localStorage.setItem('nexus_name', user);
-                    currentUser = { hex: data.hex, name: user };
-                    window.location.href = 'guide.html';
-                } else { alert("ERROR: " + data.message); }
-            } catch(e) { alert("Network Error. Check URL."); }
-            document.getElementById('loader-signup').style.display = 'none';
-        }
-
-        async function syncDown() {
-            if(!currentUser.hex) return;
-            try {
-                const res = await fetch(GOOGLE_SCRIPT_URL + '?hex=' + currentUser.hex);
-                const data = await res.json();
-                if(Array.isArray(data)) { topics = data; render(); }
-            } catch(e) { console.log(e); }
-        }
-
-        async function syncUp() {
-            try {
-                const res = await fetch(GOOGLE_SCRIPT_URL, {
-                    method: 'POST', body: JSON.stringify({ action: 'SYNC_UP', hex: currentUser.hex, topics: topics })
-                });
-            } catch(e) { console.log("Save failed"); }
-        }
-
-        function createTopic(name) { return { id: 'top_' + Date.now(), name: name, level: 0, nextReview: new Date().getTime() }; }
-        function calculateNextReview(level) {
-            const now = new Date();
-            const intervals = [0, 1, 3, 7, 14, 30, 90]; 
-            const daysToAdd = intervals[Math.min(level, intervals.length - 1)];
-            now.setDate(now.getDate() + daysToAdd);
-            return now.getTime();
-        }
-        function processReview(id, success) {
-            const topic = topics.find(t => t.id === id);
-            if (topic) {
-                if (success) { topic.level = Math.min(topic.level + 1, 6); openGoogleCalendar(topic.name, calculateNextReview(topic.level)); } 
-                else { topic.level = Math.max(topic.level - 1, 0); }
-                topic.nextReview = calculateNextReview(topic.level);
-                render(); syncUp();
+    }
+        // --- SCROLL REVEAL LOGIC ---
+        function reveal() {
+            var reveals = document.querySelectorAll(".reveal, .graph-wrapper");
+            for (var i = 0; i < reveals.length; i++) {
+                var windowHeight = window.innerHeight;
+                var elementTop = reveals[i].getBoundingClientRect().top;
+                var elementVisible = 150;
+                if (elementTop < windowHeight - elementVisible) {
+                    reveals[i].classList.add("active");
+                    // Trigger graph animation if it's the graph
+                    if(reveals[i].classList.contains('graph-wrapper')) {
+                        reveals[i].classList.add('visible');
+                    }
+                }
             }
         }
-        function deleteTopic(id) { if(confirm("Delete topic?")) { topics = topics.filter(t => t.id !== id); render(); syncUp(); } }
-        function openGoogleCalendar(topicName, nextReviewDate) {
-            const dateObj = new Date(nextReviewDate);
-            dateObj.setHours(9, 0, 0, 0);
-            const startISO = dateObj.toISOString().replace(/-|:|\.\d\d\d/g, "");
-            dateObj.setHours(9, 30, 0, 0);
-            const endISO = dateObj.toISOString().replace(/-|:|\.\d\d\d/g, "");
-            const title = encodeURIComponent(`Review: ${topicName}`);
-            const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startISO}/${endISO}&sf=true&output=xml`;
-            window.open(url, '_blank');
-        }
-        function render() {
-            const grid = document.getElementById('topic-grid'); grid.innerHTML = '';
-            let dueCount = 0; let totalLevel = 0;
-            const today = new Date(); today.setHours(0,0,0,0);
-            topics.forEach(t => {
-                const reviewDate = new Date(t.nextReview); reviewDate.setHours(0,0,0,0);
-                const due = today.getTime() >= reviewDate.getTime();
-                if(due) dueCount++; totalLevel += t.level;
-                const statusClass = due ? 'status-due' : 'status-ok';
-                const dateString = new Date(t.nextReview).toLocaleDateString(undefined, {month:'short', day:'numeric'});
-                const card = document.createElement('div'); card.className = 'card';
-                card.innerHTML = `
-                    <div class="card-header"><div class="status-dot ${statusClass}"></div><div class="card-meta">LVL ${t.level}</div></div>
-                    <div class="topic-name">${t.name}</div>
-                    <div class="card-meta" style="margin-top:auto; margin-bottom:10px;">${due ? 'REVIEW REQUIRED' : 'Next: ' + dateString}</div>
-                    <div class="card-actions">
-                        ${due ? `<button class="action-btn btn-review" onclick="processReview('${t.id}', true)">Review</button>` : `<button class="action-btn" style="background:#222; color:#555; cursor:default">Done</button>`}
-                        <button class="action-btn btn-delete" onclick="deleteTopic('${t.id}')">×</button>
-                    </div>`;
-                grid.appendChild(card);
-            });
-            document.getElementById('due-display').innerText = dueCount;
-            document.getElementById('score-display').innerText = topics.length ? Math.round((totalLevel / (topics.length * 6)) * 100) + '%' : '0%';
-        }
-
-        // --- EVENTS ---
-        document.getElementById('btn-add-modal').addEventListener('click', () => { document.getElementById('add-modal').classList.add('modal-active'); setTimeout(() => document.getElementById('new-topic-name').focus(), 50); });
-        document.getElementById('btn-cancel').addEventListener('click', () => document.getElementById('add-modal').classList.remove('modal-active'));
-        document.getElementById('btn-create-topic').addEventListener('click', () => {
-            const name = document.getElementById('new-topic-name').value.trim();
-            if(name) { topics.push(createTopic(name)); render(); syncUp(); document.getElementById('add-modal').classList.remove('modal-active'); document.getElementById('new-topic-name').value = ''; }
-        });
+        window.addEventListener("scroll", reveal);
+        // Trigger once on load
+        reveal();
+        init();
+        animate();
     </script>
 </body>
 </html>
