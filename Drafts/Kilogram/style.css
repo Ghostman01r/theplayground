@@ -1,0 +1,530 @@
+/* --- Color Palette & Variables --- */
+:root {
+    --bg-darkest: #0F0F0F;    /* Deep Background */
+    --bg-card: #202020;       /* Surface/Card Background */
+    --accent-primary: #5DD62C; /* Bright Green - Main Actions/Gradients */
+    --accent-hover: #337418;   /* Dark Green - Hover States */
+    --text-main: #F8F8F8;     /* Off-White Text */
+    --text-muted: #8E8E8E;    /* Secondary Text */
+    
+    --border-radius-lg: 20px;
+    --border-radius-md: 12px;
+    --border-radius-sm: 8px;
+    
+    /* Mac-specific glassmorphism color */
+    --glass-bg: rgba(32, 32, 32, 0.65);
+    --glass-border: rgba(248, 248, 248, 0.08);
+}
+
+/* --- Base Reset & Typography --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bg-darkest);
+    color: var(--text-main);
+    /* Mac native font stack */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* --- Layout Grid --- */
+.app-container {
+    display: flex;
+    max-width: 1400px;
+    margin: 0 auto;
+    position: relative;
+}
+
+/* --- Glassmorphism Mixin (Mac Aesthetic) --- */
+.glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-right: 1px solid var(--glass-border);
+}
+
+/* --- Sidebar --- */
+.sidebar {
+    width: 280px;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: var(--glass-bg);
+    display: flex;
+    flex-direction: column;
+    padding: 30px 20px;
+    z-index: 100;
+}
+
+.app-container {
+    display: flex;
+    max-width: 1400px;
+    margin: 0 auto;
+    position: relative;
+    padding-left: 280px; /* Offset for fixed sidebar */
+}
+
+.logo h2 {
+    font-weight: 700;
+    font-size: 1.5rem;
+    margin-bottom: 40px;
+    padding-left: 10px;
+    letter-spacing: -0.5px;
+}
+
+.nav-links {
+    list-style: none;
+    flex-grow: 1;
+}
+
+.nav-links li {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 12px 15px;
+    margin-bottom: 8px;
+    border-radius: var(--border-radius-md);
+    font-size: 1.05rem;
+    font-weight: 400;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.nav-links li i {
+    font-size: 1.5rem;
+    transition: transform 0.2s ease;
+}
+
+.nav-links li:hover {
+    background-color: rgba(248, 248, 248, 0.05);
+}
+
+.nav-links li:hover i {
+    transform: scale(1.1);
+}
+
+.nav-links li.active {
+    font-weight: 700;
+    color: var(--accent-primary);
+}
+
+.more-options {
+    padding: 12px 15px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    cursor: pointer;
+    border-radius: var(--border-radius-md);
+}
+
+.more-options:hover {
+    background-color: rgba(248, 248, 248, 0.05);
+}
+
+/* --- Main Content Area --- */
+.main-content {
+    flex-grow: 1;
+    max-width: 630px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+/* --- Stories Tray --- */
+.stories-tray {
+    display: flex;
+    gap: 15px;
+    overflow-x: auto;
+    padding-bottom: 20px;
+    margin-bottom: 30px;
+}
+
+.stories-tray::-webkit-scrollbar {
+    display: none;
+}
+
+.story {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.story span {
+    font-size: 0.75rem;
+    color: var(--text-main);
+}
+
+.gradient-ring {
+    background: linear-gradient(45deg, var(--accent-hover), var(--accent-primary));
+    padding: 3px;
+    border-radius: 50%;
+}
+
+.story-ring {
+    width: 66px;
+    height: 66px;
+}
+
+.story-inner {
+    width: 100%;
+    height: 100%;
+    background-color: var(--bg-card);
+    border-radius: 50%;
+    border: 3px solid var(--bg-darkest);
+}
+
+/* --- Post Cards --- */
+.post-card {
+    background: var(--bg-card);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--border-radius-lg);
+    margin-bottom: 30px;
+    padding: 15px 0;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.post-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 15px 15px 15px;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.profile-pic-small {
+    width: 36px;
+    height: 36px;
+    background-color: var(--text-muted);
+    border-radius: 50%;
+}
+
+.username {
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.time {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.post-image {
+    width: 100%;
+    aspect-ratio: 4/5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 1.2rem;
+}
+
+.post-actions {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px;
+    font-size: 1.6rem;
+}
+
+.action-left {
+    display: flex;
+    gap: 15px;
+}
+
+.action-btn {
+    cursor: pointer;
+    transition: color 0.2s ease, transform 0.1s ease;
+}
+
+.action-btn:hover {
+    color: var(--text-muted);
+}
+
+.action-btn:active {
+    transform: scale(0.9);
+}
+
+/* JS Activated States */
+.action-btn.liked {
+    color: var(--accent-primary);
+}
+.action-btn.saved {
+    color: var(--accent-primary);
+}
+
+.post-likes {
+    padding: 0 15px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 5px;
+}
+
+.post-caption {
+    padding: 0 15px;
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+.post-comments {
+    padding: 5px 15px;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    cursor: pointer;
+    margin-bottom: 5px;
+}
+
+.add-comment {
+    padding: 0 15px;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    cursor: text;
+}
+
+/* --- Right Sidebar (Suggestions) --- */
+.suggestions-panel {
+    width: 320px;
+    padding: 50px 20px;
+    display: none;
+}
+
+@media (min-width: 1024px) {
+    .suggestions-panel {
+        display: block;
+    }
+}
+
+.user-profile-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.profile-pic-medium {
+    width: 48px;
+    height: 48px;
+    background-color: var(--bg-card);
+    border: 2px solid var(--accent-primary);
+    border-radius: 50%;
+}
+
+.user-names {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.fullname {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.text-btn {
+    background: none;
+    border: none;
+    color: var(--accent-primary);
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.text-btn:hover {
+    color: var(--accent-hover);
+}
+
+.text-light {
+    color: var(--text-main);
+}
+
+.suggestions-header {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 15px;
+}
+
+.suggestion-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.follow-btn {
+    background: none;
+    border: none;
+    color: var(--accent-primary);
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.follow-btn:hover {
+    color: var(--text-main);
+}
+
+/* profile page */
+
+/* --- Profile View Styling --- */
+.profile-header {
+    display: flex;
+    gap: 40px;
+    padding-bottom: 40px;
+    border-bottom: 1px solid var(--glass-border);
+    margin-bottom: 20px;
+}
+
+.profile-avatar {
+    width: 150px;
+    height: 150px;
+    flex-shrink: 0;
+}
+
+.avatar-inner {
+    width: 100%;
+    height: 100%;
+    background-color: var(--text-muted);
+    border-radius: 50%;
+    border: 4px solid var(--bg-darkest);
+}
+
+.profile-info {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    justify-content: center;
+}
+
+.profile-title {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.profile-title h2 {
+    font-weight: 400;
+    font-size: 1.4rem;
+}
+
+.edit-btn {
+    background-color: var(--bg-card);
+    color: var(--text-main);
+    border: 1px solid var(--glass-border);
+    padding: 8px 16px;
+    border-radius: var(--border-radius-sm);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.profile-stats {
+    display: flex;
+    gap: 30px;
+    font-size: 1.05rem;
+}
+
+.profile-bio p {
+    margin-top: 5px;
+    color: var(--text-main);
+}
+
+.profile-bio a {
+    color: var(--accent-primary);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+/* --- Profile Tabs --- */
+.profile-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 50px;
+    margin-bottom: 20px;
+}
+
+.tab {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 15px 0;
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    cursor: pointer;
+}
+
+.tab.active {
+    color: var(--text-main);
+    border-top: 1px solid var(--text-main);
+    margin-top: -1px;
+}
+
+/* --- Profile Grid --- */
+.profile-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px; /* Tight spacing between photos */
+}
+
+.grid-item {
+    aspect-ratio: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+.grid-item:hover {
+    opacity: 0.8;
+}
+
+/* --- Search View Styling --- */
+/* --- Search View Styling --- */
+.search-bar-container {
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 1.2rem;
+}
+
+.search-input {
+    width: 100%;
+    padding: 15px 15px 15px 45px;
+    background-color: var(--bg-card);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--border-radius-md);
+    color: var(--text-main);
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.search-input:focus {
+    border-color: var(--accent-primary);
+}

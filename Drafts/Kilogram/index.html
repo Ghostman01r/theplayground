@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oscillate</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+<body>
+    <div class="app-container">
+        <nav class="sidebar glass-panel">
+            <div class="logo">
+                <h2>Oscillate</h2>
+            </div>
+            <ul class="nav-links">
+                <li class="active" id="nav-home"><i class="ph ph-house"></i> Home</li>
+                <li id="nav-search"><i class="ph ph-magnifying-glass"></i> Search</li>
+                <li id="nav-explore"><i class="ph ph-compass"></i> Explore</li>
+                <li id="nav-reels"><i class="ph ph-film-strip"></i> Reels</li>
+                <li id="nav-messages"><i class="ph ph-chat-circle-dots"></i> Messages</li>
+                <li id="nav-notifications"><i class="ph ph-heart"></i> Notifications</li>
+                <li id="nav-create"><i class="ph ph-plus-square"></i> Create</li>
+                <li id="nav-profile">
+                    <div class="profile-pic-small"></div> Profile
+                </li>
+            </ul>
+            <div class="more-options">
+                <i class="ph ph-list"></i> More
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <div id="home-view">
+                <section class="stories-tray">
+                    <div class="story">
+                        <div class="story-ring gradient-ring"><div class="story-inner"></div></div>
+                        <span>Your Story</span>
+                    </div>
+                    <div class="story">
+                        <div class="story-ring gradient-ring"><div class="story-inner"></div></div>
+                        <span>alex_design</span>
+                    </div>
+                    <div class="story">
+                        <div class="story-ring gradient-ring"><div class="story-inner"></div></div>
+                        <span>dev_sarah</span>
+                    </div>
+                    <div class="story">
+                        <div class="story-ring gradient-ring"><div class="story-inner"></div></div>
+                        <span>mac_setup</span>
+                    </div>
+                </section>
+                <div class="feed">
+                <article class="post-card">
+                    <header class="post-header">
+                        <div class="user-info">
+                            <div class="profile-pic-small gradient-ring"></div>
+                            <span class="username">oscillate_marketing</span>
+                            <span class="time">• 2h</span>
+                        </div>
+                        <i class="ph ph-dots-three"></i>
+                    </header>
+                    <div class="post-image" style="background: linear-gradient(45deg, #202020, #0F0F0F);">
+                        <div class="mock-image-content">Visual Content Here</div>
+                    </div>
+                    <div class="post-actions">
+                        <div class="action-left">
+                            <i class="ph ph-heart action-btn like-btn"></i>
+                            <i class="ph ph-chat-circle action-btn"></i>
+                            <i class="ph ph-paper-plane-tilt action-btn"></i>
+                        </div>
+                        <i class="ph ph-bookmark action-btn save-btn"></i>
+                    </div>
+                    <div class="post-likes">1,024 likes</div>
+                    <div class="post-caption">
+                        <span class="username">oscillate_marketing</span> Exploring the new minimalist dark mode UI. What do you think? 🍏✨ #design #uiux
+                    </div>
+                    <div class="post-comments">View all 86 comments</div>
+                    <div class="add-comment">Add a comment...</div>
+                </article>
+
+                <article class="post-card">
+                    <header class="post-header">
+                        <div class="user-info">
+                            <div class="profile-pic-small gradient-ring"></div>
+                            <span class="username">apple_fanatics</span>
+                            <span class="time">• 5h</span>
+                        </div>
+                        <i class="ph ph-dots-three"></i>
+                    </header>
+                    <div class="post-image" style="background: linear-gradient(135deg, #337418, #202020);">
+                        <div class="mock-image-content">M3 Chip Architecture</div>
+                    </div>
+                    <div class="post-actions">
+                        <div class="action-left">
+                            <i class="ph ph-heart action-btn like-btn"></i>
+                            <i class="ph ph-chat-circle action-btn"></i>
+                            <i class="ph ph-paper-plane-tilt action-btn"></i>
+                        </div>
+                        <i class="ph ph-bookmark action-btn save-btn"></i>
+                    </div>
+                    <div class="post-likes">8,492 likes</div>
+                    <div class="post-caption">
+                        <span class="username">apple_fanatics</span> Power meets efficiency. #tech #mac
+                    </div>
+                </article>
+                </div>
+            </div>
+            <div id="profile-view" style="display: none;">
+                <header class="profile-header">
+                    <div class="profile-avatar gradient-ring">
+                        <div class="avatar-inner"></div>
+                    </div>
+                    <div class="profile-info">
+                        <div class="profile-title">
+                            <h2>oscillate_marketing</h2>
+                            <button class="edit-btn">Edit Profile</button>
+                            <i class="ph ph-gear"></i>
+                        </div>
+                        <div class="profile-stats">
+                            <span><strong>12</strong> posts</span>
+                            <span><strong>1.2k</strong> followers</span>
+                            <span><strong>450</strong> following</span>
+                        </div>
+                        <div class="profile-bio">
+                            <strong>Oscillate Design</strong>
+                            <p>Building minimalist UI/UX experiences. 🍏✨</p>
+                            <a href="#">www.oscillatedesign.com</a>
+                        </div>
+                    </div>
+                </header>
+
+                <div class="profile-tabs">
+                    <div class="tab active"><i class="ph ph-squares-four"></i> POSTS</div>
+                    <div class="tab"><i class="ph ph-film-strip"></i> REELS</div>
+                    <div class="tab"><i class="ph ph-user-square"></i> TAGGED</div>
+                </div>
+
+                <div class="profile-grid">
+                    <!-- Using inline gradients to simulate photos based on your existing style -->
+                    <div class="grid-item" style="background: linear-gradient(45deg, #202020, #0F0F0F);">Project Alpha</div>
+                    <div class="grid-item" style="background: linear-gradient(135deg, #337418, #202020);">UI Kit</div>
+                    <div class="grid-item" style="background: linear-gradient(45deg, #5DD62C, #0F0F0F);">Workspace</div>
+                    <div class="grid-item" style="background: linear-gradient(225deg, #202020, #337418);">Mobile App</div>
+                    <div class="grid-item" style="background: linear-gradient(90deg, #0F0F0F, #202020);">Brand Guide</div>
+                    <div class="grid-item" style="background: linear-gradient(to bottom, #337418, #0F0F0F);">Icon Set</div>
+                </div>
+            </div>
+            <div id="search-view" style="display: none;">
+                <div class="search-bar-container">
+                    <i class="ph ph-magnifying-glass search-icon"></i>
+                    <input type="text" class="search-input" placeholder="Search...">
+                </div>
+                
+                <!-- Reusing your existing grid for an explore feed -->
+                <div class="profile-grid">
+                    <div class="grid-item" style="background: linear-gradient(135deg, #5DD62C, #202020);">Explore 1</div>
+                    <div class="grid-item" style="background: linear-gradient(45deg, #0F0F0F, #337418);">Explore 2</div>
+                    <div class="grid-item" style="background: linear-gradient(90deg, #202020, #0F0F0F);">Explore 3</div>
+                    <div class="grid-item" style="background: linear-gradient(180deg, #337418, #5DD62C);">Explore 4</div>
+                    <div class="grid-item" style="background: linear-gradient(270deg, #202020, #337418);">Explore 5</div>
+                    <div class="grid-item" style="background: linear-gradient(0deg, #0F0F0F, #202020);">Explore 6</div>
+                </div>
+            </div>
+        </main>
+
+        <aside class="suggestions-panel">
+            <div class="user-profile-header">
+                <div class="profile-pic-medium"></div>
+                <div class="user-names">
+                    <span class="username">user_account</span>
+                    <span class="fullname">Jane Doe</span>
+                </div>
+                <button class="text-btn">Switch</button>
+            </div>
+            
+            <div class="suggestions-header">
+                <span>Suggested for you</span>
+                <button class="text-btn text-light">See All</button>
+            </div>
+
+            <div class="suggestion-list">
+                <div class="suggestion-item">
+                    <div class="user-info">
+                        <div class="profile-pic-small"></div>
+                        <div class="user-names">
+                            <span class="username">creative_dude</span>
+                            <span class="fullname">Follows you</span>
+                        </div>
+                    </div>
+                    <button class="follow-btn">Follow</button>
+                </div>
+                <div class="suggestion-item">
+                    <div class="user-info">
+                        <div class="profile-pic-small"></div>
+                        <div class="user-names">
+                            <span class="username">ui_daily</span>
+                            <span class="fullname">New to Instagram</span>
+                        </div>
+                    </div>
+                    <button class="follow-btn">Follow</button>
+                </div>
+            </div>
+        </aside>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
