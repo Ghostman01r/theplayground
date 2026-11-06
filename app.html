@@ -165,6 +165,40 @@
             background: rgba(255, 255, 255, 0.08);
         }
 
+        @keyframes bentoFadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px) scale(0.985);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes modalPop {
+            from {
+                opacity: 0;
+                transform: translateY(12px) scale(0.96);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .animate-bento-in {
+            animation: bentoFadeUp 0.34s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        .animate-modal-pop {
+            animation: modalPop 0.24s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        .hero-celebrate {
+            box-shadow: 0 16px 44px -8px rgb(var(--accent-rgb) / 0.55), inset 0 0 0 1.5px rgba(255, 255, 255, 0.32);
+        }
+
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
@@ -287,27 +321,61 @@
             <div class="lg:col-span-5 lg:sticky lg:top-6 space-y-5">
 
                 <!-- ORANGE HERO MISSION & SCORE CARD -->
-                <div class="bento-active p-6 sm:p-7 relative overflow-hidden">
-                    <div onclick="promptMissionEdit()" class="cursor-pointer group">
-                        <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest opacity-65 mb-1">
-                            <i data-lucide="link-2" class="w-3 h-3"></i>
-                            <span>MY MISSION</span>
-                            <i data-lucide="pencil" class="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                <div id="hero-card-container" class="bento-active p-6 sm:p-7 relative overflow-hidden">
+                    <div class="flex items-center justify-between gap-2 mb-1.5">
+                        <div onclick="toggleMissionEditor()" class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest opacity-70 cursor-pointer hover:opacity-100 transition-opacity">
+                            <i data-lucide="globe" class="w-3 h-3"></i>
+                            <span id="mission-mode-label">MY MISSION // WORLD WISDOM</span>
+                            <i data-lucide="pencil" class="w-2.5 h-2.5"></i>
                         </div>
-                        <p id="mission-text" class="text-xl sm:text-2xl font-medium tracking-tight leading-snug">
-                            to master every concept without cramming
+                        <div class="flex items-center gap-1.5">
+                            <span id="hero-streak-badge" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-black/15 text-[10px] font-extrabold tracking-wide" title="Current Study Streak">
+                                <i data-lucide="flame" class="w-3 h-3 fill-current"></i>
+                                <span id="hero-streak-count">0d Streak</span>
+                            </span>
+                            <button onclick="shuffleGlobalQuote(event)" class="p-1.5 rounded-full bg-black/10 hover:bg-black/20 transition-colors" title="Next Global Quote">
+                                <i data-lucide="shuffle" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Mission / Global Quote Display -->
+                    <div id="mission-display" onclick="toggleMissionEditor()" class="cursor-pointer group">
+                        <p id="mission-text" class="text-lg sm:text-xl font-semibold tracking-tight leading-snug">
+                            "What we learn with pleasure we never forget."
+                        </p>
+                        <p id="mission-author" class="text-[11px] font-bold uppercase tracking-wider opacity-70 mt-1.5">
+                            — Alfred Mercier • France
                         </p>
                     </div>
 
+                    <!-- Inline Mission Editor (Replaces browser prompt) -->
+                    <div id="mission-editor" class="hidden mt-2 space-y-2.5 bg-black/15 p-3.5 rounded-2xl">
+                        <label class="block text-[10px] font-bold uppercase tracking-widest opacity-75">Set Custom Mission or Use World Quotes</label>
+                        <input type="text" id="mission-custom-input" onkeydown="if(event.key==='Enter'){event.preventDefault();saveCustomMission();}" class="w-full px-3 py-2 rounded-xl bg-black/20 border border-black/20 text-sm font-medium placeholder: text-current outline-none" placeholder="Type your personal study mission...">
+                        <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+                            <button type="button" onclick="useGlobalQuotesMode()" class="px-3 py-1.5 rounded-xl bg-black/15 hover:bg-black/25 text-[11px] font-bold flex items-center gap-1">
+                                <i data-lucide="globe" class="w-3 h-3"></i> Use Global Quotes
+                            </button>
+                            <div class="flex items-center gap-1.5">
+                                <button type="button" onclick="toggleMissionEditor(false)" class="px-3 py-1.5 rounded-xl bg-black/10 text-[11px] font-semibold">Cancel</button>
+                                <button type="button" onclick="saveCustomMission()" class="px-3.5 py-1.5 rounded-xl bg-black/80 text-white text-[11px] font-bold">Save Custom</button>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Progress Line -->
-                    <div class="w-full h-[2px] bg-black/15 my-5 relative rounded-full overflow-hidden">
-                        <div id="hero-progress-bar" class="h-full bg-black/80 transition-all duration-500" style="width: 0%"></div>
+                    <div class="w-full h-1.5 bg-black/15 my-5 relative rounded-full overflow-hidden">
+                        <div id="hero-progress-bar" class="h-full bg-black/80 rounded-full transition-all duration-500" style="width: 0%"></div>
                     </div>
 
                     <!-- Dual Big Percentage Stats (TODAY SCORE & LAST 30 DAYS) -->
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <div class="text-[10px] font-bold uppercase tracking-widest opacity-65 mb-0.5">TODAY SCORE</div>
+                            <div class="flex items-center gap-1.5 mb-0.5">
+                                <span class="text-[10px] font-bold uppercase tracking-widest opacity-65">TODAY SCORE</span>
+                                <span id="hero-complete-badge" class="hidden px-1.5 py-0.2 rounded-md bg-black/20 text-[9px] font-extrabold uppercase tracking-wider">All Clear</span>
+                            </div>
                             <div class="text-4xl sm:text-[2.75rem] font-extrabold tracking-tight leading-none" id="stat-today-score">100%</div>
                         </div>
                         <div>
@@ -316,23 +384,26 @@
                         </div>
                     </div>
 
-                    <!-- 30-Day Consistency Dot Strip inside Hero Card -->
-                    <div id="consistency-dots" class="flex items-center justify-between gap-1 mt-5 pt-3 border-t border-black/10" title="Last 14 Days Study Consistency"></div>
+                    <!-- 14-Day Interactive Vertical Activity Strip inside Hero Card -->
+                    <div id="consistency-dots" class="flex items-end justify-between gap-2 mt-5 pt-3.5 border-t border-black/10" title="Last 14 Days Study Consistency"></div>
                 </div>
 
-                <!-- 3-ICON SWITCHER ROW -->
-                <div class="flex items-center justify-around py-1">
-                    <button onclick="setViewFilter('today')" id="icon-tab-today" class="flex flex-col items-center gap-1 text-accent transition-colors" title="Today's Focus">
-                        <i data-lucide="layout-grid" class="w-5 h-5"></i>
-                        <span class="text-[10px] font-bold uppercase tracking-widest">Today</span>
+                <!-- SEGMENTED PILL NAVIGATION BAR -->
+                <div class="bg-oled-card p-1.5 rounded-2xl border border-oled-border grid grid-cols-3 gap-1.5">
+                    <button onclick="setViewFilter('today')" id="icon-tab-today" class="bento-active !rounded-xl py-2.5 px-2 flex items-center justify-center gap-1.5 shadow-sm transition-all" title="Today's Focus">
+                        <i data-lucide="layout-grid" class="w-4 h-4 shrink-0"></i>
+                        <span class="text-[11px] font-bold tracking-wide">Today</span>
+                        <span id="count-today-topics" class="px-1.5 py-0.5 rounded-full bg-black/15 text-[10px] font-mono font-extrabold leading-none">0</span>
                     </button>
-                    <button onclick="setViewFilter('upcoming')" id="icon-tab-upcoming" class="flex flex-col items-center gap-1 text-oled-muted hover:text-oled-text transition-colors" title="Upcoming Locked Reviews">
-                        <i data-lucide="clock" class="w-5 h-5"></i>
-                        <span class="text-[10px] font-bold uppercase tracking-widest">Upcoming</span>
+                    <button onclick="setViewFilter('upcoming')" id="icon-tab-upcoming" class="py-2.5 px-2 rounded-xl flex items-center justify-center gap-1.5 text-oled-muted hover:text-oled-text hover:bg-oled-bg/50 transition-all" title="Upcoming Locked Reviews">
+                        <i data-lucide="clock" class="w-4 h-4 shrink-0"></i>
+                        <span class="text-[11px] font-bold tracking-wide">Upcoming</span>
+                        <span id="count-upcoming-topics" class="px-1.5 py-0.5 rounded-full bg-oled-pill text-[10px] font-mono font-bold leading-none">0</span>
                     </button>
-                    <button onclick="setViewFilter('all')" id="icon-tab-all" class="flex flex-col items-center gap-1 text-oled-muted hover:text-oled-text transition-colors" title="All Topics">
-                        <i data-lucide="calendar-days" class="w-5 h-5"></i>
-                        <span class="text-[10px] font-bold uppercase tracking-widest">All (<span id="count-all-topics">0</span>)</span>
+                    <button onclick="setViewFilter('all')" id="icon-tab-all" class="py-2.5 px-2 rounded-xl flex items-center justify-center gap-1.5 text-oled-muted hover:text-oled-text hover:bg-oled-bg/50 transition-all" title="All Topics List">
+                        <i data-lucide="list-filter" class="w-4 h-4 shrink-0"></i>
+                        <span class="text-[11px] font-bold tracking-wide">All</span>
+                        <span id="count-all-topics" class="px-1.5 py-0.5 rounded-full bg-oled-pill text-[10px] font-mono font-bold leading-none">0</span>
                     </button>
                 </div>
 
@@ -365,17 +436,40 @@
 
             </div>
 
-            <!-- RIGHT COLUMN: ASYMMETRIC BENTO TOPIC GRID -->
+            <!-- RIGHT COLUMN: ASYMMETRIC BENTO TOPIC GRID OR ALL-TOPICS INTERACTIVE LIST -->
             <div class="lg:col-span-7 space-y-4">
 
                 <!-- SECTION LABEL -->
                 <div class="flex items-center justify-between">
                     <span id="section-heading" class="text-[11px] font-bold uppercase tracking-[0.2em] text-oled-muted">MORNING // TODAY'S BENTO</span>
-                    <span class="text-[11px] text-oled-muted hidden sm:inline">Tap card for details • Tap <i data-lucide="repeat" class="w-3 h-3 inline"></i> to flip notes</span>
+                    <span id="section-hint" class="text-[11px] text-oled-muted hidden sm:inline">Tap card for details • Tap <i data-lucide="repeat" class="w-3 h-3 inline"></i> to flip notes</span>
                 </div>
 
-                <!-- TRUE ASYMMETRIC BENTO GRID (grid-flow-dense allows tall row-span-2 cards beside stacked compact cards) -->
+                <!-- ALL TOPICS LIST TOOLBAR (Shown when viewing "All") -->
+                <div id="all-topics-toolbar" class="hidden bento-resting p-3.5 flex flex-wrap items-center justify-between gap-2.5">
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-oled-muted pl-1">Sort By</span>
+                        <select id="all-sort-select" onchange="changeAllTopicsSort(this.value)" class="input-dark py-1.5 px-3 text-xs font-semibold w-auto">
+                            <option value="nextReview">Next Review Date</option>
+                            <option value="levelDesc">Level (High → Low)</option>
+                            <option value="levelAsc">Level (Low → High)</option>
+                            <option value="subject">Subject</option>
+                            <option value="name">Topic Name (A–Z)</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="toggleShowArchived()" id="toggle-archived-btn" class="px-3 py-1.5 rounded-xl bg-oled-pill border border-oled-border text-xs font-semibold text-oled-muted hover:text-oled-text flex items-center gap-1.5 transition-colors">
+                            <i data-lucide="archive" class="w-3.5 h-3.5"></i>
+                            <span id="archived-btn-label">Archived (0)</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- TRUE ASYMMETRIC BENTO GRID (For 'today' and 'upcoming' views) -->
                 <div id="bento-grid" class="grid grid-cols-2 grid-flow-dense auto-rows-[minmax(142px,auto)] gap-3.5 sm:gap-4"></div>
+
+                <!-- ALL TOPICS INTERACTIVE LIST (For 'all' view with Edit, Delete, Pin, Archive) -->
+                <div id="all-topics-list" class="hidden flex flex-col gap-2.5"></div>
 
                 <!-- EMPTY STATE -->
                 <div id="empty-state" class="hidden bento-resting p-10 text-center">
@@ -399,12 +493,18 @@
     <!-- ================= FLOATING BOTTOM DOCK & + FAB ================= -->
     <div id="floating-dock" class="hidden fixed bottom-6 inset-x-0 z-40 pointer-events-none">
         <div class="max-w-6xl mx-auto px-5 flex items-center justify-between">
-            <div class="glass-dock px-3 py-2 rounded-[1.5rem] flex items-center gap-2 pointer-events-auto">
-                <button onclick="setViewFilter('today')" id="dock-btn-today" class="w-11 h-10 rounded-2xl flex items-center justify-center text-accent bg-white/10 transition-all" title="Today's Board">
-                    <i data-lucide="home" class="w-5 h-5"></i>
+            <div class="glass-dock px-2.5 py-2 rounded-[1.5rem] flex items-center gap-1.5 pointer-events-auto">
+                <button onclick="setViewFilter('today')" id="dock-btn-today" class="px-3.5 h-10 rounded-2xl flex items-center gap-1.5 text-accent bg-white/10 text-xs font-bold transition-all" title="Today's Board">
+                    <i data-lucide="home" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline">Today</span>
                 </button>
-                <button onclick="setViewFilter('all')" id="dock-btn-all" class="w-11 h-10 rounded-2xl flex items-center justify-center text-oled-muted hover:text-white transition-all" title="All Topics">
-                    <i data-lucide="bar-chart-2" class="w-5 h-5"></i>
+                <button onclick="setViewFilter('upcoming')" id="dock-btn-upcoming" class="px-3.5 h-10 rounded-2xl flex items-center gap-1.5 text-oled-muted hover:text-white text-xs font-semibold transition-all" title="Upcoming Reviews">
+                    <i data-lucide="clock" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline">Upcoming</span>
+                </button>
+                <button onclick="setViewFilter('all')" id="dock-btn-all" class="px-3.5 h-10 rounded-2xl flex items-center gap-1.5 text-oled-muted hover:text-white text-xs font-semibold transition-all" title="All Topics List">
+                    <i data-lucide="list" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline">All</span>
                 </button>
             </div>
 
@@ -416,10 +516,10 @@
 
     <!-- ================= MODALS ================= -->
 
-    <!-- LOG / EDIT TOPIC MODAL -->
+    <!-- LOG / EDIT TOPIC MODAL (Supports Sequential Enter-Key Field Navigation) -->
     <div id="add-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4">
         <div class="absolute inset-0 modal-backdrop" onclick="closeModal('add-modal')"></div>
-        <div class="w-full max-w-md bento-resting p-6 sm:p-7 relative z-10 shadow-2xl">
+        <div class="w-full max-w-md bento-resting p-6 sm:p-7 relative z-10 shadow-2xl animate-modal-pop">
             <div class="flex justify-between items-center mb-1">
                 <h3 class="text-lg font-bold" id="modal-title">Log Studied Topic</h3>
                 <button onclick="closeModal('add-modal')" class="p-1.5 text-oled-muted hover:text-oled-text"><i data-lucide="x" class="w-5 h-5"></i></button>
@@ -432,7 +532,10 @@
 
             <div class="space-y-4">
                 <div>
-                    <label class="block text-[10px] font-bold uppercase tracking-widest text-oled-muted mb-1.5">Topic Name *</label>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="block text-[10px] font-bold uppercase tracking-widest text-oled-muted">Topic Name *</label>
+                        <span class="text-[10px] text-oled-muted font-mono">Enter ↵ Next Field</span>
+                    </div>
                     <input type="text" id="new-topic-name" class="input-dark" placeholder="e.g. Dynamic Programming">
                 </div>
 
@@ -453,7 +556,10 @@
                 </div>
 
                 <div>
-                    <label class="block text-[10px] font-bold uppercase tracking-widest text-oled-muted mb-1.5">Short Subtitle / Key Notes</label>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="block text-[10px] font-bold uppercase tracking-widest text-oled-muted">Short Subtitle / Key Notes</label>
+                        <span class="text-[10px] text-oled-muted font-mono">Enter ↵ Save • Shift+Enter ↵ Line</span>
+                    </div>
                     <textarea id="new-topic-desc" class="input-dark h-28 resize-none" placeholder="- Key takeaway or formula to remember..."></textarea>
                 </div>
             </div>
@@ -468,9 +574,9 @@
     <!-- QUICK SUBJECT MODAL -->
     <div id="subject-modal" class="fixed inset-0 z-[120] hidden flex items-center justify-center p-4">
         <div class="absolute inset-0 modal-backdrop" onclick="closeModal('subject-modal')"></div>
-        <div class="w-full max-w-xs bento-resting p-5 relative z-10 shadow-2xl">
+        <div class="w-full max-w-xs bento-resting p-5 relative z-10 shadow-2xl animate-modal-pop">
             <h3 class="text-sm font-bold mb-3">Add Subject</h3>
-            <input type="text" id="quick-subject-input" class="input-dark mb-4" placeholder="e.g. Organic Chemistry">
+            <input type="text" id="quick-subject-input" onkeydown="if(event.key==='Enter'){event.preventDefault();saveQuickSubject();}" class="input-dark mb-4" placeholder="e.g. Organic Chemistry">
             <div class="flex justify-end gap-2">
                 <button onclick="closeModal('subject-modal')" class="px-3.5 py-2 rounded-xl bg-oled-pill text-xs font-semibold">Cancel</button>
                 <button onclick="saveQuickSubject()" class="px-4 py-2 bento-active font-bold text-xs">Add</button>
@@ -481,17 +587,19 @@
     <!-- TOPIC READER / DETAILS MODAL -->
     <div id="read-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4">
         <div class="absolute inset-0 modal-backdrop" onclick="closeModal('read-modal')"></div>
-        <div class="w-full max-w-lg bento-resting p-6 sm:p-7 relative z-10 shadow-2xl max-h-[85vh] flex flex-col">
+        <div class="w-full max-w-lg bento-resting p-6 sm:p-7 relative z-10 shadow-2xl max-h-[85vh] flex flex-col animate-modal-pop">
             <div class="flex justify-between items-start gap-3 mb-4">
                 <div>
                     <div class="flex flex-wrap items-center gap-2 mb-2">
                         <span id="read-subject" class="text-[10px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-oled-pill text-accent"></span>
                         <span id="read-level" class="text-xs font-mono font-bold text-oled-muted"></span>
                         <span id="read-decay-badge" class="hidden text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-500/15 text-red-400">Overdue -1 Lvl</span>
+                        <span id="read-archived-badge" class="hidden text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400">Graduated</span>
                     </div>
                     <h3 class="text-xl sm:text-2xl font-bold leading-snug" id="read-title"></h3>
                 </div>
                 <div class="flex items-center gap-1 shrink-0">
+                    <button onclick="handlePinFromModal()" id="read-pin-btn" class="p-2 rounded-full bg-oled-pill text-oled-muted hover:text-accent" title="Pin Topic"><i data-lucide="pin" class="w-4 h-4"></i></button>
                     <button onclick="handleEditFromModal()" class="p-2 rounded-full bg-oled-pill text-oled-muted hover:text-oled-text" title="Edit"><i data-lucide="pencil" class="w-4 h-4"></i></button>
                     <button onclick="handleDeleteFromModal()" class="p-2 rounded-full bg-oled-pill text-oled-muted hover:text-red-400" title="Delete"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                     <button onclick="closeModal('read-modal')" class="p-2 rounded-full bg-oled-pill text-oled-muted hover:text-oled-text"><i data-lucide="x" class="w-4 h-4"></i></button>
@@ -516,7 +624,7 @@
     <!-- SETTINGS & SRS SCHEDULE MODAL -->
     <div id="profile-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4">
         <div class="absolute inset-0 modal-backdrop" onclick="closeModal('profile-modal')"></div>
-        <div class="w-full max-w-lg bento-resting p-6 sm:p-7 relative z-10 shadow-2xl max-h-[88vh] overflow-y-auto space-y-5">
+        <div class="w-full max-w-lg bento-resting p-6 sm:p-7 relative z-10 shadow-2xl max-h-[88vh] overflow-y-auto space-y-5 animate-modal-pop">
             <div class="flex justify-between items-center">
                 <div>
                     <h2 class="text-lg font-bold">Workspace Settings</h2>
@@ -593,7 +701,7 @@
                 <label class="block text-[10px] font-bold uppercase tracking-widest text-oled-muted mb-2.5">Subjects</label>
                 <div id="subject-list" class="flex flex-wrap gap-1.5 mb-3"></div>
                 <div class="flex gap-2">
-                    <input type="text" id="new-subject-input" class="input-dark py-2 text-xs" placeholder="Add new subject...">
+                    <input type="text" id="new-subject-input" onkeydown="if(event.key==='Enter'){event.preventDefault();addNewSubject();}" class="input-dark py-2 text-xs" placeholder="Add new subject...">
                     <button onclick="addNewSubject()" class="px-4 rounded-xl bg-oled-pill text-xs font-bold">Add</button>
                 </div>
             </div>
@@ -625,6 +733,28 @@
         const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxqhlq19-8l-RmOVVGlzaOLhxm3g_cEiPzReXOF1__qGs0h8_qmAmUfnW14Q1k5kI1-Iw/exec';
         // =================================================================
 
+        // CURATED GLOBAL WISDOM & MASTERY QUOTES FROM AROUND THE WORLD
+        const GLOBAL_QUOTES = [
+            { text: "Learn thoroughly whatever you learn, and let your conduct be worthy of what you have learned.", author: "Thiruvalluvar", origin: "India (Tirukkural)" },
+            { text: "Learning without thought is labor lost; thought without learning is perilous.", author: "Confucius", origin: "China" },
+            { text: "Step by step walk the thousand-mile road.", author: "Miyamoto Musashi", origin: "Japan" },
+            { text: "As long as you live, keep learning how to live.", author: "Seneca", origin: "Ancient Rome" },
+            { text: "Knowledge is a habit; its mastery comes only through repetition and practice.", author: "Ibn Khaldun", origin: "Tunisia" },
+            { text: "Nothing in life is to be feared, it is only to be understood.", author: "Marie Skłodowska Curie", origin: "Poland / France" },
+            { text: "Education is the most powerful weapon which you can use to change the world.", author: "Nelson Mandela", origin: "South Africa" },
+            { text: "Do not stay satisfied with stories of how things have gone with others. Unfold your own myth.", author: "Jalāl al-Dīn Rūmī", origin: "Persia" },
+            { text: "Learning never exhausts the mind.", author: "Leonardo da Vinci", origin: "Italy" },
+            { text: "We are what we repeatedly do. Excellence, then, is not an act, but a habit.", author: "Aristotle", origin: "Greece" },
+            { text: "Don't limit a child to your own learning, for they were born in another time.", author: "Rabindranath Tagore", origin: "India" },
+            { text: "Do the best you can until you know better. Then when you know better, do better.", author: "Maya Angelou", origin: "United States" },
+            { text: "To know and not to act is not yet to know.", author: "Wang Yangming", origin: "China" },
+            { text: "Reserve your right to think, for even to think wrongly is better than not to think at all.", author: "Hypatia of Alexandria", origin: "Egypt" },
+            { text: "I do not study to know more, but to ignore less.", author: "Sor Juana Inés de la Cruz", origin: "Mexico" },
+            { text: "Little by little, a little becomes a lot.", author: "Swahili Proverb", origin: "East Africa" },
+            { text: "He who learns, teaches.", author: "Ethiopian Proverb", origin: "Ethiopia" },
+            { text: "Repetition is the mother of retention.", author: "Classical Maxim", origin: "Latin Tradition" }
+        ];
+
         const SRS_CURVES = {
             standard: { 1: 1, 2: 3, 3: 7, 4: 14, 5: 30, 6: 90 },
             semester: { 1: 1, 2: 3, 3: 7, 4: 15, 5: 30, 6: 60 },
@@ -640,7 +770,8 @@
             user: null,
             hex: null,
             time: "09:00",
-            mission: "to master every concept without cramming",
+            mission: "", // Empty string means use rotating Global Quotes
+            quoteIndex: 0,
             srsCurve: 'standard',
             overdueDecay: true,
             zeroClickCal: true,
@@ -650,10 +781,12 @@
             subjects: [],
             viewFilter: 'today', // 'today' | 'upcoming' | 'all'
             subjectFilter: 'all',
-            lookaheadDateKey: null, // Optional filter from 7-Day Lookahead Strip
-            flippedCards: {},       // Tracks in-place flipped cards { [id]: true }
-            todayActions: {},       // { [topicId]: { dateStr, type: 'added'|'reviewed', prevLevel, prevNextReview } }
-            activityLog: {}         // { ['YYYY-MM-DD']: count } for 30-day consistency dots
+            allSortBy: 'nextReview', // 'nextReview' | 'levelDesc' | 'levelAsc' | 'subject' | 'name'
+            showArchived: false,
+            lookaheadDateKey: null,
+            flippedCards: {},
+            todayActions: {},
+            activityLog: {}
         };
 
         // --- BULLETPROOF GOOGLE APPS SCRIPT FETCH HELPERS ---
@@ -668,7 +801,6 @@
             try {
                 return JSON.parse(rawText);
             } catch (err) {
-                // Extract readable error from Google Apps Script HTML error page if returned
                 const match = rawText.match(/<div[^>]*class="errorMessage"[^>]*>([\s\S]*?)<\/div>/i) ||
                               rawText.match(/<title>([\s\S]*?)<\/title>/i);
                 const extracted = match ? match[1].replace(/<[^>]+>/g, '').trim() : rawText.substring(0, 160).trim();
@@ -754,6 +886,7 @@
         }
 
         function formatRestingPill(t) {
+            if (t.archived) return 'Graduated';
             if (wasStudiedToday(t)) {
                 const target = new Date(Number(t.nextReview));
                 const diff = Math.round((target.setHours(0,0,0,0) - getTodayStart()) / 86400000);
@@ -763,6 +896,7 @@
             target.setHours(0, 0, 0, 0);
             const diffDays = Math.round((target.getTime() - getTodayStart()) / 86400000);
             const shortDate = target.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            if (diffDays <= 0) return `Due Today • ${shortDate}`;
             if (diffDays === 1) return `Tomorrow • ${shortDate}`;
             if (diffDays > 1) return `In ${diffDays}d • ${shortDate}`;
             return shortDate;
@@ -882,6 +1016,65 @@
                 .replace(/`([^`]+)`/g, '<code>$1</code>');
         }
 
+        // DETERMINISTIC COLOR-CODED SUBJECT DOTS & 6-SEGMENT MASTERY METER
+        const SUBJECT_COLORS = [
+            '#10B981', // Emerald
+            '#38BDF8', // Sky
+            '#F59E0B', // Amber
+            '#A78BFA', // Violet
+            '#F43F5E', // Rose
+            '#2DD4BF', // Teal
+            '#84CC16', // Lime
+            '#E879F9'  // Fuchsia
+        ];
+
+        function getSubjectColor(subjectName) {
+            if (!subjectName || subjectName === 'all') return 'rgb(var(--accent-rgb))';
+            const idx = state.subjects.indexOf(subjectName);
+            if (idx >= 0) return SUBJECT_COLORS[idx % SUBJECT_COLORS.length];
+            let hash = 0;
+            for (let i = 0; i < subjectName.length; i++) {
+                hash = subjectName.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            return SUBJECT_COLORS[Math.abs(hash) % SUBJECT_COLORS.length];
+        }
+
+        function renderMasterySegments(level, isDue = false) {
+            const lvl = Math.min(Math.max(Number(level) || 1, 1), MAX_LEVEL);
+            let segs = `<div class="inline-flex items-center gap-0.5" title="Mastery Level ${lvl} of ${MAX_LEVEL}">`;
+            for (let i = 1; i <= MAX_LEVEL; i++) {
+                const filled = i <= lvl;
+                const cls = isDue
+                    ? (filled ? 'bg-black/80' : 'bg-black/20')
+                    : (filled ? 'bg-accent' : 'bg-oled-border');
+                segs += `<span class="w-2 h-1.5 rounded-sm transition-all ${cls}"></span>`;
+            }
+            segs += `</div>`;
+            return segs;
+        }
+
+        function calculateStreak() {
+            const todayStart = getTodayStart();
+            const todayKey = getTodayKey();
+            const hasTodayActivity = (state.activityLog[todayKey] || 0) > 0 || Object.keys(state.todayActions).length > 0;
+            let streak = 0;
+
+            for (let i = 0; i < 365; i++) {
+                const d = new Date(todayStart - i * 86400000);
+                const k = getDateKey(d.getTime());
+                const active = i === 0 ? hasTodayActivity : (state.activityLog[k] || 0) > 0;
+                if (active) {
+                    streak++;
+                } else if (i === 0) {
+                    // If today hasn't been logged yet, check if yesterday's streak is still alive
+                    continue;
+                } else {
+                    break;
+                }
+            }
+            return streak;
+        }
+
         function showToast(message, actionLabel = null, actionFn = null) {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
@@ -906,7 +1099,7 @@
             setTimeout(() => {
                 toast.style.opacity = '0';
                 setTimeout(() => toast.remove(), 250);
-            }, 4500);
+            }, 5000);
         }
 
         function setSyncBadge(status) {
@@ -923,12 +1116,131 @@
             }
         }
 
+        // --- GLOBAL QUOTES & MISSION LOGIC ---
+        function getDailyQuoteIndex() {
+            const now = new Date();
+            const dayHash = now.getFullYear() * 366 + (now.getMonth() + 1) * 31 + now.getDate();
+            return dayHash % GLOBAL_QUOTES.length;
+        }
+
+        function renderMissionOrQuote() {
+            const textEl = document.getElementById('mission-text');
+            const authorEl = document.getElementById('mission-author');
+            const modeLabel = document.getElementById('mission-mode-label');
+            if (!textEl || !authorEl) return;
+
+            if (state.mission && state.mission.trim().length > 0) {
+                modeLabel.innerText = "MY PERSONAL MISSION";
+                textEl.innerText = state.mission;
+                authorEl.classList.add('hidden');
+            } else {
+                modeLabel.innerText = "MY MISSION // WORLD WISDOM";
+                const q = GLOBAL_QUOTES[state.quoteIndex % GLOBAL_QUOTES.length];
+                textEl.innerText = `"${q.text}"`;
+                authorEl.innerText = `— ${q.author} • ${q.origin}`;
+                authorEl.classList.remove('hidden');
+            }
+        }
+
+        function shuffleGlobalQuote(e) {
+            if (e) e.stopPropagation();
+            state.mission = "";
+            localStorage.removeItem('nexus_mission');
+            state.quoteIndex = (state.quoteIndex + 1) % GLOBAL_QUOTES.length;
+            localStorage.setItem('nexus_quote_idx', String(state.quoteIndex));
+            renderMissionOrQuote();
+        }
+
+        function toggleMissionEditor(forceState) {
+            const editor = document.getElementById('mission-editor');
+            const display = document.getElementById('mission-display');
+            if (!editor || !display) return;
+
+            const shouldOpen = typeof forceState === 'boolean' ? forceState : editor.classList.contains('hidden');
+            editor.classList.toggle('hidden', !shouldOpen);
+            display.classList.toggle('hidden', shouldOpen);
+
+            if (shouldOpen) {
+                const input = document.getElementById('mission-custom-input');
+                input.value = state.mission || '';
+                setTimeout(() => input.focus(), 40);
+            }
+        }
+
+        function saveCustomMission() {
+            const input = document.getElementById('mission-custom-input');
+            const val = (input?.value || '').trim();
+            state.mission = val;
+            if (val) {
+                localStorage.setItem('nexus_mission', val);
+                showToast('Custom mission saved');
+            } else {
+                localStorage.removeItem('nexus_mission');
+                showToast('Switched to Global Quotes');
+            }
+            toggleMissionEditor(false);
+            renderMissionOrQuote();
+        }
+
+        function useGlobalQuotesMode() {
+            state.mission = "";
+            localStorage.removeItem('nexus_mission');
+            toggleMissionEditor(false);
+            renderMissionOrQuote();
+            showToast('Displaying quotes from around the world');
+        }
+
+        // --- SEQUENTIAL ENTER-KEY FIELD NAVIGATION IN ADD/EDIT MODAL ---
+        function setupAddModalEnterNavigation() {
+            const nameInput = document.getElementById('new-topic-name');
+            const subjectSelect = document.getElementById('new-topic-subject');
+            const linkInput = document.getElementById('new-topic-link');
+            const descInput = document.getElementById('new-topic-desc');
+
+            if (nameInput) {
+                nameInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        subjectSelect?.focus();
+                    }
+                });
+            }
+
+            if (subjectSelect) {
+                subjectSelect.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        linkInput?.focus();
+                    }
+                });
+            }
+
+            if (linkInput) {
+                linkInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        descInput?.focus();
+                    }
+                });
+            }
+
+            if (descInput) {
+                descInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        saveTopic();
+                    }
+                });
+            }
+        }
+
         // --- INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', () => {
             const now = new Date();
             document.getElementById('header-day-name').innerText = now.toLocaleDateString('en-US', { weekday: 'long' });
             document.getElementById('header-day-num').innerText = now.getDate();
 
+            setupAddModalEnterNavigation();
             lucide.createIcons();
             checkSession();
 
@@ -939,6 +1251,7 @@
 
                 if (e.key === 'Escape') {
                     ['add-modal', 'profile-modal', 'read-modal', 'subject-modal'].forEach(id => closeModal(id));
+                    toggleMissionEditor(false);
                     return;
                 }
                 if (!inInput) {
@@ -1290,11 +1603,42 @@
             const { start } = getStaggeredSlotForTopic(t);
             const timeLabel = start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-            if (syncedSilently) {
+            if (newLevel === MAX_LEVEL) {
+                showToast(`Mastered 🔥 Lvl ${MAX_LEVEL}! Ready to graduate?`, 'Graduate', () => toggleArchiveTopic(id));
+            } else if (syncedSilently) {
                 showToast(`🔥 Lvl ${newLevel} (+${daysToAdd}d) • Synced to Calendar @ ${timeLabel}`, 'Undo', () => undoTodayReview(id));
             } else {
                 showToast(`🔥 Lvl ${newLevel} (+${daysToAdd}d) • Slot: ${timeLabel}`, 'Set Reminder', () => openCalendar(id));
             }
+        }
+
+        // RECALL DIFFICULTY GRADING: "FORGOT / AGAIN (1d)"
+        async function resetTopicLevel(id) {
+            const t = state.topics.find(x => x.id === id);
+            if (!t) return;
+
+            const prevLevel = t.level;
+            const prevNextReview = t.nextReview;
+            const curve = getActiveCurve();
+            const firstDays = curve[1] || 1;
+
+            t.level = 1;
+            t.nextReview = getFutureMidnight(firstDays);
+            delete t.decayedOn;
+
+            state.todayActions[id] = {
+                dateStr: getTodayKey(),
+                type: 'reviewed',
+                prevLevel,
+                prevNextReview
+            };
+            saveTodayActions();
+            recordDailyActivity();
+
+            syncUp();
+            renderWorkspace();
+
+            showToast(`Reset to 🔥 Lvl 1 • Scheduled for tomorrow (+${firstDays}d)`, 'Undo', () => undoTodayReview(id));
         }
 
         function undoTodayReview(id) {
@@ -1310,6 +1654,48 @@
             syncUp();
             renderWorkspace();
             showToast('Review undone');
+        }
+
+        function togglePinTopic(id) {
+            const t = state.topics.find(x => x.id === id);
+            if (!t) return;
+            t.pinned = !t.pinned;
+            syncUp();
+            renderWorkspace();
+            showToast(t.pinned ? 'Topic pinned to top' : 'Topic unpinned');
+        }
+
+        function toggleArchiveTopic(id) {
+            const t = state.topics.find(x => x.id === id);
+            if (!t) return;
+            t.archived = !t.archived;
+            syncUp();
+            renderWorkspace();
+            showToast(t.archived ? 'Topic graduated & archived' : 'Topic restored to active board');
+        }
+
+        function deleteTopicWithUndo(id) {
+            const idx = state.topics.findIndex(x => x.id === id);
+            if (idx === -1) return;
+            const removedTopic = { ...state.topics[idx] };
+            const removedAction = state.todayActions[id] ? { ...state.todayActions[id] } : null;
+
+            state.topics.splice(idx, 1);
+            delete state.todayActions[id];
+            saveTodayActions();
+            syncUp();
+            renderWorkspace();
+
+            showToast(`Deleted "${removedTopic.name}"`, 'Undo', () => {
+                state.topics.push(removedTopic);
+                if (removedAction) {
+                    state.todayActions[id] = removedAction;
+                    saveTodayActions();
+                }
+                syncUp();
+                renderWorkspace();
+                showToast('Topic restored');
+            });
         }
 
         function toggleFlipCard(id) {
@@ -1359,40 +1745,70 @@
             const container = document.getElementById('consistency-dots');
             if (!container) return;
             const todayStart = getTodayStart();
-            let dotsHtml = '<span class="text-[9px] font-bold uppercase tracking-widest opacity-60 mr-2">14d Streak</span><div class="flex items-center gap-1.5">';
+            const streak = calculateStreak();
+            const streakCountEl = document.getElementById('hero-streak-count');
+            if (streakCountEl) {
+                streakCountEl.innerText = `${streak}d Streak`;
+            }
+
+            let barsHtml = `
+                <div class="flex flex-col justify-end">
+                    <span class="text-[9px] font-bold uppercase tracking-widest opacity-65 leading-none">14d Activity</span>
+                    <span class="text-[10px] font-extrabold opacity-85 mt-0.5">${streak > 0 ? `${streak} day streak` : 'Start today'}</span>
+                </div>
+                <div class="flex items-end gap-1.5 h-7">
+            `;
+
             for (let i = 13; i >= 0; i--) {
                 const d = new Date(todayStart - i * 86400000);
                 const k = getDateKey(d.getTime());
-                const active = (state.activityLog[k] || 0) > 0 || (i === 0 && Object.keys(state.todayActions).length > 0);
-                dotsHtml += `<span class="w-2 h-2 rounded-full ${active ? 'bg-black/85 scale-110' : 'bg-black/20'}" title="${k}"></span>`;
+                const shortLabel = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                const rawCount = (state.activityLog[k] || 0) + (i === 0 && !(state.activityLog[k] > 0) ? Object.keys(state.todayActions).length : 0);
+                const active = rawCount > 0;
+
+                const heightPx = active ? Math.min(26, 11 + rawCount * 4) : 7;
+                const barCls = active
+                    ? (i === 0 ? 'bg-black/90 shadow-sm' : 'bg-black/75')
+                    : 'bg-black/20 hover:bg-black/35';
+
+                barsHtml += `
+                    <div class="flex flex-col items-center justify-end h-full group cursor-pointer" title="${shortLabel} (${k}) • ${rawCount} study action${rawCount === 1 ? '' : 's'}">
+                        <span style="height: ${heightPx}px" class="w-2 rounded-full transition-all duration-300 group-hover:scale-110 ${barCls}"></span>
+                    </div>
+                `;
             }
-            dotsHtml += '</div>';
-            container.innerHTML = dotsHtml;
+            barsHtml += '</div>';
+            container.innerHTML = barsHtml;
         }
 
-        // --- RENDERING THE DAYBASE BENTO UI ---
+        // --- RENDERING THE DAYBASE BENTO UI & ALL-TOPICS LIST ---
         function setViewFilter(mode) {
             state.viewFilter = mode;
             state.lookaheadDateKey = null;
             ['today', 'upcoming', 'all'].forEach(k => {
                 const iconBtn = document.getElementById('icon-tab-' + k);
+                const countBadge = document.getElementById(`count-${k}-topics`);
+                const isActive = k === mode;
                 if (iconBtn) {
-                    iconBtn.className = k === mode
-                        ? "flex flex-col items-center gap-1 text-accent transition-colors"
-                        : "flex flex-col items-center gap-1 text-oled-muted hover:text-oled-text transition-colors";
+                    iconBtn.className = isActive
+                        ? "bento-active !rounded-xl py-2.5 px-2 flex items-center justify-center gap-1.5 shadow-sm transition-all"
+                        : "py-2.5 px-2 rounded-xl flex items-center justify-center gap-1.5 text-oled-muted hover:text-oled-text hover:bg-oled-bg/50 transition-all";
+                }
+                if (countBadge) {
+                    countBadge.className = isActive
+                        ? "px-1.5 py-0.5 rounded-full bg-black/15 text-[10px] font-mono font-extrabold leading-none"
+                        : "px-1.5 py-0.5 rounded-full bg-oled-pill text-[10px] font-mono font-bold leading-none";
                 }
             });
 
-            const dockToday = document.getElementById('dock-btn-today');
-            const dockAll = document.getElementById('dock-btn-all');
-            if (dockToday && dockAll) {
-                dockToday.className = mode === 'today'
-                    ? "w-11 h-10 rounded-2xl flex items-center justify-center text-accent bg-white/10 transition-all"
-                    : "w-11 h-10 rounded-2xl flex items-center justify-center text-oled-muted hover:text-white transition-all";
-                dockAll.className = mode !== 'today'
-                    ? "w-11 h-10 rounded-2xl flex items-center justify-center text-accent bg-white/10 transition-all"
-                    : "w-11 h-10 rounded-2xl flex items-center justify-center text-oled-muted hover:text-white transition-all";
-            }
+            ['today', 'upcoming', 'all'].forEach(k => {
+                const dockBtn = document.getElementById('dock-btn-' + k);
+                if (dockBtn) {
+                    dockBtn.className = k === mode
+                        ? "px-3.5 h-10 rounded-2xl flex items-center gap-1.5 text-accent bg-white/10 text-xs font-bold transition-all"
+                        : "px-3.5 h-10 rounded-2xl flex items-center gap-1.5 text-oled-muted hover:text-white text-xs font-semibold transition-all";
+                }
+            });
 
             const headings = {
                 today: "MORNING // TODAY'S BENTO",
@@ -1400,6 +1816,16 @@
                 all: "COMPLETE TOPIC ARCHIVE"
             };
             document.getElementById('section-heading').innerText = headings[mode] || "MORNING // TODAY'S BENTO";
+            renderWorkspace();
+        }
+
+        function changeAllTopicsSort(val) {
+            state.allSortBy = val;
+            renderWorkspace();
+        }
+
+        function toggleShowArchived() {
+            state.showArchived = !state.showArchived;
             renderWorkspace();
         }
 
@@ -1414,18 +1840,22 @@
             const list = ['all', ...state.subjects];
             container.innerHTML = list.map(s => {
                 const active = state.subjectFilter === s;
-                const label = s === 'all' ? 'All' : escapeHtml(s);
+                const label = s === 'all' ? 'All Subjects' : escapeHtml(s);
+                const dotColor = getSubjectColor(s);
+                const dotHtml = s === 'all'
+                    ? `<span class="w-2 h-2 rounded-full ${active ? 'bg-black/75' : 'bg-accent'}"></span>`
+                    : `<span class="w-2 h-2 rounded-full shrink-0" style="background-color: ${dotColor}"></span>`;
                 const cls = active
-                    ? 'bento-active px-3.5 py-1.5 rounded-full text-xs font-bold shadow-none'
-                    : 'bg-oled-card text-oled-muted border border-oled-border px-3.5 py-1.5 rounded-full text-xs font-semibold hover:text-oled-text';
-                return `<button onclick="setSubjectFilter('${escapeHtml(s)}')" class="shrink-0 transition-all ${cls}">${label}</button>`;
+                    ? 'bento-active px-3.5 py-1.5 rounded-full text-xs font-bold shadow-none inline-flex items-center gap-1.5'
+                    : 'bg-oled-card text-oled-muted border border-oled-border px-3.5 py-1.5 rounded-full text-xs font-semibold hover:text-oled-text inline-flex items-center gap-1.5';
+                return `<button onclick="setSubjectFilter('${escapeHtml(s)}')" class="shrink-0 transition-all ${cls}">${dotHtml}<span>${label}</span></button>`;
             }).join('');
         }
 
         /*
-         * CREATE ASYMMETRIC BENTO CARD:
-         * - Index 0: Full-width hero card (col-span-2) matching "Work on a project 2h"
-         * - Cards with detailed notes or index % 3 === 2: Tall vertical card (row-span-2) matching "Stretch" beside 2 stacked compact cards!
+         * CREATE CONTENT-AWARE ASYMMETRIC BENTO CARD:
+         * - Index 0: Full-width hero card (col-span-2)
+         * - Cards with detailed notes (>55 chars): Tall vertical card (row-span-2)
          */
         function createBentoCard(t, index) {
             const isDue = canReviewTopicToday(t);
@@ -1435,19 +1865,22 @@
             const curve = getActiveCurve();
             const nextLvl = Math.min((t.level || 1) + 1, MAX_LEVEL);
             const nextDays = curve[nextLvl] || 3;
+            const subColor = getSubjectColor(t.category || 'General');
+            const masteryBar = renderMasterySegments(t.level, isDue);
 
             let spanClass = 'col-span-1 row-span-1 min-h-[144px]';
             if (index === 0) {
                 spanClass = 'col-span-2 row-span-1 min-h-[172px]';
-            } else if ((t.desc && t.desc.length > 55) || index % 3 === 2) {
+            } else if (t.desc && t.desc.trim().length > 55) {
                 spanClass = 'col-span-1 row-span-2 min-h-[302px]';
             }
 
             const card = document.createElement('div');
+            card.style.animationDelay = `${Math.min(index * 35, 280)}ms`;
 
             // IN-PLACE FLIPPED VIEW (Shows formatted study notes directly inside the Bento grid)
             if (isFlipped) {
-                card.className = `${isDue ? 'bento-active' : 'bento-resting'} ${spanClass} p-5 flex flex-col justify-between cursor-pointer relative`;
+                card.className = `${isDue ? 'bento-active' : 'bento-resting'} ${spanClass} p-5 flex flex-col justify-between cursor-pointer relative animate-bento-in`;
                 card.onclick = (e) => {
                     if (!e.target.closest('button')) toggleFlipCard(t.id);
                 };
@@ -1464,9 +1897,14 @@
                     <div class="flex items-center justify-between pt-2">
                         <button onclick="openReadMode('${t.id}'); event.stopPropagation();" class="text-[11px] font-bold underline opacity-80">Full View</button>
                         ${isDue ? `
-                            <button onclick="markTopicReviewed('${t.id}'); event.stopPropagation();" class="px-3 py-1 rounded-full bg-black/15 font-bold text-xs flex items-center gap-1">
-                                <i data-lucide="check" class="w-3.5 h-3.5"></i> Done
-                            </button>
+                            <div class="flex items-center gap-1.5">
+                                <button onclick="resetTopicLevel('${t.id}'); event.stopPropagation();" class="px-2.5 py-1 rounded-full bg-black/10 hover:bg-black/20 font-bold text-[11px]" title="Forgot / Again (1d)">
+                                    Again
+                                </button>
+                                <button onclick="markTopicReviewed('${t.id}'); event.stopPropagation();" class="px-3 py-1 rounded-full bg-black/15 font-bold text-xs flex items-center gap-1">
+                                    <i data-lucide="check" class="w-3.5 h-3.5"></i> Done
+                                </button>
+                            </div>
                         ` : ''}
                     </div>
                 `;
@@ -1475,7 +1913,7 @@
 
             if (isDue) {
                 // VIBRANT ORANGE DUE CARD
-                card.className = `bento-active ${spanClass} p-5 flex flex-col justify-between cursor-pointer relative group`;
+                card.className = `bento-active ${spanClass} p-5 flex flex-col justify-between cursor-pointer relative group animate-bento-in`;
                 card.onclick = (e) => {
                     if (!e.target.closest('button')) openReadMode(t.id);
                 };
@@ -1483,29 +1921,47 @@
                 card.innerHTML = `
                     <div>
                         <div class="flex items-center justify-between gap-2 mb-1">
-                            <span class="text-[10px] font-extrabold uppercase tracking-wider opacity-65 truncate">${escapeHtml(t.category || 'General')}</span>
-                            <button onclick="toggleFlipCard('${t.id}'); event.stopPropagation();" class="w-6 h-6 rounded-full bg-black/10 hover:bg-black/20 flex items-center justify-center opacity-75 hover:opacity-100" title="Flip to read notes in-place">
-                                <i data-lucide="repeat" class="w-3 h-3"></i>
-                            </button>
+                            <div class="flex items-center gap-1.5 min-w-0">
+                                <span class="w-2 h-2 rounded-full shrink-0 ring-1 ring-black/25" style="background-color: ${subColor}"></span>
+                                ${t.pinned ? `<i data-lucide="pin" class="w-3 h-3 shrink-0 fill-current"></i>` : ''}
+                                <span class="text-[10px] font-extrabold uppercase tracking-wider opacity-70 truncate">${escapeHtml(t.category || 'General')}</span>
+                            </div>
+                            <div class="flex items-center gap-1 shrink-0">
+                                <button onclick="togglePinTopic('${t.id}'); event.stopPropagation();" class="w-6 h-6 rounded-full bg-black/10 hover:bg-black/20 flex items-center justify-center ${t.pinned ? 'opacity-100' : 'opacity-60 hover:opacity-100'}" title="${t.pinned ? 'Unpin' : 'Pin Topic'}">
+                                    <i data-lucide="pin" class="w-3 h-3"></i>
+                                </button>
+                                <button onclick="toggleFlipCard('${t.id}'); event.stopPropagation();" class="w-6 h-6 rounded-full bg-black/10 hover:bg-black/20 flex items-center justify-center opacity-75 hover:opacity-100" title="Flip to read notes in-place">
+                                    <i data-lucide="repeat" class="w-3 h-3"></i>
+                                </button>
+                            </div>
                         </div>
                         <h3 class="${index === 0 ? 'text-lg sm:text-xl' : 'text-base'} font-bold leading-snug line-clamp-2">${escapeHtml(t.name)}</h3>
                         <p class="text-xs opacity-75 ${spanClass.includes('row-span-2') ? 'line-clamp-5 mt-2' : 'line-clamp-2 mt-1'} leading-relaxed">${escapeHtml(t.desc || `Ready for Level ${nextLvl} review (+${nextDays}d)`)}</p>
                     </div>
 
                     <div class="flex items-center justify-between pt-4 mt-auto">
-                        <div class="inline-flex items-center gap-1 text-xs font-extrabold">
-                            <i data-lucide="flame" class="w-4 h-4 fill-current"></i>
-                            <span>x${t.level}</span>
+                        <div class="flex items-center gap-2">
+                            <div class="inline-flex items-center gap-1 text-xs font-extrabold">
+                                <i data-lucide="flame" class="w-4 h-4 fill-current"></i>
+                                <span>x${t.level}</span>
+                            </div>
+                            ${masteryBar}
                         </div>
 
-                        <button onclick="markTopicReviewed('${t.id}'); event.stopPropagation();" class="w-8 h-8 rounded-full bg-black/10 hover:bg-black/20 flex items-center justify-center transition-transform active:scale-90" title="Mark Reviewed Today (+${nextDays}d)">
-                            <i data-lucide="check" class="w-4 h-4 stroke-[2.5]"></i>
-                        </button>
+                        <div class="flex items-center gap-1.5">
+                            <button onclick="resetTopicLevel('${t.id}'); event.stopPropagation();" class="px-2.5 h-8 rounded-full bg-black/10 hover:bg-black/20 flex items-center justify-center gap-1 text-[11px] font-bold transition-transform active:scale-90" title="Forgot / Reset to Level 1 (1d)">
+                                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                                <span class="hidden sm:inline">1d</span>
+                            </button>
+                            <button onclick="markTopicReviewed('${t.id}'); event.stopPropagation();" class="w-8 h-8 rounded-full bg-black/15 hover:bg-black/25 flex items-center justify-center transition-transform active:scale-90" title="Mark Reviewed Today (+${nextDays}d)">
+                                <i data-lucide="check" class="w-4 h-4 stroke-[2.5]"></i>
+                            </button>
+                        </div>
                     </div>
                 `;
             } else {
                 // SLEEK DARK CHARCOAL LOCKED / RESTING CARD WITH SVG MASTERY RING
-                card.className = `bento-resting ${spanClass} p-5 flex flex-col justify-between cursor-pointer relative group`;
+                card.className = `bento-resting ${spanClass} p-5 flex flex-col justify-between cursor-pointer relative group animate-bento-in`;
                 card.onclick = (e) => {
                     if (!e.target.closest('button')) openReadMode(t.id);
                 };
@@ -1518,7 +1974,11 @@
                 card.innerHTML = `
                     <div class="flex items-start justify-between gap-2">
                         <div class="min-w-0 flex-1">
-                            <span class="text-[10px] font-bold uppercase tracking-wider text-oled-muted block mb-0.5 truncate">${escapeHtml(t.category || 'General')}</span>
+                            <div class="flex items-center gap-1.5 mb-0.5">
+                                <span class="w-2 h-2 rounded-full shrink-0" style="background-color: ${subColor}"></span>
+                                ${t.pinned ? `<i data-lucide="pin" class="w-3 h-3 text-accent shrink-0"></i>` : ''}
+                                <span class="text-[10px] font-bold uppercase tracking-wider text-oled-muted block truncate">${escapeHtml(t.category || 'General')}</span>
+                            </div>
                             <h3 class="text-sm sm:text-base font-semibold text-oled-muted group-hover:text-oled-text transition-colors leading-snug line-clamp-2">${escapeHtml(t.name)}</h3>
                             ${spanClass.includes('row-span-2') && t.desc ? `<p class="text-xs text-oled-muted/70 line-clamp-4 mt-2 leading-relaxed">${escapeHtml(t.desc)}</p>` : ''}
                         </div>
@@ -1526,7 +1986,7 @@
                         <!-- Radial Mastery Progress Ring + Calendar Button -->
                         <button onclick="openCalendar('${t.id}'); event.stopPropagation();" class="relative w-9 h-9 rounded-full bg-oled-pill flex items-center justify-center text-oled-muted hover:text-accent shrink-0 transition-colors" title="Level ${t.level}/6 Mastery • Click for Google Calendar Reminder">
                             <svg class="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 36 36">
-                                <circle cx="18" cy="18" r="15" fill="none" stroke="currentColor" stroke-width="2.2" class=" opacity-15" />
+                                <circle cx="18" cy="18" r="15" fill="none" stroke="currentColor" stroke-width="2.2" class="opacity-15" />
                                 <circle cx="18" cy="18" r="15" fill="none" stroke="rgb(var(--accent-rgb))" stroke-width="2.2" stroke-dasharray="${ringCircumference}" stroke-dashoffset="${ringOffset}" stroke-linecap="round" />
                             </svg>
                             <i data-lucide="${doneToday ? 'check' : 'lock'}" class="w-3.5 h-3.5 relative z-10"></i>
@@ -1539,6 +1999,9 @@
                         </span>
 
                         <div class="flex items-center gap-1.5 shrink-0">
+                            <button onclick="togglePinTopic('${t.id}'); event.stopPropagation();" class="p-1 ${t.pinned ? 'text-accent' : 'text-oled-muted hover:text-oled-text'}" title="${t.pinned ? 'Unpin' : 'Pin'}">
+                                <i data-lucide="pin" class="w-3 h-3"></i>
+                            </button>
                             <button onclick="toggleFlipCard('${t.id}'); event.stopPropagation();" class="p-1 text-oled-muted hover:text-oled-text" title="Flip Notes">
                                 <i data-lucide="repeat" class="w-3 h-3"></i>
                             </button>
@@ -1547,7 +2010,10 @@
                                     <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
                                 </button>
                             ` : `
-                                <span class="text-[11px] font-mono font-bold text-oled-muted">🔥x${t.level}</span>
+                                <div class="flex items-center gap-1.5">
+                                    <span class="text-[11px] font-mono font-bold text-oled-muted">🔥x${t.level}</span>
+                                    ${masteryBar}
+                                </div>
                             `}
                         </div>
                     </div>
@@ -1557,17 +2023,106 @@
             return card;
         }
 
+        // CREATE INTERACTIVE ROW FOR THE "ALL TOPICS" LIST VIEW
+        function createAllTopicListRow(t, index = 0) {
+            const isDue = canReviewTopicToday(t);
+            const pillText = formatRestingPill(t);
+            const subColor = getSubjectColor(t.category || 'General');
+            const masteryBar = renderMasterySegments(t.level, false);
+            const row = document.createElement('div');
+            row.style.animationDelay = `${Math.min(index * 25, 240)}ms`;
+            row.className = `bento-resting px-4 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer hover:border-accent/40 transition-all animate-bento-in ${t.archived ? 'opacity-65' : ''}`;
+            row.onclick = (e) => {
+                if (!e.target.closest('button') && !e.target.closest('a')) openReadMode(t.id);
+            };
+
+            const statusBadge = isDue
+                ? `<span class="px-2.5 py-0.5 rounded-full bento-active text-[10px] font-extrabold shadow-none">Due Today</span>`
+                : `<span class="px-2.5 py-0.5 rounded-full bg-oled-pill text-[11px] font-semibold text-oled-muted">${escapeHtml(pillText)}</span>`;
+
+            row.innerHTML = `
+                <div class="flex items-start sm:items-center gap-3 min-w-0 flex-1">
+                    <button onclick="togglePinTopic('${t.id}'); event.stopPropagation();" class="mt-0.5 sm:mt-0 w-8 h-8 rounded-xl bg-oled-pill flex items-center justify-center shrink-0 ${t.pinned ? 'text-accent border border-accent/40' : 'text-oled-muted hover:text-oled-text'}" title="${t.pinned ? 'Unpin Topic' : 'Pin Topic'}">
+                        <i data-lucide="pin" class="w-3.5 h-3.5 ${t.pinned ? 'fill-current' : ''}"></i>
+                    </button>
+
+                    <div class="min-w-0 flex-1">
+                        <div class="flex flex-wrap items-center gap-2 mb-0.5">
+                            <h3 class="text-sm font-bold text-oled-text truncate">${escapeHtml(t.name)}</h3>
+                            <span class="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-oled-pill text-oled-text">
+                                <span class="w-1.5 h-1.5 rounded-full" style="background-color: ${subColor}"></span>
+                                ${escapeHtml(t.category || 'General')}
+                            </span>
+                            <div class="inline-flex items-center gap-1.5">
+                                <span class="text-[11px] font-mono font-bold text-oled-muted">🔥 Lvl ${t.level}/${MAX_LEVEL}</span>
+                                ${masteryBar}
+                            </div>
+                            ${statusBadge}
+                        </div>
+                        ${t.desc ? `<p class="text-xs text-oled-muted line-clamp-1">${escapeHtml(t.desc)}</p>` : ''}
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-1.5 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-oled-border/60">
+                    ${isDue ? `
+                        <button onclick="markTopicReviewed('${t.id}'); event.stopPropagation();" class="px-2.5 py-1.5 rounded-xl bento-active text-[11px] font-bold flex items-center gap-1 shadow-none" title="Complete Review">
+                            <i data-lucide="check" class="w-3.5 h-3.5"></i> Review
+                        </button>
+                        <button onclick="resetTopicLevel('${t.id}'); event.stopPropagation();" class="p-2 rounded-xl bg-oled-pill text-oled-muted hover:text-amber-400 transition-colors" title="Forgot / Reset to Lvl 1 (1d)">
+                            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                        </button>
+                    ` : ''}
+                    <button onclick="openModal('add-modal', '${t.id}'); event.stopPropagation();" class="px-2.5 py-1.5 rounded-xl bg-oled-pill text-oled-muted hover:text-oled-text text-xs font-semibold flex items-center gap-1 transition-colors" title="Edit Topic">
+                        <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                        <span>Edit</span>
+                    </button>
+                    <button onclick="toggleArchiveTopic('${t.id}'); event.stopPropagation();" class="p-2 rounded-xl bg-oled-pill text-oled-muted hover:text-emerald-400 transition-colors" title="${t.archived ? 'Restore Topic' : 'Graduate / Archive Topic'}">
+                        <i data-lucide="${t.archived ? 'archive-restore' : 'archive'}" class="w-3.5 h-3.5"></i>
+                    </button>
+                    <button onclick="deleteTopicWithUndo('${t.id}'); event.stopPropagation();" class="px-2.5 py-1.5 rounded-xl bg-oled-pill text-oled-muted hover:text-red-400 text-xs font-semibold flex items-center gap-1 transition-colors" title="Delete Topic">
+                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                        <span>Delete</span>
+                    </button>
+                </div>
+            `;
+            return row;
+        }
+
+        function sortTopicsByPreference(arr, sortKey) {
+            return [...arr].sort((a, b) => {
+                if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
+                if (sortKey === 'levelDesc') return (b.level || 1) - (a.level || 1);
+                if (sortKey === 'levelAsc') return (a.level || 1) - (b.level || 1);
+                if (sortKey === 'subject') return String(a.category || '').localeCompare(String(b.category || ''));
+                if (sortKey === 'name') return String(a.name || '').localeCompare(String(b.name || ''));
+                return Number(a.nextReview) - Number(b.nextReview);
+            });
+        }
+
         function renderWorkspace() {
             const grid = document.getElementById('bento-grid');
-            if (!grid) return;
+            const listContainer = document.getElementById('all-topics-list');
+            const allToolbar = document.getElementById('all-topics-toolbar');
+            if (!grid || !listContainer) return;
+
             grid.innerHTML = '';
+            listContainer.innerHTML = '';
+
+            renderMissionOrQuote();
 
             const search = (document.getElementById('search-input')?.value || '').trim().toLowerCase();
-            const activeTopics = state.topics.filter(t => t.id !== 'config_subjects' && !t.archived);
+            const allNonSystem = state.topics.filter(t => t.id !== 'config_subjects');
+            const activeTopics = allNonSystem.filter(t => !t.archived);
+            const archivedTopics = allNonSystem.filter(t => t.archived);
 
-            const dueTopics = activeTopics.filter(t => canReviewTopicToday(t)).sort((a, b) => a.nextReview - b.nextReview);
+            const sortWithPinsFirst = (a, b) => {
+                if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
+                return Number(a.nextReview) - Number(b.nextReview);
+            };
+
+            const dueTopics = activeTopics.filter(t => canReviewTopicToday(t)).sort(sortWithPinsFirst);
             const doneTodayTopics = activeTopics.filter(t => wasStudiedToday(t));
-            const upcomingRestingTopics = activeTopics.filter(t => !canReviewTopicToday(t)).sort((a, b) => a.nextReview - b.nextReview);
+            const upcomingRestingTopics = activeTopics.filter(t => !canReviewTopicToday(t)).sort(sortWithPinsFirst);
 
             const totalTodayPool = dueTopics.length + doneTodayTopics.length;
             const todayScorePct = totalTodayPool === 0 ? 100 : ((doneTodayTopics.length / totalTodayPool) * 100);
@@ -1578,7 +2133,28 @@
             document.getElementById('stat-today-score').innerText = `${todayScorePct % 1 === 0 ? todayScorePct.toFixed(0) : todayScorePct.toFixed(1)}%`;
             document.getElementById('stat-retention-score').innerText = `${retentionPct.toFixed(1)}%`;
             document.getElementById('hero-progress-bar').style.width = `${Math.min(100, todayScorePct)}%`;
-            document.getElementById('count-all-topics').innerText = activeTopics.length;
+
+            const countTodayEl = document.getElementById('count-today-topics');
+            const countUpcomingEl = document.getElementById('count-upcoming-topics');
+            const countAllEl = document.getElementById('count-all-topics');
+            if (countTodayEl) countTodayEl.innerText = dueTopics.length;
+            if (countUpcomingEl) countUpcomingEl.innerText = upcomingRestingTopics.length;
+            if (countAllEl) countAllEl.innerText = activeTopics.length;
+
+            const heroCard = document.getElementById('hero-card-container');
+            const completeBadge = document.getElementById('hero-complete-badge');
+            const isAllComplete = todayScorePct >= 100 && activeTopics.length > 0;
+            heroCard?.classList.toggle('hero-celebrate', isAllComplete);
+            completeBadge?.classList.toggle('hidden', !isAllComplete);
+
+            const archivedBtnLabel = document.getElementById('archived-btn-label');
+            const toggleArchivedBtn = document.getElementById('toggle-archived-btn');
+            if (archivedBtnLabel) archivedBtnLabel.innerText = `Archived (${archivedTopics.length})`;
+            if (toggleArchivedBtn) {
+                toggleArchivedBtn.className = state.showArchived
+                    ? "px-3 py-1.5 rounded-xl bento-active text-xs font-bold flex items-center gap-1.5 shadow-none"
+                    : "px-3 py-1.5 rounded-xl bg-oled-pill border border-oled-border text-xs font-semibold text-oled-muted hover:text-oled-text flex items-center gap-1.5 transition-colors";
+            }
 
             document.title = dueTopics.length > 0 ? `(${dueTopics.length} Due) Nexus Daybase` : 'Nexus // Daybase Study Tracker';
 
@@ -1602,8 +2178,16 @@
                 return true;
             };
 
+            const isAllListView = state.viewFilter === 'all' && !state.lookaheadDateKey;
+            allToolbar?.classList.toggle('hidden', !isAllListView);
+            grid.classList.toggle('hidden', isAllListView);
+            listContainer.classList.toggle('hidden', !isAllListView);
+
             let displayList = [];
-            if (state.lookaheadDateKey) {
+            if (isAllListView) {
+                const pool = state.showArchived ? allNonSystem : activeTopics;
+                displayList = sortTopicsByPreference(pool.filter(matchesFilter), state.allSortBy);
+            } else if (state.lookaheadDateKey) {
                 displayList = activeTopics.filter(matchesFilter);
             } else if (state.viewFilter === 'today') {
                 const dueFiltered = dueTopics.filter(matchesFilter);
@@ -1611,8 +2195,6 @@
                 displayList = [...dueFiltered, ...restingFiltered];
             } else if (state.viewFilter === 'upcoming') {
                 displayList = upcomingRestingTopics.filter(matchesFilter);
-            } else {
-                displayList = [...dueTopics.filter(matchesFilter), ...upcomingRestingTopics.filter(matchesFilter)];
             }
 
             const emptyState = document.getElementById('empty-state');
@@ -1620,9 +2202,15 @@
                 emptyState.classList.remove('hidden');
             } else {
                 emptyState.classList.add('hidden');
-                displayList.forEach((t, index) => {
-                    grid.appendChild(createBentoCard(t, index));
-                });
+                if (isAllListView) {
+                    displayList.forEach((t, index) => {
+                        listContainer.appendChild(createAllTopicListRow(t, index));
+                    });
+                } else {
+                    displayList.forEach((t, index) => {
+                        grid.appendChild(createBentoCard(t, index));
+                    });
+                }
             }
 
             lucide.createIcons();
@@ -1638,6 +2226,14 @@
             document.getElementById('read-subject').innerText = t.category || 'General';
             document.getElementById('read-level').innerText = `🔥 Level ${t.level} of ${MAX_LEVEL}`;
             document.getElementById('read-decay-badge').classList.toggle('hidden', !t.decayedOn);
+            document.getElementById('read-archived-badge').classList.toggle('hidden', !t.archived);
+
+            const pinBtn = document.getElementById('read-pin-btn');
+            if (pinBtn) {
+                pinBtn.className = t.pinned
+                    ? "p-2 rounded-full bg-oled-pill text-accent"
+                    : "p-2 rounded-full bg-oled-pill text-oled-muted hover:text-accent";
+            }
 
             const linkSec = document.getElementById('read-link-section');
             const linkBtn = document.getElementById('read-link-action');
@@ -1661,9 +2257,12 @@
             if (isDue) {
                 footer.innerHTML = `
                     <span class="text-xs text-oled-muted">Due for review today</span>
-                    <div class="flex items-center gap-2">
-                        <button onclick="openCalendar('${t.id}')" class="px-3.5 py-2 rounded-xl bg-oled-pill text-xs font-semibold hover:text-accent">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button onclick="openCalendar('${t.id}')" class="px-3 py-2 rounded-xl bg-oled-pill text-xs font-semibold hover:text-accent">
                             <i data-lucide="calendar" class="w-3.5 h-3.5 inline mr-1"></i> ${slotStr}
+                        </button>
+                        <button onclick="resetTopicLevel('${t.id}'); closeModal('read-modal');" class="px-3.5 py-2 rounded-xl bg-oled-pill text-xs font-bold text-oled-muted hover:text-amber-400 flex items-center gap-1">
+                            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Again (1d)
                         </button>
                         <button onclick="markTopicReviewed('${t.id}'); closeModal('read-modal');" class="px-4 py-2 bento-active font-bold text-xs flex items-center gap-1.5">
                             <i data-lucide="check" class="w-4 h-4"></i> Complete Review (+${nextDays}d)
@@ -1676,14 +2275,26 @@
                         <i data-lucide="lock" class="w-3.5 h-3.5 text-accent"></i>
                         Locked (${formatRestingPill(t)})
                     </span>
-                    <button onclick="openCalendar('${t.id}')" class="px-3.5 py-2 rounded-xl bg-oled-pill text-xs font-semibold hover:text-accent flex items-center gap-1.5">
-                        <i data-lucide="calendar-plus" class="w-3.5 h-3.5 text-accent"></i> Reminder (${slotStr})
-                    </button>
+                    <div class="flex items-center gap-2">
+                        <button onclick="toggleArchiveTopic('${t.id}'); closeModal('read-modal');" class="px-3 py-2 rounded-xl bg-oled-pill text-xs font-semibold text-oled-muted hover:text-oled-text flex items-center gap-1.5">
+                            <i data-lucide="${t.archived ? 'archive-restore' : 'archive'}" class="w-3.5 h-3.5"></i> ${t.archived ? 'Restore' : 'Graduate'}
+                        </button>
+                        <button onclick="openCalendar('${t.id}')" class="px-3.5 py-2 rounded-xl bg-oled-pill text-xs font-semibold hover:text-accent flex items-center gap-1.5">
+                            <i data-lucide="calendar-plus" class="w-3.5 h-3.5 text-accent"></i> Reminder (${slotStr})
+                        </button>
+                    </div>
                 `;
             }
 
             openModal('read-modal');
             lucide.createIcons();
+        }
+
+        function handlePinFromModal() {
+            const id = document.getElementById('read-current-id').value;
+            if (!id) return;
+            togglePinTopic(id);
+            openReadMode(id);
         }
 
         function handleEditFromModal() {
@@ -1695,27 +2306,11 @@
         function handleDeleteFromModal() {
             const id = document.getElementById('read-current-id').value;
             if (!id) return;
-            if (confirm('Delete this topic permanently?')) {
-                state.topics = state.topics.filter(t => t.id !== id);
-                delete state.todayActions[id];
-                saveTodayActions();
-                closeModal('read-modal');
-                syncUp();
-                renderWorkspace();
-                showToast('Topic deleted');
-            }
+            closeModal('read-modal');
+            deleteTopicWithUndo(id);
         }
 
-        // --- MISSION, SUBJECTS & PREFERENCES ---
-        function promptMissionEdit() {
-            const next = prompt('Update your personal study mission:', state.mission);
-            if (next && next.trim()) {
-                state.mission = next.trim();
-                localStorage.setItem('nexus_mission', state.mission);
-                document.getElementById('mission-text').innerText = state.mission;
-            }
-        }
-
+        // --- SUBJECTS & PREFERENCES ---
         function loadSubjects() {
             const stored = localStorage.getItem('nexus_subjects');
             state.subjects = stored ? JSON.parse(stored) : [...defaultSubjects];
@@ -1842,8 +2437,10 @@
                 document.getElementById('surface-mode-label').innerText = 'Paper Light';
             }
 
-            state.mission = localStorage.getItem('nexus_mission') || "to master every concept without cramming";
-            document.getElementById('mission-text').innerText = state.mission;
+            state.mission = localStorage.getItem('nexus_mission') || "";
+            const savedQuoteIdx = localStorage.getItem('nexus_quote_idx');
+            state.quoteIndex = savedQuoteIdx !== null ? parseInt(savedQuoteIdx, 10) : getDailyQuoteIndex();
+            renderMissionOrQuote();
 
             state.srsCurve = localStorage.getItem('nexus_srs_curve') || 'standard';
             const curveSelect = document.getElementById('srs-curve-select');
@@ -1948,6 +2545,7 @@
                         document.getElementById('new-topic-subject').value = t.category || 'General';
                         document.getElementById('new-topic-desc').value = t.desc || '';
                         document.getElementById('new-topic-link').value = t.link || '';
+                        setTimeout(() => document.getElementById('new-topic-name').focus(), 50);
                     }
                 } else {
                     document.getElementById('modal-title').innerText = "Log Studied Topic";
